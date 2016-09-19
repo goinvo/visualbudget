@@ -11,5 +11,6 @@
  * @subpackage        VisualBudget/admin/partials
  */
 ?>
-
 <!-- This file should primarily consist of HTML with a little bit of PHP. -->
+<h1>Visual Budget</h1>
+<p>Welcome to the Visual Budget dashboard.</p>

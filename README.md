@@ -1,19 +1,19 @@
-== Plugin Name ==
-Here is a short description of the plugin, including things like authors'
-names and software requirements.
+# Plugin Name
+Visual Budget is a WordPress plugin designed to make it easy to visualize a
+town's budget for its citizenry.
 
 
-== Description ==
-This is the long description.
+## Description
+[Long description.]
 
 
-== Installation ==
-This section describes how to install the plugin and get it working.
+## Installation
+[How to install.]
 
 
-== Screenshots ==
-Some screenshots of the plugin in action.
+## Screenshots
+[Screenshots of VB in action.]
 
 
-== Changelog ==
-A log of version updates.
+## Changelog
+[A log of version updates.]

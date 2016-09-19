@@ -3,11 +3,11 @@
 /**
  * Fired during plugin activation
  *
- * @link       http://example.com
- * @since      1.0.0
+ * @link       http://visgov.com
+ * @since      0.1.0
  *
- * @package    Plugin_Name
- * @subpackage Plugin_Name/includes
+ * @package    VisualBudget
+ * @subpackage VisualBudget/includes
  */
 
 /**
@@ -15,19 +15,18 @@
  *
  * This class defines all code necessary to run during the plugin's activation.
  *
- * @since      1.0.0
- * @package    Plugin_Name
- * @subpackage Plugin_Name/includes
- * @author     Your Name <email@example.com>
+ * @since      0.1.0
+ * @package    VisualBudget
+ * @subpackage VisualBudget/includes
  */
-class Plugin_Name_Activator {
+class VisualBudget_Activator {
 
 	/**
 	 * Short Description. (use period)
 	 *
 	 * Long Description.
 	 *
-	 * @since    1.0.0
+	 * @since    0.1.0
 	 */
 	public static function activate() {
 

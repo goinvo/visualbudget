@@ -133,11 +133,20 @@ class VisualBudget_Admin {
             'visualbudget_dashboard'        // page
         );
 
-        // Add the town name setting
+        // Add the name setting
         add_settings_field(
-            'town_name',                    // setting ID
-            'Town name',                    // setting title
-            array( $this, 'town_name_callback' ), // callback function
+            'org_name',                      // setting ID
+            'Name of city, town, district, or organization', // setting title
+            array( $this, 'org_name_callback' ),             // callback function
+            'visualbudget_dashboard',        // page
+            'visualbudget_config'            // settings section
+        );
+
+        // Add the state setting
+        add_settings_field(
+            'state',                        // setting ID
+            'State or territory',           // setting title
+            array( $this, 'state_callback' ), // callback function
             'visualbudget_dashboard',       // page
             'visualbudget_config'           // settings section
         );
@@ -160,8 +169,11 @@ class VisualBudget_Admin {
      */
     public function sanitize( $input ) {
         $new_input = array();
-        if( isset( $input['town_name'] ) )
-            $new_input['town_name'] = sanitize_text_field( $input['town_name'] );
+        if( isset( $input['org_name'] ) )
+            $new_input['org_name'] = sanitize_text_field( $input['org_name'] );
+
+        if( isset( $input['state'] ) )
+            $new_input['state'] = sanitize_text_field( $input['state'] );
 
         if( isset( $input['contact_email'] ) )
             $new_input['contact_email'] = sanitize_email( $input['contact_email'] );
@@ -177,17 +189,91 @@ class VisualBudget_Admin {
     }
 
     /**
-     * Get the settings option array and print one of its values
+     * Callback for the long town name setting
      */
-    public function town_name_callback() {
+    public function org_name_callback() {
         printf(
-            '<input type="text" size="35" id="town_name" name="visualbudget_settings[town_name]" value="%s" />',
-            isset( $this->options['town_name'] ) ? esc_attr( $this->options['town_name']) : ''
+            '<input type="text" size="35" id="org_name" name="visualbudget_settings[org_name]" value="%s" />',
+            isset( $this->options['org_name'] ) ? esc_attr( $this->options['org_name']) : ''
         );
     }
 
     /**
-     * Get the settings option array and print one of its values
+     * Callback for the state setting
+     */
+    public function state_callback() {
+        $states = array(
+                    'Alabama (AL)',
+                    'Alaska (AK)',
+                    'American Samoa (AS)',
+                    'Arizona (AZ)',
+                    'Arkansas (AR)',
+                    'California (CA)',
+                    'Colorado (CO)',
+                    'Connecticut (CT)',
+                    'Delaware (DE)',
+                    'District of Columbia (DC)',
+                    'Federated States of Micronesia (FM)',
+                    'Florida (FL)',
+                    'Georgia (GA)',
+                    'Guam (GU)',
+                    'Hawaii (HI)',
+                    'Idaho (ID)',
+                    'Illinois (IL)',
+                    'Indiana (IN)',
+                    'Iowa (IA)',
+                    'Kansas (KS)',
+                    'Kentucky (KY)',
+                    'Louisiana (LA)',
+                    'Maine (ME)',
+                    'Marshall Islands (MH)',
+                    'Maryland (MD)',
+                    'Massachusetts (MA)',
+                    'Michigan (MI)',
+                    'Minnesota (MN)',
+                    'Mississippi (MS)',
+                    'Missouri (MO)',
+                    'Montana (MT)',
+                    'Nebraska (NE)',
+                    'Nevada (NV)',
+                    'New Hampshire (NH)',
+                    'New Jersey (NJ)',
+                    'New Mexico (NM)',
+                    'New York (NY)',
+                    'North Carolina (NC)',
+                    'North Dakota (ND)',
+                    'Northern Marianas Islands (MP)',
+                    'Ohio (OH)',
+                    'Oklahoma (OK)',
+                    'Oregon (OR)',
+                    'Palau (PW)',
+                    'Pennsylvania (PA)',
+                    'Puerto Rico (RP)',
+                    'Rhode Island (RI)',
+                    'South Carolina (SC)',
+                    'South Dakota (SD)',
+                    'Tennessee (TN)',
+                    'Texas (TX)',
+                    'Utah (UT)',
+                    'Vermont (VT)',
+                    'Virgin Islands (VI)',
+                    'Virginia (VA)',
+                    'Washington (WA)',
+                    'West Virginia (WV)',
+                    'Wisconsin (WI)',
+                    'Wyoming (WY)' );
+
+        echo '<select name="visualbudget_settings[state]" id="state">';
+        foreach ($states as $state) {
+            echo '<option value="' . esc_attr($state) . '" '
+                . selected( $this->options['state'], esc_attr($state) )
+                . '>' . esc_attr($state) . '</option>';
+        }
+        echo '</select>';
+    }
+
+    /**
+     * Callback for the contact email setting
      */
     public function contact_email_callback() {
         printf(

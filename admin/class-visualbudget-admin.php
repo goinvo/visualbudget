@@ -41,6 +41,12 @@ class VisualBudget_Admin {
     private $version;
 
     /**
+     * The settings page is accessed via
+     *      [URL]/wp-admin/admin.php?page=$settings_page_handle
+     */
+    private $settings_page_handle = 'visualbudget';
+
+    /**
      * Initialize the class and set its properties.
      *
      * @since    0.1.0
@@ -62,9 +68,9 @@ class VisualBudget_Admin {
             'Visual Budget',                                // string $page_title,
             'Visual Budget',                                // string $menu_title,
             'manage_options',                               // string $capability,
-            'visualbudget',                                 // string $menu_slug,
+            $this->settings_page_handle,                    // string $menu_slug,
             array($this, 'visualbudget_display_dashboard'), // callable $function = '',
-            '',                                             // string $icon_url = '',
+            'dashicons-chart-area',                         // string $icon_url = '',
             null                                            // int $position = null
         );
     }
@@ -83,15 +89,15 @@ class VisualBudget_Admin {
      */
     public function visualbudget_dashboard_init() {
         register_setting(
-            'visualbudget_settings_group',  // Option group
-            'visualbudget_settings',        // Option name
-            array( $this, 'sanitize' )      // Sanitize
+            'visualbudget_settings_group',  // option group
+            'visualbudget_settings',        // option name
+            array( $this, 'sanitize' )      // sanitize
         );
 
         // Add a new setting section
         add_settings_section(
             'visualbudget_config',          // section ID
-            'Configuration',  // section title
+            'Configuration',                // section title
             array( $this, 'print_section_info' ), // callback
             'visualbudget_dashboard'        // page
         );

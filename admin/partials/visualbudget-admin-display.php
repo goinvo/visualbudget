@@ -11,13 +11,23 @@
  * @subpackage        VisualBudget/admin/partials
  */
 ?><div class="wrap">
-<h1>Visual Budget</h1>
-<p>Welcome to the Visual Budget dashboard. This is place to configure things.</p>
+<h1></span>Visual Budget</h1>
+<?php $this->visualbudget_display_dashboard_tabs(); ?>
 <form method="post" action="options.php">
-    <?php $this->options = get_option( 'visualbudget_settings' );  ?>
-    <?php settings_fields( 'visualbudget_settings_group' ); ?>
-    <?php do_settings_sections( 'visualbudget_dashboard' ); ?>
-    <?php submit_button(); ?>
+    <?php
+    // Grab the saved options
+    $active_tab = isset( $_GET[ 'tab' ] ) ? $_GET[ 'tab' ] : 'configuration';
+    $this->options = get_option( 'visualbudget_settings' );
+
+    // Display the appropriate tab content
+    if ( $active_tab == 'configuration' ) {
+        settings_fields( 'visualbudget_settings_group' );
+        do_settings_sections( 'visualbudget_dashboard' );
+        submit_button();
+    } else {
+        echo ('<p>Nothing here yet.</p>');
+    }
+    ?>
 </form>
 
 </div><!-- div.wrap -->

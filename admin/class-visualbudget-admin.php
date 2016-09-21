@@ -41,6 +41,12 @@ class VisualBudget_Admin {
     private $version;
 
     /**
+     * The settings page is accessed via
+     *      [URL]/wp-admin/admin.php?page=$settings_page_handle
+     */
+    private $settings_page_handle = 'visualbudget';
+
+    /**
      * Initialize the class and set its properties.
      *
      * @since    0.1.0
@@ -62,9 +68,9 @@ class VisualBudget_Admin {
             'Visual Budget',                                // string $page_title,
             'Visual Budget',                                // string $menu_title,
             'manage_options',                               // string $capability,
-            'visualbudget',                                 // string $menu_slug,
+            $this->settings_page_handle,                    // string $menu_slug,
             array($this, 'visualbudget_display_dashboard'), // callable $function = '',
-            '',                                             // string $icon_url = '',
+            'dashicons-chart-area',                         // string $icon_url = '',
             null                                            // int $position = null
         );
     }
@@ -79,19 +85,50 @@ class VisualBudget_Admin {
     }
 
     /**
+     * Display the tab nav at the top of the VB dashboard page
+     */
+    public function visualbudget_display_dashboard_tabs() {
+        echo '<h2 class="nav-tab-wrapper">';
+
+        // Get the active tab name if there is one; else go to default.
+        $active_tab = isset( $_GET[ 'tab' ] ) ? $_GET[ 'tab' ] : 'configuration';
+
+        // A list of the tabs
+        $tabs = array(
+            'configuration' =>
+                array('name'=>'Configuration',
+                      'icon'=>'dashicons-admin-settings'),
+            'datasets' =>
+                array('name'=>'Datasets',
+                      'icon'=>'dashicons-media-spreadsheet'),
+            'visualizations' =>
+                array('name'=>'Visualizations',
+                      'icon'=>'dashicons-chart-line'),
+            );
+
+        foreach ($tabs as $key => $info) {
+            echo '<a href="?page=' . $this->settings_page_handle . '&tab=' . $key;
+            echo '" class="nav-tab ' . ( $active_tab == $key ? 'nav-tab-active' : '' );
+            echo '"><span class="dashicons ' . $info['icon'] . '" style="margin-right:.3em"></span>';
+            echo $info['name'] . '</a>';
+        }
+        echo '</h2>';
+    }
+
+    /**
      * Register and add settings
      */
     public function visualbudget_dashboard_init() {
         register_setting(
-            'visualbudget_settings_group',  // Option group
-            'visualbudget_settings',        // Option name
-            array( $this, 'sanitize' )      // Sanitize
+            'visualbudget_settings_group',  // option group
+            'visualbudget_settings',        // option name
+            array( $this, 'sanitize' )      // sanitize
         );
 
         // Add a new setting section
         add_settings_section(
             'visualbudget_config',          // section ID
-            'Configuration',  // section title
+            'Required configuration',       // section title
             array( $this, 'print_section_info' ), // callback
             'visualbudget_dashboard'        // page
         );
@@ -133,7 +170,7 @@ class VisualBudget_Admin {
     }
 
     /**
-     * Print the Section text
+     * Print the section text
      */
     public function print_section_info() {
         print 'Required configuration for your Visual Budget website:';

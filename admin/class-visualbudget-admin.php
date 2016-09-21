@@ -54,24 +54,111 @@ class VisualBudget_Admin {
 
     }
 
+    /**
+     * Add dashboard page
+     */
     public function visualbudget_add_dashboard_sidelink() {
         add_menu_page(
-            'Visual Budget',                            // string $page_title,
-            'Visual Budget',                            // string $menu_title,
-            'manage_options',                           // string $capability,
-            'visualbudget',                             // string $menu_slug,
-            array($this, 'visualbudget_dashboard'),     // callable $function = '',
-            '',                                         // string $icon_url = '',
-            null                                        // int $position = null
+            'Visual Budget',                                // string $page_title,
+            'Visual Budget',                                // string $menu_title,
+            'manage_options',                               // string $capability,
+            'visualbudget',                                 // string $menu_slug,
+            array($this, 'visualbudget_display_dashboard'), // callable $function = '',
+            '',                                             // string $icon_url = '',
+            null                                            // int $position = null
         );
     }
 
-
-    public function visualbudget_dashboard() {
+    /**
+     * Dashboard page callback
+     */
+    public function visualbudget_display_dashboard() {
 
         require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/partials/visualbudget-admin-display.php';
 
     }
+
+    /**
+     * Register and add settings
+     */
+    public function visualbudget_dashboard_init() {
+        register_setting(
+            'visualbudget_settings_group',  // Option group
+            'visualbudget_settings',        // Option name
+            array( $this, 'sanitize' )      // Sanitize
+        );
+
+        // Add a new setting section
+        add_settings_section(
+            'visualbudget_config',          // section ID
+            'Configuration',  // section title
+            array( $this, 'print_section_info' ), // callback
+            'visualbudget_dashboard'        // page
+        );
+
+        // Add the town name setting
+        add_settings_field(
+            'town_name',                    // setting ID
+            'Town name',                    // setting title
+            array( $this, 'town_name_callback' ), // callback function
+            'visualbudget_dashboard',       // page
+            'visualbudget_config'           // settings section
+        );
+
+        // Add the contact email setting
+        add_settings_field(
+            'contact_email',
+            'Contact email address',
+            array( $this, 'contact_email_callback' ),
+            'visualbudget_dashboard',
+            'visualbudget_config'
+        );
+
+    }
+
+    /**
+     * Sanitize each setting field as needed
+     *
+     * @param array     $input      Contains all settings fields as array keys
+     */
+    public function sanitize( $input ) {
+        $new_input = array();
+        if( isset( $input['town_name'] ) )
+            $new_input['town_name'] = sanitize_text_field( $input['town_name'] );
+
+        if( isset( $input['contact_email'] ) )
+            $new_input['contact_email'] = sanitize_email( $input['contact_email'] );
+
+        return $new_input;
+    }
+
+    /**
+     * Print the Section text
+     */
+    public function print_section_info() {
+        print 'Required configuration for your Visual Budget website:';
+    }
+
+    /**
+     * Get the settings option array and print one of its values
+     */
+    public function town_name_callback() {
+        printf(
+            '<input type="text" size="35" id="town_name" name="visualbudget_settings[town_name]" value="%s" />',
+            isset( $this->options['town_name'] ) ? esc_attr( $this->options['town_name']) : ''
+        );
+    }
+
+    /**
+     * Get the settings option array and print one of its values
+     */
+    public function contact_email_callback() {
+        printf(
+            '<input type="text" size="35" id="contact_email" name="visualbudget_settings[contact_email]" value="%s" />',
+            isset( $this->options['contact_email'] ) ? esc_attr( $this->options['contact_email']) : ''
+        );
+    }
+
 
     /**
      * Register the stylesheets for the admin area.

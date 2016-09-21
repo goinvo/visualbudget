@@ -10,7 +10,14 @@
  * @package           VisualBudget
  * @subpackage        VisualBudget/admin/partials
  */
-?>
-<!-- This file should primarily consist of HTML with a little bit of PHP. -->
+?><div class="wrap">
 <h1>Visual Budget</h1>
-<p>Welcome to the Visual Budget dashboard.</p>
+<p>Welcome to the Visual Budget dashboard. This is place to configure things.</p>
+<form method="post" action="options.php">
+    <?php $this->options = get_option( 'visualbudget_settings' );  ?>
+    <?php settings_fields( 'visualbudget_settings_group' ); ?>
+    <?php do_settings_sections( 'visualbudget_dashboard' ); ?>
+    <?php submit_button(); ?>
+</form>
+
+</div><!-- div.wrap -->

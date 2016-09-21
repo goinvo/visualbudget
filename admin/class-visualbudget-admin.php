@@ -97,7 +97,7 @@ class VisualBudget_Admin {
         // Add a new setting section
         add_settings_section(
             'visualbudget_config',          // section ID
-            'Configuration',                // section title
+            'Required configuration',       // section title
             array( $this, 'print_section_info' ), // callback
             'visualbudget_dashboard'        // page
         );
@@ -139,7 +139,7 @@ class VisualBudget_Admin {
     }
 
     /**
-     * Print the Section text
+     * Print the section text
      */
     public function print_section_info() {
         print 'Required configuration for your Visual Budget website:';

@@ -11,15 +11,15 @@
  * @subpackage        VisualBudget/admin/partials
  */
 ?><div class="wrap">
-<h1><span class="dashicons dashicons-admin-settings" style='font-size:30px;margin-right:.6em;'></span>Visual Budget</h1>
+<h1></span>Visual Budget</h1>
 <h2 class="nav-tab-wrapper">
 <?php
 // Get the active tab name if there is one; else go to default.
 $active_tab = isset( $_GET[ 'tab' ] ) ? $_GET[ 'tab' ] : 'configuration';
 ?>
-    <a href="?page=<?php echo $this->settings_page_handle ?>&tab=configuration" class="nav-tab <?php echo $active_tab == 'configuration' ? 'nav-tab-active' : ''; ?>">Configuration</a>
-    <a href="?page=<?php echo $this->settings_page_handle ?>&tab=datasets" class="nav-tab <?php echo $active_tab == 'datasets' ? 'nav-tab-active' : ''; ?>">Datasets</a>
-    <a href="?page=<?php echo $this->settings_page_handle ?>&tab=visualizations" class="nav-tab <?php echo $active_tab == 'visualizations' ? 'nav-tab-active' : ''; ?>">Visualizations</a>
+    <a href="?page=<?php echo $this->settings_page_handle ?>&tab=configuration" class="nav-tab <?php echo $active_tab == 'configuration' ? 'nav-tab-active' : ''; ?>"><span class="dashicons dashicons-admin-settings" style='margin-right:.3em'></span>Configuration</a>
+    <a href="?page=<?php echo $this->settings_page_handle ?>&tab=datasets" class="nav-tab <?php echo $active_tab == 'datasets' ? 'nav-tab-active' : ''; ?>"><span class="dashicons dashicons-media-spreadsheet" style='margin-right:.3em'></span>Datasets</a>
+    <a href="?page=<?php echo $this->settings_page_handle ?>&tab=visualizations" class="nav-tab <?php echo $active_tab == 'visualizations' ? 'nav-tab-active' : ''; ?>"><span class="dashicons dashicons-chart-line" style='margin-right:.3em'></span>Visualizations</a>
 </h2>
 <form method="post" action="options.php">
     <?php

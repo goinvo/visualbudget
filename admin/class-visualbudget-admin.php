@@ -85,6 +85,37 @@ class VisualBudget_Admin {
     }
 
     /**
+     * Display the tab nav at the top of the VB dashboard page
+     */
+    public function visualbudget_display_dashboard_tabs() {
+        echo '<h2 class="nav-tab-wrapper">';
+
+        // Get the active tab name if there is one; else go to default.
+        $active_tab = isset( $_GET[ 'tab' ] ) ? $_GET[ 'tab' ] : 'configuration';
+
+        // A list of the tabs
+        $tabs = array(
+            'configuration' =>
+                array('name'=>'Configuration',
+                      'icon'=>'dashicons-admin-settings'),
+            'datasets' =>
+                array('name'=>'Datasets',
+                      'icon'=>'dashicons-media-spreadsheet'),
+            'visualizations' =>
+                array('name'=>'Visualizations',
+                      'icon'=>'dashicons-chart-line'),
+            );
+
+        foreach ($tabs as $key => $info) {
+            echo '<a href="?page=' . $this->settings_page_handle . '&tab=' . $key;
+            echo '" class="nav-tab ' . ( $active_tab == $key ? 'nav-tab-active' : '' );
+            echo '"><span class="dashicons ' . $info['icon'] . '" style="margin-right:.3em"></span>';
+            echo $info['name'] . '</a>';
+        }
+        echo '</h2>';
+    }
+
+    /**
      * Register and add settings
      */
     public function visualbudget_dashboard_init() {

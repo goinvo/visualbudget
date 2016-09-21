@@ -64,7 +64,7 @@ class VisualBudget_Public {
 		 * This function is provided for demonstration purposes only.
 		 *
 		 * An instance of this class should be passed to the run() function
-		 * defined in Plugin_Name_Loader as all of the hooks are defined
+		 * defined in VisualBudget_Loader as all of the hooks are defined
 		 * in that particular class.
 		 *
 		 * The VisualBudget_Loader will then create the relationship

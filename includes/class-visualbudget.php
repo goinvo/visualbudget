@@ -25,11 +25,11 @@ class VisualBudget {
          */
         define('VISUALBUDGET_SLUG', 'visualbudget' );
         define('VISUALBUDGET_VERSION', '0.1.0' );
-        define('VISUALBUDGET_PATH', plugin_dir_path( dirname( __FILE__ ) ) );
         define('VISUALBUDGET_UPLOAD_DIR', 'datasets/' );
+        define('VISUALBUDGET_PATH', plugin_dir_path( dirname( __FILE__ ) ) );
         define('VISUALBUDGET_UPLOAD_PATH', VISUALBUDGET_PATH . VISUALBUDGET_UPLOAD_DIR );
-        // FIXME: This following should change. The dir might not be the slug.
-        define('VISUALBUDGET_URL', site_url() . '/wp-content/plugins/'.VISUALBUDGET_SLUG.'/' );
+        define('VISUALBUDGET_URL', plugin_dir_url( dirname( __FILE__ ) ) );
+        define('VISUALBUDGET_UPLOAD_URL', VISUALBUDGET_URL . VISUALBUDGET_UPLOAD_DIR );
 
         $this->load_dependencies();
         $this->set_locale();

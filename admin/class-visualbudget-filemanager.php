@@ -31,8 +31,16 @@ class VisualBudget_FileManager {
 
     public function get_datasets_inventory() {
         global $wp_filesystem;
+
+        // see:
+        // http://wordpress.stackexchange.com/questions/160823/use-wp-filesystem-to-list-files-in-directory
         $filelist = $wp_filesystem->dirlist(VISUALBUDGET_UPLOAD_PATH);
+
         return $filelist;
+    }
+
+    public function upload_file($file) {
+        echo 'Not yet.';
     }
 
 }

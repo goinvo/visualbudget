@@ -35,14 +35,6 @@ class VisualBudget_FileManager {
         return $filelist;
     }
 
-    /**
-     * Read into a directory and create a VisualBudget_File object for each file.
-     * Return all objects in an array.
-     */
-    public function get_tree_of( $dir ) {
-        return Array(0);
-    }
-
 }
 
 ?>

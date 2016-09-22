@@ -34,9 +34,16 @@ class VisualBudget_FileManager {
 
         // see:
         // http://wordpress.stackexchange.com/questions/160823/use-wp-filesystem-to-list-files-in-directory
-        $filelist = $wp_filesystem->dirlist(VISUALBUDGET_UPLOAD_PATH);
+        $files = $wp_filesystem->dirlist(VISUALBUDGET_UPLOAD_PATH);
 
-        return $filelist;
+        // Filter out anything that is not a file
+        // (i.e. the 'originals' directory)
+        $files = array_filter($files,
+            function(&$i) {
+                return is_file(VISUALBUDGET_UPLOAD_PATH . $i['name']);
+            });
+
+        return $files;
     }
 
     public function upload_file($file) {

@@ -12,22 +12,33 @@
  */
 ?><div class="wrap">
 <h1></span>Visual Budget</h1>
-<?php $this->visualbudget_display_dashboard_tabs(); ?>
-<form method="post" action="options.php">
-    <?php
-    // Grab the saved options
-    $active_tab = isset( $_GET[ 'tab' ] ) ? $_GET[ 'tab' ] : 'configuration';
-    $this->options = get_option( 'visualbudget_settings' );
+<?php
 
-    // Display the appropriate tab content
-    if ( $active_tab == 'configuration' ) {
-        settings_fields( 'visualbudget_settings_group' );
-        do_settings_sections( 'visualbudget_dashboard' );
-        submit_button();
-    } else {
-        echo ('<p>Nothing here yet.</p>');
-    }
-    ?>
+// First display the tab nav at the top
+$this->visualbudget_display_dashboard_tabs();
+
+// Find out (or set) which tab is active
+// By default, 'configuration' is active
+$active_tab = isset( $_GET[ 'tab' ] ) ? $_GET[ 'tab' ] : 'configuration';
+
+// Grab the saved options
+$this->options = get_option( 'visualbudget_settings' );
+
+// Display the appropriate tab content
+switch ( $active_tab ) {
+    case 'configuration':
+        include plugin_dir_path( dirname( __FILE__ ) ) . 'partials/visualbudget-admin-display-configuration.php';
+        break;
+
+    case 'datasets':
+        include plugin_dir_path( dirname( __FILE__ ) ) . 'partials/visualbudget-admin-display-datasets.php';
+        break;
+
+    case 'visualizations':
+        echo "Nothing here yet.";
+        break;
+}
+?>
 </form>
 
 </div><!-- div.wrap -->

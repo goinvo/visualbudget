@@ -25,14 +25,22 @@ class VisualBudget {
          */
         define('VISUALBUDGET_SLUG', 'visualbudget' );
         define('VISUALBUDGET_VERSION', '0.1.0' );
+        define('VISUALBUDGET_UPLOAD_DIR', 'datasets/' );
+        define('VISUALBUDGET_UPLOAD_ORIGINALS_DIR', 'originals/' );
         define('VISUALBUDGET_PATH', plugin_dir_path( dirname( __FILE__ ) ) );
-        define('VISUALBUDGET_UPLOAD_PATH', VISUALBUDGET_PATH . 'datasets/' );
-        define('VISUALBUDGET_UPLOAD_ORIGNALS_PATH', VISUALBUDGET_UPLOAD_PATH . 'originals/' );
+        define('VISUALBUDGET_UPLOAD_PATH', VISUALBUDGET_PATH . VISUALBUDGET_UPLOAD_DIR );
+        define('VISUALBUDGET_UPLOAD_ORIGNALS_PATH',
+            VISUALBUDGET_UPLOAD_PATH . VISUALBUDGET_UPLOAD_ORIGINALS_DIR );
+        define('VISUALBUDGET_URL', plugin_dir_url( dirname( __FILE__ ) ) );
+        define('VISUALBUDGET_UPLOAD_URL', VISUALBUDGET_URL . VISUALBUDGET_UPLOAD_DIR );
+        define('VISUALBUDGET_UPLOAD_ORIGINALS_URL',
+            VISUALBUDGET_UPLOAD_URL . VISUALBUDGET_UPLOAD_ORIGINALS_DIR );
 
         $this->load_dependencies();
         $this->set_locale();
         $this->define_admin_hooks();
         $this->define_public_hooks();
+        $this->define_shortcodes();
 
     }
 
@@ -123,6 +131,22 @@ class VisualBudget {
         $this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_styles' );
         $this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
 
+    }
+
+    private function define_shortcodes() {
+        // [visualbudget text="display me"]
+        add_shortcode( 'visualbudget', Array( $this, 'visualbudget_func' ) );
+    }
+
+
+    public function visualbudget_func( $atts ) {
+        $a = shortcode_atts( array(
+            'text' => 'Default text.',
+        ), $atts );
+
+        return "<iframe src='" . VISUALBUDGET_URL . "vis.php?text=" . urlencode($a['text']) . "'"
+            . " width='100%' height='100px' style='border:1px solid #aaa;'>"
+            . "</iframe>";
     }
 
     /**

@@ -2,20 +2,9 @@
 
 /**
  * The file manager, for dealing with uploading/reading/writing of datasets.
- *
- * @link       http://visgov.com
- * @since      0.1.0
- *
- * @package    VisualBudget
- * @subpackage VisualBudget/admin
  */
 
 class VisualBudget_FileManager {
-
-    /**
-     * Full path to the directory in which datasets reside.
-     */
-    private $upload_path;
 
     /**
      * The contents of $upload_path, stored as an array of FILE objects.
@@ -24,33 +13,25 @@ class VisualBudget_FileManager {
 
     /**
      * Initialize the class and set its properties.
-     *
-     * @since    0.1.0
      * @param    string    $plugin_name   The name of this plugin.
      * @param    string    $version       The version of this plugin.
      * @param    string    $upload_dir    The upload directory (not full path).
      */
     public function __construct() {
 
-        // $url = wp_nonce_url($this->upload_path);
-        // if (false === ($creds = request_filesystem_credentials($url, '', false, false, null) ) ) {
-        //     return; // stop processing here
-        // }
-        // if ( ! WP_Filesystem($creds) ) {
-        //     request_filesystem_credentials($url, '', true, false, null);
-        //     return;
-        // }
+        // WordPress's own filesystem class.
+        global $wp_filesystem;
 
-        // $code = $this->initialize_filesystem();
-        // echo $code;
-
-        // Create the $datasets array.
-        // $this->datasets = $this->get_tree_of( $this->upload_dir );
+        // Create the upload directory if it doesn't exist.
+        if ( !is_dir(VISUALBUDGET_UPLOAD_PATH) ) {
+            $wp_filesystem->mkdir(VISUALBUDGET_UPLOAD_PATH);
+        }
 
     }
 
-    public function initialize_filesystem() {
-        return 0;
+    public function get_datasets_inventory() {
+        global $wp_filesystem;
+        echo $wp_filesystem->abspath();
     }
 
     /**

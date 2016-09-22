@@ -11,7 +11,8 @@ class VisualBudget_Admin {
      */
     public function __construct() {
 
-        // $this->load_dependencies();
+        // Load the classes that the admin panel uses.
+        $this->load_dependencies();
 
     }
 
@@ -21,17 +22,19 @@ class VisualBudget_Admin {
     private function load_dependencies() {
 
         // The class responsible for interacting with the filesystem.
+        // Note that we are not instatiating the filemanager here, but
+        // do rather in the function setup_filesystem_manager(),
+        // after the credentials are obtained.
         require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/class-visualbudget-filemanager.php';
-
-        $this->filemanager = new VisualBudget_FileManager();
 
     }
 
-            // $wp_filesystem->mkdir(VISUALBUDGET_PATH . 'testy');
     /**
      * Required to read/write to the filesystem.
      */
-    public function get_filesystem_credentials() {
+    public function setup_filesystem_manager() {
+        // The firs thing to do is to get credentials to
+        // get our fingers in the filesystem.
         $access_type = get_filesystem_method();
         if($access_type === 'direct') {
             // We can safely run request_filesystem_credentials()
@@ -44,11 +47,17 @@ class VisualBudget_Admin {
                 return false;
             }
 
+            // Declare the global variable $wp_filesystem, which
+            // is the WP class for interacting with the filesystem.
             global $wp_filesystem;
+
         } else {
             // We don't have direct write access. Prompt user with our notice.
             // FIXME: Add notice of error.
         }
+
+        // Finally, instantiate the file manager.
+        $this->filemanager = new VisualBudget_FileManager();
     }
 
     /**

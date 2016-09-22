@@ -25,7 +25,10 @@ class VisualBudget_Admin {
         // Note that we are not instatiating the filemanager here, but
         // do rather in the function setup_filesystem_manager(),
         // after the credentials are obtained.
-        require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/class-visualbudget-filemanager.php';
+        require_once VISUALBUDGET_PATH . 'admin/class-visualbudget-filemanager.php';
+
+        require_once VISUALBUDGET_PATH . 'admin/class-visualbudget-admin-settings.php';
+        $this->settings = new VisualBudget_Admin_Settings();
 
     }
 
@@ -84,6 +87,10 @@ class VisualBudget_Admin {
 
     }
 
+    public function visualbudget_dashboard_init() {
+        $this->settings->register_settings();
+    }
+
     /**
      * Display the tab nav at the top of the VB dashboard page
      */
@@ -114,87 +121,6 @@ class VisualBudget_Admin {
         }
         echo '</h2>';
     }
-
-    /**
-     * Register and add settings
-     */
-    public function visualbudget_dashboard_init() {
-        register_setting(
-            'visualbudget_settings_group',  // option group
-            'visualbudget_settings',        // option name
-            array( $this, 'sanitize' )      // sanitize
-        );
-
-        // Add a new setting section
-        add_settings_section(
-            'visualbudget_config',          // section ID
-            'Required configuration',       // section title
-            array( $this, 'print_section_info' ), // callback
-            'visualbudget_dashboard'        // page
-        );
-
-        // Add the name setting
-        add_settings_field(
-            'org_name',                      // setting ID
-            'Name of city, town, district, or organization', // setting title
-            array( $this, 'org_name_callback' ),             // callback function
-            'visualbudget_dashboard',        // page
-            'visualbudget_config'            // settings section
-        );
-
-        // Add the contact email setting
-        add_settings_field(
-            'contact_email',
-            'Contact email address',
-            array( $this, 'contact_email_callback' ),
-            'visualbudget_dashboard',
-            'visualbudget_config'
-        );
-
-    }
-
-    /**
-     * Sanitize each setting field as needed
-     * @param array     $input      Contains all settings fields as array keys
-     */
-    public function sanitize( $input ) {
-        $new_input = array();
-        if( isset( $input['org_name'] ) )
-            $new_input['org_name'] = sanitize_text_field( $input['org_name'] );
-
-        if( isset( $input['contact_email'] ) )
-            $new_input['contact_email'] = sanitize_email( $input['contact_email'] );
-
-        return $new_input;
-    }
-
-    /**
-     * Print the section text
-     */
-    public function print_section_info() {
-        print 'Required configuration for your Visual Budget website:';
-    }
-
-    /**
-     * Callback for the long town name setting
-     */
-    public function org_name_callback() {
-        printf(
-            '<input type="text" size="35" id="org_name" name="visualbudget_settings[org_name]" value="%s" />',
-            isset( $this->options['org_name'] ) ? esc_attr( $this->options['org_name']) : ''
-        );
-    }
-
-    /**
-     * Callback for the contact email setting
-     */
-    public function contact_email_callback() {
-        printf(
-            '<input type="text" size="35" id="contact_email" name="visualbudget_settings[contact_email]" value="%s" />',
-            isset( $this->options['contact_email'] ) ? esc_attr( $this->options['contact_email']) : ''
-        );
-    }
-
 
     /**
      * Register the stylesheets for the admin area.

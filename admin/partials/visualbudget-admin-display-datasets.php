@@ -7,4 +7,13 @@
 <div><h3>From URL</h3></div>
 <hr/>
 <h2>My datasets</h2>
-<?php $this->filemanager->get_datasets_inventory(); ?>
+<?php
+$datasets = $this->filemanager->get_datasets_inventory();
+if (!empty($datasets)) {
+    foreach ($datasets as $dataset) {
+        echo '<div>' . $dataset['name'] . '</div>';
+    }
+} else {
+    echo 'There are no datasets.';
+}
+?>

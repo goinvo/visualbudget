@@ -31,7 +31,8 @@ class VisualBudget_FileManager {
 
     public function get_datasets_inventory() {
         global $wp_filesystem;
-        echo $wp_filesystem->abspath();
+        $filelist = $wp_filesystem->dirlist(VISUALBUDGET_UPLOAD_PATH);
+        return $filelist;
     }
 
     /**

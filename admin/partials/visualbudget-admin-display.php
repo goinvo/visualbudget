@@ -1,14 +1,6 @@
 <?php
 /**
- * Provide an admin area view for the plugin
- *
- * This file is used to markup the admin-facing aspects of the plugin.
- *
- *
- * @link              http://visgov.com
- * @since             0.1.0
- * @package           VisualBudget
- * @subpackage        VisualBudget/admin/partials
+ * Provide an admin area view for the plugin.
  */
 ?><div class="wrap">
 <h1></span>Visual Budget</h1>
@@ -27,11 +19,11 @@ $this->options = get_option( 'visualbudget_settings' );
 // Display the appropriate tab content
 switch ( $active_tab ) {
     case 'configuration':
-        include plugin_dir_path( dirname( __FILE__ ) ) . 'partials/visualbudget-admin-display-configuration.php';
+        include VISUALBUDGET_PATH . 'admin/partials/visualbudget-admin-display-configuration.php';
         break;
 
     case 'datasets':
-        include plugin_dir_path( dirname( __FILE__ ) ) . 'partials/visualbudget-admin-display-datasets.php';
+        include VISUALBUDGET_PATH . 'admin/partials/visualbudget-admin-display-datasets.php';
         break;
 
     case 'visualizations':

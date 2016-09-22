@@ -8,10 +8,6 @@
  * registers the activation and deactivation functions, and defines a function
  * that starts the plugin.
  *
- * @link              http://visgov.com
- * @since             0.1.0
- * @package           VisualBudget
- *
  * @wordpress-plugin
  * Plugin Name:       Visual Budget
  * Plugin URI:        http://visgov.com/plugin/
@@ -64,8 +60,6 @@ require plugin_dir_path( __FILE__ ) . 'includes/class-visualbudget.php';
  * Since everything within the plugin is registered via hooks,
  * then kicking off the plugin from this point in the file does
  * not affect the page life cycle.
- *
- * @since    0.1.0
  */
 function run_visualbudget() {
 

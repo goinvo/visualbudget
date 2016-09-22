@@ -2,61 +2,14 @@
 
 /**
  * The admin-specific functionality of the plugin.
- *
- * @link       http://visgov.com
- * @since      0.1.0
- *
- * @package    VisualBudget
- * @subpackage VisualBudget/admin
- */
-
-/**
- * The admin-specific functionality of the plugin.
- *
- * Defines the plugin name, version, and two examples hooks for how to
- * enqueue the admin-specific stylesheet and JavaScript.
- *
- * @package    VisualBudget
- * @subpackage VisualBudget/admin
  */
 
 class VisualBudget_Admin {
 
     /**
-     * The ID of this plugin.
-     *
-     * @since    0.1.0
-     * @access   private
-     * @var      string    $plugin_name    The ID of this plugin.
-     */
-    private $plugin_name;
-
-    /**
-     * The version of this plugin.
-     *
-     * @since    0.1.0
-     * @access   private
-     * @var      string    $version    The current version of this plugin.
-     */
-    private $version;
-
-    /**
-     * The settings page is accessed via
-     *      [URL]/wp-admin/admin.php?page=$settings_page_handle
-     */
-    private $settings_page_handle = 'visualbudget';
-
-    /**
      * Initialize the class and set its properties.
-     *
-     * @since    0.1.0
-     * @param    string    $plugin_name   The name of this plugin.
-     * @param    string    $version       The version of this plugin.
      */
-    public function __construct( $plugin_name, $version ) {
-
-        $this->plugin_name = $plugin_name;
-        $this->version = $version;
+    public function __construct() {
 
     }
 
@@ -68,7 +21,7 @@ class VisualBudget_Admin {
             'Visual Budget',                                // string $page_title,
             'Visual Budget',                                // string $menu_title,
             'manage_options',                               // string $capability,
-            $this->settings_page_handle,                    // string $menu_slug,
+            VISUALBUDGET_SLUG,                              // string $menu_slug,
             array($this, 'visualbudget_display_dashboard'), // callable $function = '',
             'dashicons-chart-area',                         // string $icon_url = '',
             null                                            // int $position = null
@@ -80,7 +33,7 @@ class VisualBudget_Admin {
      */
     public function visualbudget_display_dashboard() {
 
-        require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/partials/visualbudget-admin-display.php';
+        require_once VISUALBUDGET_PATH . 'admin/partials/visualbudget-admin-display.php';
 
     }
 
@@ -107,7 +60,7 @@ class VisualBudget_Admin {
             );
 
         foreach ($tabs as $key => $info) {
-            echo '<a href="?page=' . $this->settings_page_handle . '&tab=' . $key;
+            echo '<a href="?page=' . VISUALBUDGET_SLUG . '&tab=' . $key;
             echo '" class="nav-tab ' . ( $active_tab == $key ? 'nav-tab-active' : '' );
             echo '"><span class="dashicons ' . $info['icon'] . '" style="margin-right:.3em"></span>';
             echo $info['name'] . '</a>';
@@ -155,7 +108,6 @@ class VisualBudget_Admin {
 
     /**
      * Sanitize each setting field as needed
-     *
      * @param array     $input      Contains all settings fields as array keys
      */
     public function sanitize( $input ) {
@@ -199,8 +151,6 @@ class VisualBudget_Admin {
 
     /**
      * Register the stylesheets for the admin area.
-     *
-     * @since    0.1.0
      */
     public function enqueue_styles() {
 
@@ -222,8 +172,6 @@ class VisualBudget_Admin {
 
     /**
      * Register the JavaScript for the admin area.
-     *
-     * @since    0.1.0
      */
     public function enqueue_scripts() {
 

@@ -27,6 +27,7 @@ class VisualBudget {
         define('VISUALBUDGET_VERSION', '0.1.0' );
         define('VISUALBUDGET_PATH', plugin_dir_path( dirname( __FILE__ ) ) );
         define('VISUALBUDGET_UPLOAD_PATH', VISUALBUDGET_PATH . 'datasets/' );
+        define('VISUALBUDGET_UPLOAD_ORIGNALS_PATH', VISUALBUDGET_UPLOAD_PATH . 'originals/' );
 
         $this->load_dependencies();
         $this->set_locale();

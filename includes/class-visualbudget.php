@@ -99,9 +99,14 @@ class VisualBudget {
 
         $plugin_admin = new VisualBudget_Admin();
 
+        // Add scripts and styles.
         $this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles' );
         $this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
 
+        // Set up the file manager, including getting the credentials.
+        $this->loader->add_action( 'admin_init', $plugin_admin, 'setup_filesystem_manager' );
+
+        // Set up the dashboard.
         $this->loader->add_action( 'admin_menu', $plugin_admin, 'visualbudget_add_dashboard_sidelink' );
         $this->loader->add_action( 'admin_init', $plugin_admin, 'visualbudget_dashboard_init' );
     }

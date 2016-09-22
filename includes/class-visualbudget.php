@@ -28,10 +28,6 @@ class VisualBudget {
         define('VISUALBUDGET_PATH', plugin_dir_path( dirname( __FILE__ ) ) );
         define('VISUALBUDGET_UPLOAD_PATH', VISUALBUDGET_PATH . 'datasets/' );
 
-
-        $this->plugin_name = 'visualbudget';
-        $this->version = '0.1.0';
-
         $this->load_dependencies();
         $this->set_locale();
         $this->define_admin_hooks();

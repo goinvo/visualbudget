@@ -7,10 +7,14 @@
 header("Content-Type: text/plain");
 
 // Get an array of the names of files in the directory
-$files = scandir('datasets/');
+$dir = 'datasets/';
+$files = scandir($dir);
 
-// Remove the virtual directories '.' and '..'
-$files = array_diff_key($files, ['.', '..']);
+// Filter out anything that is not a file
+$files = array_filter($files,
+    function(&$i) use ($dir) {
+        return is_file($dir . $i);
+    });
 
 // Print out all the others, one per line
 echo implode("\n", $files);

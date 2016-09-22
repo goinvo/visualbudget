@@ -11,6 +11,44 @@ class VisualBudget_Admin {
      */
     public function __construct() {
 
+        // $this->load_dependencies();
+
+    }
+
+    /**
+     * Load the required dependencies for the admin panel.
+     */
+    private function load_dependencies() {
+
+        // The class responsible for interacting with the filesystem.
+        require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/class-visualbudget-filemanager.php';
+
+        $this->filemanager = new VisualBudget_FileManager();
+
+    }
+
+            // $wp_filesystem->mkdir(VISUALBUDGET_PATH . 'testy');
+    /**
+     * Required to read/write to the filesystem.
+     */
+    public function get_filesystem_credentials() {
+        $access_type = get_filesystem_method();
+        if($access_type === 'direct') {
+            // We can safely run request_filesystem_credentials()
+            // without any issues and don't need to worry about passing in a URL
+            $creds = request_filesystem_credentials(site_url() . '/wp-content/plugins/' . VISUALBUDGET_SLUG, '', false, false, array());
+
+            // Initialize the API
+            if ( ! WP_Filesystem($creds) ) {
+                // Exit if there are any problems
+                return false;
+            }
+
+            global $wp_filesystem;
+        } else {
+            // We don't have direct write access. Prompt user with our notice.
+            // FIXME: Add notice of error.
+        }
     }
 
     /**

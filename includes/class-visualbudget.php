@@ -102,6 +102,8 @@ class VisualBudget {
         $this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles' );
         $this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
 
+        $this->loader->add_action( 'admin_init', $plugin_admin, 'get_filesystem_credentials' );
+
         $this->loader->add_action( 'admin_menu', $plugin_admin, 'visualbudget_add_dashboard_sidelink' );
         $this->loader->add_action( 'admin_init', $plugin_admin, 'visualbudget_dashboard_init' );
     }

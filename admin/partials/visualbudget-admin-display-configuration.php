@@ -5,8 +5,8 @@
 ?>
 <form method="post" action="options.php">
 <?php
-settings_fields( 'visualbudget_settings_group' );
-do_settings_sections( 'visualbudget_dashboard' );
+settings_fields( 'visualbudget_settings' );
+do_settings_sections( 'visualbudget_configuration' );
 submit_button();
 ?>
 </form>

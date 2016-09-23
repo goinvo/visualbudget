@@ -26,9 +26,12 @@ class VisualBudget_Admin {
 
         // The class responsible for interacting with the filesystem.
         // Note that we are not instatiating the filemanager here, but
-        // do rather in the function setup_filesystem_manager(),
+        // do so rather in the function setup_filesystem_manager(),
         // after the credentials are obtained.
         require_once VISUALBUDGET_PATH . 'admin/class-visualbudget-filemanager.php';
+
+        // Each dataset is represented as an object of the Dataset class.
+        require_once VISUALBUDGET_PATH . 'admin/class-visualbudget-dataset.php';
 
         // The class which handles all the settings of VB.
         require_once VISUALBUDGET_PATH . 'admin/class-visualbudget-admin-settings.php';
@@ -39,7 +42,7 @@ class VisualBudget_Admin {
      * Required to read/write to the filesystem.
      */
     public function setup_filesystem_manager() {
-        // The firs thing to do is to get credentials to
+        // The first thing to do is to get credentials to
         // get our fingers in the filesystem.
         $access_type = get_filesystem_method();
         if($access_type === 'direct') {
@@ -105,20 +108,38 @@ class VisualBudget_Admin {
      */
     public function handle_file_uploads() {
         // These are the field names to look for.
-        $settings_name = $this->settings->get_settings_group_name();
-        $input_names = $this->settings->get_upload_field_names();
+        $group = $this->settings->get_settings_group_name();
+        $inputs = $this->settings->get_upload_field_names();
 
         // Try to upload each file.
-        // The file manager takes care of error handling.
-        foreach($input_names as $i => $input_name) {
-            $this->filemanager->upload_file($settings_name, $input_name);
-        }
+        foreach($inputs as $i => $input) {
+            // Check that the uploaded file exists and that there were no errors
+            if ( isset($_FILES[$group]) && $_FILES[$group]['error'][$input] == 0 ) {
+                // Grab the information about the uploaded file
+                $properties = Array(
+                    "tmp_name" => $_FILES[$group]['tmp_name'][$input],
+                    "uploaded_name" => $_FILES[$group]['name'][$input],
+                    "uploaded_size" => $_FILES[$group]['size'][$input],
+                    "uploaded_type" => $_FILES[$group]['type'][$input]
+                    );
 
-        // // conversion of CSV to JSON
-        // $file = "abc.csv";
-        // $csv = file_get_contents($file);
-        // $array = array_map("str_getcsv", explode("\n", $csv));
-        // $json = json_encode($array);
+                // Create a dataset object
+                $dataset = new VisualBudget_Dataset($properties);
+
+                // The validate() function also converts to JSON.
+                if ( $dataset->validate() ) {
+
+                    // Write the dataset and its meta information to the 'datasets' directory
+                    // and write the original file to the 'datasets/orignals' directory.
+                    $this->filemanager->new_file( $dataset->get_filepath(),
+                                                  $dataset->get_json() );
+                    $this->filemanager->new_file( $dataset->get_meta_filepath(),
+                                                  $dataset->get_meta_json() );
+                    $this->filemanager->new_file( $dataset->get_original_filepath(),
+                                                  $dataset->get_original_blob() );
+                }
+            }
+        }
     }
 
     /**

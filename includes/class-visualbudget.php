@@ -35,15 +35,10 @@ class VisualBudget {
         define('VISUALBUDGET_SLUG', 'visualbudget' );
         define('VISUALBUDGET_VERSION', '0.1.0' );
         define('VISUALBUDGET_UPLOAD_DIR', 'datasets/' );
-        define('VISUALBUDGET_UPLOAD_ORIGINALS_DIR', 'originals/' );
         define('VISUALBUDGET_PATH', plugin_dir_path( dirname( __FILE__ ) ) );
         define('VISUALBUDGET_UPLOAD_PATH', VISUALBUDGET_PATH . VISUALBUDGET_UPLOAD_DIR );
-        define('VISUALBUDGET_UPLOAD_ORIGNALS_PATH',
-            VISUALBUDGET_UPLOAD_PATH . VISUALBUDGET_UPLOAD_ORIGINALS_DIR );
         define('VISUALBUDGET_URL', plugin_dir_url( dirname( __FILE__ ) ) );
         define('VISUALBUDGET_UPLOAD_URL', VISUALBUDGET_URL . VISUALBUDGET_UPLOAD_DIR );
-        define('VISUALBUDGET_UPLOAD_ORIGINALS_URL',
-            VISUALBUDGET_UPLOAD_URL . VISUALBUDGET_UPLOAD_ORIGINALS_DIR );
     }
 
     /**
@@ -109,8 +104,6 @@ class VisualBudget {
     private function define_admin_hooks() {
 
         $plugin_admin = new VisualBudget_Admin();
-
-$this->loader->add_action( 'post_edit_form_tag' , function() {echo ' enctype="multipart/form-data"';} );
 
         // Add scripts and styles.
         $this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles' );

@@ -22,11 +22,6 @@ class VisualBudget_FileManager {
             $wp_filesystem->mkdir(VISUALBUDGET_UPLOAD_PATH);
         }
 
-        // Create the upload originals directory if it doesn't exist.
-        if ( !is_dir(VISUALBUDGET_UPLOAD_ORIGINALS_PATH) ) {
-            $wp_filesystem->mkdir(VISUALBUDGET_UPLOAD_ORIGINALS_PATH);
-        }
-
     }
 
     /**

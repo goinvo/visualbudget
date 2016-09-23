@@ -149,7 +149,7 @@ class VisualBudget_Dataset {
 
             // Create the original filename
             $this->properties['original_filename'] =
-                $this->properties['created'] . '.' . $this->properties['original_extension'];
+                $this->properties['created'] . '_original.' . $this->properties['original_extension'];
 
             $this->properties['filepath'] =
                 VISUALBUDGET_UPLOAD_PATH . $this->properties['filename'];
@@ -158,7 +158,7 @@ class VisualBudget_Dataset {
                 VISUALBUDGET_UPLOAD_PATH . $this->properties['meta_filename'];
 
             $this->properties['original_filepath'] =
-                VISUALBUDGET_UPLOAD_ORIGINALS_PATH . $this->properties['original_filename'];
+                VISUALBUDGET_UPLOAD_PATH . $this->properties['original_filename'];
 
             // FIXME: To add: "size" (rows * cols)
             // and maybe "preview" for the corner of the spreadsheet

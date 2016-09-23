@@ -22,6 +22,11 @@ class VisualBudget_FileManager {
             $wp_filesystem->mkdir(VISUALBUDGET_UPLOAD_PATH);
         }
 
+        // Create the upload originals directory if it doesn't exist.
+        if ( !is_dir(VISUALBUDGET_UPLOAD_ORIGINALS_PATH) ) {
+            $wp_filesystem->mkdir(VISUALBUDGET_UPLOAD_ORIGINALS_PATH);
+        }
+
     }
 
     /**
@@ -52,27 +57,17 @@ class VisualBudget_FileManager {
      * @param    $group   The settings group.
      * @param    $name    The input name.
      */
-    public function upload_file($group, $name) {
+    public function new_file($path, $contents) {
 
-        // WordPress's own filesystem class.
-        global $wp_filesystem;
-
-        // Check to see if the uploaded file exists.
-        if ( isset($_FILES[$group]) && $_FILES[$group]['error'][$name] == 0 ) {
-            // The current, temporary storage path
-            $tmp_name = $_FILES[$group]['tmp_name'][$name];
-
-            // Path to new uploaded file
-            $new_filename = VISUALBUDGET_UPLOAD_PATH . sprintf('uploaded_%s.txt', time());
-
-            // The contents of the file
-            $contents = file_get_contents($tmp_name);
+        try {
+            // WordPress's own filesystem class.
+            global $wp_filesystem;
 
             // Write the new file
-            $wp_filesystem->put_contents($new_filename, $contents);
+            $wp_filesystem->put_contents($path, $contents);
 
-        } else {
-            // FIXME: This should be an error.
+        } catch (Exception $e) {
+            // FIXME: What to do with this error?
         }
     }
 

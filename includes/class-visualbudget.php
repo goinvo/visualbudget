@@ -23,6 +23,16 @@ class VisualBudget {
         /**
          * Define all constants related to this plugin.
          */
+        self::define_constants();
+        $this->load_dependencies();
+        $this->set_locale();
+        $this->define_admin_hooks();
+        $this->define_public_hooks();
+        $this->define_shortcodes();
+
+    }
+
+    public static function define_constants() {
         define('VISUALBUDGET_SLUG', 'visualbudget' );
         define('VISUALBUDGET_VERSION', '0.1.0' );
         define('VISUALBUDGET_UPLOAD_DIR', 'datasets/' );
@@ -35,13 +45,6 @@ class VisualBudget {
         define('VISUALBUDGET_UPLOAD_URL', VISUALBUDGET_URL . VISUALBUDGET_UPLOAD_DIR );
         define('VISUALBUDGET_UPLOAD_ORIGINALS_URL',
             VISUALBUDGET_UPLOAD_URL . VISUALBUDGET_UPLOAD_ORIGINALS_DIR );
-
-        $this->load_dependencies();
-        $this->set_locale();
-        $this->define_admin_hooks();
-        $this->define_public_hooks();
-        $this->define_shortcodes();
-
     }
 
     /**

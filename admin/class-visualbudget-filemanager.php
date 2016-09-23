@@ -29,6 +29,9 @@ class VisualBudget_FileManager {
 
     }
 
+    /**
+     * Return an inventory of all datasets that have been uploaded.
+     */
     public function get_datasets_inventory() {
         global $wp_filesystem;
 
@@ -46,8 +49,36 @@ class VisualBudget_FileManager {
         return $files;
     }
 
-    public function upload_file($file) {
-        echo 'Not yet.';
+    /**
+     * Upload a file. The file will be accessed via PHP's own $_FILES variable,
+     * and will specifically query  $_FILES[$group]['tmp_name'][$name]  to look
+     * for the uploaded file.
+     *
+     * @param    $group   The settings group.
+     * @param    $name    The input name.
+     */
+    public function upload_file($group, $name) {
+
+        // WordPress's own filesystem class.
+        global $wp_filesystem;
+
+        // Check to see if the uploaded file exists.
+        if ( isset($_FILES[$group]) && $_FILES[$group]['error'][$name] == 0 ) {
+            // The current, temporary storage path
+            $tmp_name = $_FILES[$group]['tmp_name'][$name];
+
+            // Path to new uploaded file
+            $new_filename = VISUALBUDGET_UPLOAD_PATH . sprintf('uploaded_%s.txt', time());
+
+            // The contents of the file
+            $contents = file_get_contents($tmp_name);
+
+            // Write the new file
+            $wp_filesystem->put_contents($new_filename, $contents);
+
+        } else {
+            // FIXME: This should be an error.
+        }
     }
 
 }

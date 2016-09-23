@@ -6,6 +6,9 @@
 
 class VisualBudget_Admin {
 
+    // The file manager object, for interacting with the filesystem.
+    public $filemanager;
+
     /**
      * Initialize the class and set its properties.
      */
@@ -27,8 +30,8 @@ class VisualBudget_Admin {
         // after the credentials are obtained.
         require_once VISUALBUDGET_PATH . 'admin/class-visualbudget-filemanager.php';
 
+        // The class which handles all the settings of VB.
         require_once VISUALBUDGET_PATH . 'admin/class-visualbudget-admin-settings.php';
-        $this->settings = new VisualBudget_Admin_Settings();
 
     }
 
@@ -79,16 +82,37 @@ class VisualBudget_Admin {
     }
 
     /**
-     * Dashboard page callback
+     * Dashboard page callback. Simply display the page.
      */
     public function visualbudget_display_dashboard() {
-
         require_once VISUALBUDGET_PATH . 'admin/partials/visualbudget-admin-display.php';
-
     }
 
+    /**
+     * Initialize the dashboard
+     */
     public function visualbudget_dashboard_init() {
+        $this->settings = new VisualBudget_Admin_Settings();
         $this->settings->register_settings();
+
+        // Now that settings are registered and the filesystem is set up,
+        // we may handle any uploads taking place.
+        $this->handle_file_uploads();
+    }
+
+    /**
+     * Pass uploaded files on to the filemanager.
+     */
+    public function handle_file_uploads() {
+        // These are the field names to look for.
+        $settings_name = $this->settings->get_settings_group_name();
+        $input_names = $this->settings->get_upload_field_names();
+
+        // Try to upload each file.
+        // The file manager takes care of error handling.
+        foreach($input_names as $i => $input_name) {
+            $this->filemanager->upload_file($settings_name, $input_name);
+        }
     }
 
     /**

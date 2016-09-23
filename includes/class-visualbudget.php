@@ -19,7 +19,6 @@ class VisualBudget {
      * the public-facing side of the site.
      */
     public function __construct() {
-
         /**
          * Define all constants related to this plugin.
          */
@@ -111,6 +110,8 @@ class VisualBudget {
 
         $plugin_admin = new VisualBudget_Admin();
 
+$this->loader->add_action( 'post_edit_form_tag' , function() {echo ' enctype="multipart/form-data"';} );
+
         // Add scripts and styles.
         $this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles' );
         $this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
@@ -119,8 +120,8 @@ class VisualBudget {
         $this->loader->add_action( 'admin_init', $plugin_admin, 'setup_filesystem_manager' );
 
         // Set up the dashboard.
-        $this->loader->add_action( 'admin_menu', $plugin_admin, 'visualbudget_add_dashboard_sidelink' );
         $this->loader->add_action( 'admin_init', $plugin_admin, 'visualbudget_dashboard_init' );
+        $this->loader->add_action( 'admin_menu', $plugin_admin, 'visualbudget_add_dashboard_sidelink' );
     }
 
     /**

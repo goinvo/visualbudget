@@ -37,7 +37,7 @@ class VisualBudget_Admin_Settings {
 
         // And add a new setting section for configuration
         add_settings_section(
-            'visualbudget_section',               // section ID
+            'visualbudget_config',                // section ID
             'Required configuration',             // section title
             '',                                   // callback
             'visualbudget_configuration'          // page
@@ -49,7 +49,7 @@ class VisualBudget_Admin_Settings {
             'Name of city, town, district, or organization', // setting title
             array( $this, 'org_name_callback' ),             // callback function
             'visualbudget_configuration',                    // page
-            'visualbudget_section'                           // settings section
+            'visualbudget_config'                            // settings section
         );
 
         // Add the contact email setting
@@ -58,7 +58,7 @@ class VisualBudget_Admin_Settings {
             'Contact email address',
             array( $this, 'contact_email_callback' ),
             'visualbudget_configuration',
-            'visualbudget_section'
+            'visualbudget_config'
         );
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -67,7 +67,7 @@ class VisualBudget_Admin_Settings {
 
         // And add a new setting section for the uploader
         add_settings_section(
-            'visualbudget_section',               // section ID
+            'visualbudget_upload',                // section ID
             'Upload a new dataset',               // section title
             '',                                   // callback
             'visualbudget_datasets_upload'        // page
@@ -79,7 +79,7 @@ class VisualBudget_Admin_Settings {
             'Upload new dataset',
             array( $this, 'upload_callback' ),
             'visualbudget_datasets_upload',
-            'visualbudget_section'
+            'visualbudget_upload'
         );
 
     }

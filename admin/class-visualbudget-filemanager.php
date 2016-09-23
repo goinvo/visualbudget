@@ -7,11 +7,6 @@
 class VisualBudget_FileManager {
 
     /**
-     * The contents of $upload_path, stored as an array of FILE objects.
-     */
-    private $datasets;
-
-    /**
      * Initialize the class and set its properties.
      * @param    string    $plugin_name   The name of this plugin.
      * @param    string    $version       The version of this plugin.

@@ -113,6 +113,12 @@ class VisualBudget_Admin {
         foreach($input_names as $i => $input_name) {
             $this->filemanager->upload_file($settings_name, $input_name);
         }
+
+        // // conversion of CSV to JSON
+        // $file = "abc.csv";
+        // $csv = file_get_contents($file);
+        // $array = array_map("str_getcsv", explode("\n", $csv));
+        // $json = json_encode($array);
     }
 
     /**

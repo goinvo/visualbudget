@@ -94,7 +94,7 @@ class VisualBudget_Admin_Settings {
             $new_input['org_name'] = sanitize_text_field( $input['org_name'] );
 
         if( isset( $input['contact_email'] ) )
-            $new_input['contact_email'] = sanitize_email( $input['contact_email'] );
+            $new_input['contact_email'] = sanitize_text_field( $input['contact_email'] );
 
         // We don't want WP to save uploaded files to the database;
         // so we intercept them in the admin and upload them ourselves locally.

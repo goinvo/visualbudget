@@ -29,7 +29,7 @@ class VisualBudget_FileManager {
             $wp_filesystem->mkdir(VISUALBUDGET_UPLOAD_PATH);
         }
 
-        // Create the upload directory if it doesn't exist.
+        // Create the trash directory if it doesn't exist.
         if ( !is_dir(VISUALBUDGET_UPLOAD_PATH . 'trash/') ) {
             $wp_filesystem->mkdir(VISUALBUDGET_UPLOAD_PATH . 'trash/');
         }

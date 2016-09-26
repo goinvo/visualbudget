@@ -81,6 +81,7 @@ class VisualBudget_Dataset {
                     case 'text/csv':
                         $csv = $this->original_blob;
                         $array = array_map("str_getcsv", explode("\n", $csv));
+
                         $this->json = json_encode($array);
                         break;
 
@@ -182,7 +183,10 @@ class VisualBudget_Dataset {
                 'meta_filename',
                 'original_filename',
                 'uploaded_name',
-                'url'
+                'url',
+                'rows',
+                'cols',
+                'corner'
                 );
 
         // Filter out every key not in $keep.

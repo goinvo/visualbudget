@@ -44,6 +44,16 @@ class VisualBudget_FileManager {
         return $files;
     }
 
+
+    /**
+     * Read a file.
+     */
+    public function read_file($dataset_filename) {
+        global $wp_filesystem;
+
+        return $wp_filesystem->get_contents(VISUALBUDGET_UPLOAD_PATH . $dataset_filename);
+    }
+
     /**
      * Upload a file. The file will be accessed via PHP's own $_FILES variable,
      * and will specifically query  $_FILES[$group]['tmp_name'][$name]  to look

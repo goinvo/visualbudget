@@ -25,36 +25,6 @@ submit_button('Upload file');
 <div class='bootstrap-wrapper'>
 <?php
 $datasets = $this->filemanager->get_datasets_inventory();
-$filenames = array_keys($datasets);
-
-// First check if we are supposed to delete any of them.
-// If the DELETE query key is set, make sure it actually refers to
-// a real file.
-$delete_num = false;
-if ( isset($_GET['delete'])
-    && $this->filemanager->is_file($_GET['delete'] . '_data.json') ) {
-
-    $delete_num = $_GET[ 'delete' ];
-}
-
-if ($delete_num) {
-    // We must delete every file with the $delete_num value in the filename;
-    // $delete_num is a number, and we search for NUMBER_data.json
-    // NUMBER_meta.json, etc.
-    $filenames_to_delete = array_filter($filenames,
-        function($filename) use ($delete_num) {
-            return ( strpos($filename, $delete_num) !== false );
-        });
-
-    foreach ($filenames_to_delete as $filename) {
-        $this->filemanager->move_file($filename, 'trash/' . $filename);
-    }
-
-    // Now get the inventory again, since it has changed.
-    $datasets = $this->filemanager->get_datasets_inventory();
-    $filenames = array_keys($datasets);
-}
-
 
 if (!empty($datasets)) {
     // Just get the IDs of the datasets
@@ -91,6 +61,8 @@ if (!empty($datasets)) {
         echo ' [<a href="?' . http_build_query($_GET) . '&delete=' . $number . '">delete</a>]';
         echo '<br/>';
         echo $rows . ' rows &times; ' . $cols . ' columns';
+        echo '<br/>';
+        echo 'added ' . date('H:i', $number) . ' on '. date('j M Y', $number);
         echo '<br/>';
         echo '<small>JSON: <a href="' . VISUALBUDGET_UPLOAD_URL . $meta['filename'] . '">'
                     . $meta['filename'] . '</a></small>';

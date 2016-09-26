@@ -190,7 +190,10 @@ class VisualBudget_Admin {
          * class.
          */
 
-        wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/visualbudget-admin.css', array(), $this->version, 'all' );
+        wp_enqueue_style( VISUALBUDGET_SLUG, plugin_dir_url( __FILE__ ) . 'css/bootstrap.min.css', array(), VISUALBUDGET_VERSION, 'all' );
+
+        // FIXME: Why does bootstrap.css end up getting included, but the following doesn't?
+        wp_enqueue_style( VISUALBUDGET_SLUG, plugin_dir_url( __FILE__ ) . 'css/visualbudget-admin.css', array(), VISUALBUDGET_VERSION, 'all' );
 
     }
 
@@ -211,7 +214,7 @@ class VisualBudget_Admin {
          * class.
          */
 
-        wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/visualbudget-admin.js', array( 'jquery' ), $this->version, false );
+        wp_enqueue_script( VISUALBUDGET_SLUG, plugin_dir_url( __FILE__ ) . 'js/visualbudget-admin.js', array( 'jquery' ), VISUALBUDGET_VERSION, false );
 
     }
 

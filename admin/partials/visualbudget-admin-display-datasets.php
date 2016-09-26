@@ -22,6 +22,7 @@ submit_button('Upload file');
 </form>
 -->
 <h2>My datasets</h2>
+<div class='bootstrap-wrapper'>
 <?php
 $datasets = $this->filemanager->get_datasets_inventory();
 if (!empty($datasets)) {
@@ -78,3 +79,5 @@ if (!empty($datasets)) {
 } else {
     echo 'There are no datasets.';
 }
+?>
+</div>

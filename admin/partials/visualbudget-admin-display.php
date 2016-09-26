@@ -28,6 +28,4 @@ switch ( $active_tab ) {
         break;
 }
 ?>
-</form>
-
 </div><!-- div.wrap -->

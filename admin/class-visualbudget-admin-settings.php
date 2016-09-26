@@ -10,13 +10,16 @@ class VisualBudget_Admin_Settings {
     // attributes, so that the admin class can know while $_FILES[]
     // to look for and what to do with them.
     private $upload_field_names;
-    private $settings_group_name;
+    private $settings_group_names;
 
     /**
      * Initialize the class and set its properties.
      */
     public function __construct() {
-        $this->settings_group_name = 'visualbudget_settings';
+        $this->settings_group_names = Array(
+                    'visualbudget_tab_config',
+                    'visualbudget_tab_datasets'
+                    );
         $this->upload_field_names = Array('upload');
     }
 
@@ -33,7 +36,7 @@ class VisualBudget_Admin_Settings {
             'visualbudget_config',                // section ID
             'Required configuration',             // section title
             '',                                   // callback
-            'visualbudget_configuration'          // page
+            'visualbudget_tab_config'             // page
         );
 
         // Add the name setting
@@ -41,7 +44,7 @@ class VisualBudget_Admin_Settings {
             'org_name',                                      // setting ID
             'Name of city, town, district, or organization', // setting title
             array( $this, 'org_name_callback' ),             // callback function
-            'visualbudget_configuration',                    // page
+            'visualbudget_tab_config',                       // page
             'visualbudget_config'                            // settings section
         );
 
@@ -50,8 +53,15 @@ class VisualBudget_Admin_Settings {
             'contact_email',
             'Contact email address',
             array( $this, 'contact_email_callback' ),
-            'visualbudget_configuration',
+            'visualbudget_tab_config',
             'visualbudget_config'
+        );
+
+        // Now register the settings
+        register_setting(
+            'visualbudget_tab_config',            // option group
+            'visualbudget_tab_config',            // option name
+            array( $this, 'sanitize' )            // sanitize
         );
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -63,7 +73,7 @@ class VisualBudget_Admin_Settings {
             'visualbudget_upload',                // section ID
             'Upload a new dataset',               // section title
             '',                                   // callback
-            'visualbudget_datasets_upload'        // page
+            'visualbudget_tab_datasets'           // page
         );
 
         // Add the contact email setting
@@ -71,19 +81,26 @@ class VisualBudget_Admin_Settings {
             'upload',
             'Upload new dataset',
             array( $this, 'upload_callback' ),
-            'visualbudget_datasets_upload',
+            'visualbudget_tab_datasets',
             'visualbudget_upload'
+        );
+
+        // Now register the settings
+        register_setting(
+            'visualbudget_tab_datasets',          // option group
+            'visualbudget_tab_datasets',          // option name
+            array( $this, 'sanitize' )            // sanitize
         );
 
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
          * FINALLY, REGISTER THE SETTINGS
          * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-        register_setting(
-            $this->settings_group_name,           // option group
-            $this->settings_group_name,           // option name
-            array( $this, 'sanitize' )            // sanitize
-        );
+        // register_setting(
+        //     $this->settings_group_name,           // option group
+        //     $this->settings_group_name,           // option name
+        //     array( $this, 'sanitize' )            // sanitize
+        // );
     }
 
     /**
@@ -110,7 +127,7 @@ class VisualBudget_Admin_Settings {
     // Callback for the organization name setting
     public function org_name_callback() {
         printf(
-            '<input type="text" size="35" id="org_name" name="visualbudget_settings[org_name]" value="%s" />',
+            '<input type="text" size="35" id="org_name" name="visualbudget_tab_config[org_name]" value="%s" />',
             isset( $this->options['org_name'] ) ? esc_attr( $this->options['org_name']) : ''
         );
     }
@@ -118,20 +135,20 @@ class VisualBudget_Admin_Settings {
     // Callback for the contact email setting
     public function contact_email_callback() {
         printf(
-            '<input type="text" size="35" id="contact_email" name="visualbudget_settings[contact_email]" value="%s" />',
+            '<input type="text" size="35" id="contact_email" name="visualbudget_tab_config[contact_email]" value="%s" />',
             isset( $this->options['contact_email'] ) ? esc_attr( $this->options['contact_email']) : ''
         );
     }
 
     // Callback for the upload
     public function upload_callback() {
-        printf( '<input name="visualbudget_settings[upload]" id="upload" type="file" />' );
+        printf( '<input name="visualbudget_tab_datasets[upload]" id="upload" type="file" />' );
     }
 
     // Get function for the settings group name.
     // The admin class uses this.
-    public function get_settings_group_name() {
-        return $this->settings_group_name;
+    public function get_settings_group_names() {
+        return $this->settings_group_names;
     }
 
     // Get function for the upload field names.

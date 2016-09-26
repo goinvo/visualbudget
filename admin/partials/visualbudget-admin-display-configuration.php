@@ -5,8 +5,11 @@
 ?>
 <form method="post" action="options.php">
 <?php
-settings_fields( 'visualbudget_settings' );
-do_settings_sections( 'visualbudget_configuration' );
+// Grab the saved options
+$this->settings->options = get_option( 'visualbudget_tab_config' );
+
+settings_fields( 'visualbudget_tab_config' );
+do_settings_sections( 'visualbudget_tab_config' );
 submit_button();
 ?>
 </form>

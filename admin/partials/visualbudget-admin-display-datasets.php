@@ -6,8 +6,11 @@
 <!-- <input type='hidden' name='MAX_FILE_SIZE' value='8388608' /> -->
 <form method="post" action="options.php" enctype="multipart/form-data">
 <?php
-settings_fields( 'visualbudget_settings' );
-do_settings_sections( 'visualbudget_datasets_upload' );
+// Grab the saved options
+$this->settings->options = get_option( 'visualbudget_tab_datasets' );
+
+settings_fields( 'visualbudget_tab_datasets' );
+do_settings_sections( 'visualbudget_tab_datasets' );
 submit_button('Upload file');
 ?>
 </form>

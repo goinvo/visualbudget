@@ -149,7 +149,7 @@ class VisualBudget_Dataset {
 
             // Create the original filename
             $this->properties['original_filename'] =
-                $this->properties['created'] . '_original.' . $this->properties['original_extension'];
+                $this->properties['created'] . '_orig.' . $this->properties['original_extension'];
 
             $this->properties['filepath'] =
                 VISUALBUDGET_UPLOAD_PATH . $this->properties['filename'];

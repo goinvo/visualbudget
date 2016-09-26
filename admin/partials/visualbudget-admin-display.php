@@ -13,9 +13,6 @@ $this->visualbudget_display_dashboard_tabs();
 // By default, 'configuration' is active
 $active_tab = isset( $_GET[ 'tab' ] ) ? $_GET[ 'tab' ] : 'configuration';
 
-// Grab the saved options
-$this->settings->options = get_option( 'visualbudget_settings' );
-
 // Display the appropriate tab content
 switch ( $active_tab ) {
     case 'configuration':

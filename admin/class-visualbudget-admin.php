@@ -108,7 +108,7 @@ class VisualBudget_Admin {
      */
     public function handle_file_uploads() {
         // These are the field names to look for.
-        $group = $this->settings->get_settings_group_name();
+        $group = 'visualbudget_tab_datasets';
         $inputs = $this->settings->get_upload_field_names();
 
         // Try to upload each file.

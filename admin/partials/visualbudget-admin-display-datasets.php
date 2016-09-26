@@ -59,7 +59,7 @@ if (!empty($datasets)) {
         echo 'Original file: <a href="' . VISUALBUDGET_UPLOAD_URL . $meta['original_filename'] . '">'
                     . $meta['original_filename'] . '</a>';
         echo '<br/>';
-        echo 'Size: ' . $rows . 'x' . $cols;
+        echo 'Size: ' . $rows . ' rows &times; ' . $cols . ' columns';
         echo '<br/>';
         echo 'Corner: ';
         $rows = $meta['corner'];

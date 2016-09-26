@@ -14,13 +14,15 @@ do_settings_sections( 'visualbudget_tab_datasets' );
 submit_button('Upload file');
 ?>
 </form>
+<!--
 <div><h3>From URL</h3></div>
 <form method="post" action="options.php">
 <input name='xxx' id='xxx' type='text' />
 <?php submit_button('Add file from URL'); ?>
 </form>
-<hr/>
+-->
 <h2>My datasets</h2>
+<div class='bootstrap-wrapper'>
 <?php
 $datasets = $this->filemanager->get_datasets_inventory();
 if (!empty($datasets)) {
@@ -50,27 +52,32 @@ if (!empty($datasets)) {
             0, 4);
 
 
-        echo '<div>';
-        echo 'Uploaded as: ' . $meta['uploaded_name'];
+        // echo '<hr/>';
         echo '<br/>';
-        echo 'JSON file: <a href="' . VISUALBUDGET_UPLOAD_URL . $meta['filename'] . '">'
-                    . $meta['filename'] . '</a>';
+        echo '<div class="row">';
+        echo '<div class="col-md-5">';
+        echo '<strong>' . $meta['uploaded_name'] . '</strong>';
         echo '<br/>';
-        echo 'Original file: <a href="' . VISUALBUDGET_UPLOAD_URL . $meta['original_filename'] . '">'
-                    . $meta['original_filename'] . '</a>';
+        echo $rows . ' rows &times; ' . $cols . ' columns';
         echo '<br/>';
-        echo 'Size: ' . $rows . ' rows &times; ' . $cols . ' columns';
+        echo '<small>JSON: <a href="' . VISUALBUDGET_UPLOAD_URL . $meta['filename'] . '">'
+                    . $meta['filename'] . '</a></small>';
         echo '<br/>';
-        echo 'Corner: ';
+        echo '<small>Original: <a href="' . VISUALBUDGET_UPLOAD_URL . $meta['original_filename'] . '">'
+                    . $meta['original_filename'] . '</a></small>';
+        echo '</div>';
+        echo '<div class="col-md-7">';
         $rows = $meta['corner'];
         // table code from http://stackoverflow.com/a/37727144/1516307
         $tbody = array_reduce(array_slice($corner,1), function($a, $b){return $a.="<tr><td>".implode("</td><td>",$b)."</td></tr>";});
         $thead = "<tr><th>" . implode("</th><th>", array_values($corner[0])) . "</th></tr>";
 
-        echo "<table>\n$thead\n$tbody\n</table>";
-        echo '<hr/>';
+        echo "<small><table class='table table-condensed table-responsive'>\n$thead\n$tbody\n</table></small>";
+        echo '</div>';
         echo '</div>';
     }
 } else {
     echo 'There are no datasets.';
 }
+?>
+</div>

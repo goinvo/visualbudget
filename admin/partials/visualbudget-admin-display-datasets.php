@@ -23,8 +23,11 @@ submit_button('Upload file');
 -->
 <h2>My datasets</h2>
 <div class='bootstrap-wrapper'>
+<p class='alert alert-danger'><em>Caveat emptor &mdash;</em> datasets are not yet validated upon upload.</p>
 <?php
 $datasets = $this->filemanager->get_datasets_inventory();
+
+// $datasets = $this->datasets;
 
 if (!empty($datasets)) {
     // Just get the IDs of the datasets
@@ -62,7 +65,7 @@ if (!empty($datasets)) {
         echo '<br/>';
         echo $rows . ' rows &times; ' . $cols . ' columns';
         echo '<br/>';
-        echo 'added ' . date('H:i', $number) . ' on '. date('j M Y', $number);
+        echo 'added ' . date('H:i', $meta['created']) . ' on '. date('j M Y', $meta['created']);
         echo '<br/>';
         echo '<small>JSON: <a href="' . VISUALBUDGET_UPLOAD_URL . $meta['filename'] . '">'
                     . $meta['filename'] . '</a></small>';

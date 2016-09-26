@@ -16,20 +16,15 @@ class VisualBudget_Dataset {
     // That side was made for you and me.
 
     /**
-     * The contents of the original (uploaded to gotten from URL) dataset
+     * The contents of the original (uploaded or gotten from URL) dataset.
+
      */
     private $original_blob;
 
     /**
-     * The contents of the original (uploaded to gotten from URL) dataset
+     * The actual data, represented as PHP array.
      */
-    private $json;
-
-    /**
-     * A flag, false by default. Set to true when date of creation, filename, etc,
-     * have been established and set.
-     */
-    private $has_meta_properties;
+    private $data;
 
     /**
      * Initialize the class and set its properties.
@@ -41,15 +36,12 @@ class VisualBudget_Dataset {
      */
     public function __construct( $properties ) {
 
-        // Set the flag to false.
-        $this->has_meta_properties = 0;
-
         // Copy over any properties which were passed into construction.
         $this->properties = $properties;
 
-        // If the dataset has a 'filename' property, that means
+        // If the dataset has a 'id' property, that means
         // it already exits and we can construct the object that way.
-        if ( isset($this->properties['filename']) ) {
+        if ( isset($this->properties['id']) ) {
             $this->from_file();
         }
 
@@ -80,8 +72,7 @@ class VisualBudget_Dataset {
                 switch ( $this->properties['uploaded_type'] ) {
                     case 'text/csv':
                         $csv = $this->original_blob;
-                        $array = array_map("str_getcsv", explode("\n", $csv));
-                        $this->json = json_encode($array);
+                        $this->data = array_map("str_getcsv", explode("\n", $csv));
                         break;
 
                     default:
@@ -95,7 +86,7 @@ class VisualBudget_Dataset {
                 return 0;
             }
 
-        } else if ( !isset($this->json) ) {
+        } else if ( !isset($this->data) ) {
             // FIXME: Perhaps this should throw an exception
             return 0;
         }
@@ -106,9 +97,18 @@ class VisualBudget_Dataset {
         return 1;
     }
 
+
     // Create a dataset from an existing file
     public function from_file() {
-        // FIXME: To do.
+        $id = $this->properties['id'];
+
+        // FIXME: How to use $wp_filesystem here?
+        $meta = file_get_contents(VISUALBUDGET_UPLOAD_PATH . $id . '_meta.json');
+        $this->properties = json_decode($meta, true);
+
+        // JSON data.
+        $json = file_get_contents($this->get_filepath()); // FIXME: Same.
+        $this->data = json_decode($json);
     }
 
     // Create a dataset from an upload
@@ -117,7 +117,7 @@ class VisualBudget_Dataset {
         $this->original_blob = file_get_contents($this->properties['tmp_name']);
 
         // And set the original name
-        $this->properties['original_name'] = $this->properties['uploaded_name'];
+        $this->properties['original_filename'] = $this->properties['uploaded_name'];
     }
 
     // Create a dataset from a given URL
@@ -125,20 +125,24 @@ class VisualBudget_Dataset {
         // FIXME: To do.
     }
 
+
     // Set the meta properties. This function is called after validation.
     public function set_meta_properties() {
 
         // We don't want to do this twice!
-        if ( !$this->has_meta_properties ) {
+        if ( !isset($this->properties['id']) ) {
 
             // The (UNIX) time of creation
             $this->properties['created'] = time();
 
-            // Create the filename, since it needs one
+            // The same as 'created', for now
+            $this->properties['id'] = $this->properties['created'];
+
+            // The filename, since it needs one
             // (But don't create the file itself yet)
             $this->properties['filename'] = $this->properties['created'] . '_data.json';
 
-            // Create the meta filename
+            // The meta filename
             $this->properties['meta_filename'] = $this->properties['created'] . '_meta.json';
 
             // What is the original extension?
@@ -147,38 +151,29 @@ class VisualBudget_Dataset {
                 $this->properties['original_extension'] = $pathinfo['extension'];
             }
 
-            // Create the original filename
+            // The original filename
             $this->properties['original_filename'] =
                 $this->properties['created'] . '_orig.' . $this->properties['original_extension'];
-
-            $this->properties['filepath'] =
-                VISUALBUDGET_UPLOAD_PATH . $this->properties['filename'];
-
-            $this->properties['meta_filepath'] =
-                VISUALBUDGET_UPLOAD_PATH . $this->properties['meta_filename'];
-
-            $this->properties['original_filepath'] =
-                VISUALBUDGET_UPLOAD_PATH . $this->properties['original_filename'];
-
-            $this->has_meta_properties = 1;
         }
 
     }
 
     // Get the JSON representation of this dataset.
     public function get_json() {
-        return $this->json;
+        return json_encode($this->data);
     }
 
     public function get_meta_json() {
         // Don't write all the meta properties to the meta file.
         // These are the ones to keep.
         $keep = Array(
+                'id',
                 'created',
                 'filename',
                 'meta_filename',
                 'original_filename',
                 'uploaded_name',
+                'original_extension',
                 'url'
                 );
 
@@ -200,17 +195,17 @@ class VisualBudget_Dataset {
 
     // Get the file path of this dataset.
     public function get_filepath() {
-        return $this->properties['filepath'];
+        return VISUALBUDGET_UPLOAD_PATH . $this->properties['filename'];
     }
 
     // Get the file path of this dataset.
     public function get_meta_filepath() {
-        return $this->properties['meta_filepath'];
+        return VISUALBUDGET_UPLOAD_PATH . $this->properties['meta_filename'];
     }
 
     // Get the file path of the original version of this dataset.
     public function get_original_filepath() {
-        return $this->properties['original_filepath'];
+        return VISUALBUDGET_UPLOAD_PATH . $this->properties['original_filename'];
     }
 
 }

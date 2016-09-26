@@ -9,6 +9,9 @@ class VisualBudget_Admin {
     // The file manager object, for interacting with the filesystem.
     public $filemanager;
 
+    // All the active datasets, stored as an array of VisualBudget_Dataset objects.
+    public $datasets;
+
     /**
      * Initialize the class and set its properties.
      */
@@ -102,14 +105,18 @@ class VisualBudget_Admin {
         // we may handle any uploads taking place.
         $this->handle_file_uploads();
         $this->handle_file_deletions();
+
+        // Now construct the dataset objects and store them in $this->datasets.
+        $this->datasets = $this->construct_dataset_objects();
     }
 
     /**
      * Pass uploaded files on to the filemanager.
      */
     public function handle_file_uploads() {
+
         // These are the field names to look for.
-        $group = 'visualbudget_tab_datasets';
+        $group = 'visualbudget_tab_datasets'; // FIXME: This should be get()'d
         $inputs = $this->settings->get_upload_field_names();
 
         // Try to upload each file.
@@ -185,6 +192,38 @@ class VisualBudget_Admin {
         }
 
     }
+
+    /**
+     * Construct a VisualBudget_Dataset object for each database in the
+     * datasets folder. Return all objects in an array.
+     */
+    public function construct_dataset_objects() {
+
+        // Get the inventory, which is an array of files created by
+        // $wp_filesystem.
+        $file_array = $this->filemanager->get_datasets_inventory();
+
+        // Just get the IDs of the datasets
+        $ids = array_map(function($i) {
+                return explode('_', $i['name'])[0];
+            }, $file_array);
+
+        // We'll have duplicates, so get a unique set
+        $ids = array_unique($ids);
+
+        // The array we are building
+        $datasets = Array();
+
+        // Construct one object for each id
+        foreach ($ids as $id) {
+            $props = Array('id' => $id);
+            $dataset = new VisualBudget_Dataset($props);
+            $datasets[] = $dataset;
+        }
+
+        return $datasets;
+    }
+
 
     /**
      * Display the tab nav at the top of the VB dashboard page

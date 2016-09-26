@@ -25,6 +25,7 @@ submit_button('Upload file');
 <div class='bootstrap-wrapper'>
 <?php
 $datasets = $this->filemanager->get_datasets_inventory();
+
 if (!empty($datasets)) {
     // Just get the IDs of the datasets
     $numbers = array_map(function($i) {
@@ -57,8 +58,11 @@ if (!empty($datasets)) {
         echo '<div class="row">';
         echo '<div class="col-md-5">';
         echo '<strong>' . $meta['uploaded_name'] . '</strong>';
+        echo ' [<a href="?' . http_build_query($_GET) . '&delete=' . $number . '">delete</a>]';
         echo '<br/>';
         echo $rows . ' rows &times; ' . $cols . ' columns';
+        echo '<br/>';
+        echo 'added ' . date('H:i', $number) . ' on '. date('j M Y', $number);
         echo '<br/>';
         echo '<small>JSON: <a href="' . VISUALBUDGET_UPLOAD_URL . $meta['filename'] . '">'
                     . $meta['filename'] . '</a></small>';

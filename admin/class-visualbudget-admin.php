@@ -101,6 +101,7 @@ class VisualBudget_Admin {
         // Now that settings are registered and the filesystem is set up,
         // we may handle any uploads taking place.
         $this->handle_file_uploads();
+        $this->handle_file_deletions();
     }
 
     /**
@@ -140,6 +141,49 @@ class VisualBudget_Admin {
                 }
             }
         }
+    }
+
+    /**
+     * Delete any files that were requested to be deleted.
+     */
+    public function handle_file_deletions() {
+
+        // Get the dataset inventory from the filemanager.
+        // The returned object is an array created by $wp_filesystem.
+        $datasets = $this->filemanager->get_datasets_inventory();
+        $filenames = array_keys($datasets);
+
+        // First check if we are supposed to delete any of them.
+        // If the DELETE query key is set, make sure it actually refers to
+        // a real file.
+        $delete_num = false;
+        if ( isset($_GET['delete'])
+            && $this->filemanager->is_file($_GET['delete'] . '_data.json') ) {
+
+            $delete_num = $_GET[ 'delete' ];
+        }
+
+        if ($delete_num) {
+            // We must delete every file with the $delete_num value in the filename;
+            // $delete_num is a number, and we search for NUMBER_data.json
+            // NUMBER_meta.json, etc.
+            $filenames_to_delete = array_filter($filenames,
+                function($filename) use ($delete_num) {
+                    return ( strpos($filename, $delete_num) !== false );
+                });
+
+            foreach ($filenames_to_delete as $filename) {
+                $this->filemanager->move_file($filename, 'trash/' . $filename);
+            }
+
+            // Now we refresh the page, omitting the "delete" query string key.
+            // This way if the user refreshes the page (or bookmarks it for some
+            // reason), the delete command will not be repeatedly invoked.
+            unset($_GET['delete']);
+            $query = http_build_query($_GET);
+            header("Refresh:0; url=?" . $query);
+        }
+
     }
 
     /**

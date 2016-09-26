@@ -2,6 +2,13 @@
 
 /**
  * The file manager, for dealing with uploading/reading/writing of datasets.
+ *
+ * FIXME: The methods of this class are inconsistent: some require the full path
+ *        to the datasets directory, while others simply require a filename.
+ *        Should this class be called "datasets-manager" or such? Perhaps it is
+ *        meant to be a specialized datasets manager, and not a general
+ *        interface to the filesystem. (What else do we need to interact with
+ *        the filesystem for, anyway?)
  */
 
 class VisualBudget_FileManager {
@@ -20,6 +27,11 @@ class VisualBudget_FileManager {
         // Create the upload directory if it doesn't exist.
         if ( !is_dir(VISUALBUDGET_UPLOAD_PATH) ) {
             $wp_filesystem->mkdir(VISUALBUDGET_UPLOAD_PATH);
+        }
+
+        // Create the trash directory if it doesn't exist.
+        if ( !is_dir(VISUALBUDGET_UPLOAD_PATH . 'trash/') ) {
+            $wp_filesystem->mkdir(VISUALBUDGET_UPLOAD_PATH . 'trash/');
         }
 
     }
@@ -74,6 +86,23 @@ class VisualBudget_FileManager {
         } catch (Exception $e) {
             // FIXME: What to do with this error?
         }
+    }
+
+    /**
+     * Move a file.
+     */
+    public function move_file($current, $new) {
+        global $wp_filesystem;
+
+        return $wp_filesystem->move(VISUALBUDGET_UPLOAD_PATH . $current,
+                                    VISUALBUDGET_UPLOAD_PATH . $new);
+    }
+
+    /**
+     * Check to see if X a file.
+     */
+    public function is_file($filename) {
+        return is_file(VISUALBUDGET_UPLOAD_PATH . $filename);
     }
 
 }

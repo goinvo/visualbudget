@@ -22,6 +22,7 @@ class VisualBudget {
         /**
          * Define all constants related to this plugin.
          */
+        date_default_timezone_set("America/New_York");
         self::define_constants();
         $this->load_dependencies();
         $this->set_locale();

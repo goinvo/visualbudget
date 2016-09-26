@@ -24,13 +24,6 @@ class VisualBudget_Admin_Settings {
      * Register and add settings
      */
     public function register_settings() {
-        // First set up the options group
-        register_setting(
-            $this->settings_group_name,           // option group
-            $this->settings_group_name,           // option name
-            array( $this, 'sanitize' )            // sanitize
-        );
-
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
          * CONFIGURATION OPTIONS
          * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -82,6 +75,15 @@ class VisualBudget_Admin_Settings {
             'visualbudget_upload'
         );
 
+
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+         * FINALLY, REGISTER THE SETTINGS
+         * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+        register_setting(
+            $this->settings_group_name,           // option group
+            $this->settings_group_name,           // option name
+            array( $this, 'sanitize' )            // sanitize
+        );
     }
 
     /**

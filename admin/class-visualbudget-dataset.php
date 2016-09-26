@@ -81,7 +81,6 @@ class VisualBudget_Dataset {
                     case 'text/csv':
                         $csv = $this->original_blob;
                         $array = array_map("str_getcsv", explode("\n", $csv));
-
                         $this->json = json_encode($array);
                         break;
 
@@ -161,9 +160,6 @@ class VisualBudget_Dataset {
             $this->properties['original_filepath'] =
                 VISUALBUDGET_UPLOAD_PATH . $this->properties['original_filename'];
 
-            // FIXME: To add: "size" (rows * cols)
-            // and maybe "preview" for the corner of the spreadsheet
-
             $this->has_meta_properties = 1;
         }
 
@@ -183,10 +179,7 @@ class VisualBudget_Dataset {
                 'meta_filename',
                 'original_filename',
                 'uploaded_name',
-                'url',
-                'rows',
-                'cols',
-                'corner'
+                'url'
                 );
 
         // Filter out every key not in $keep.

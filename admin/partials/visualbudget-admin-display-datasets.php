@@ -34,6 +34,7 @@ if (!empty($datasets)) {
 
     // Now print some information for each.
     foreach ($numbers as $number) {
+
         $meta = $this->filemanager->read_file($number . '_meta.json');
         $meta = json_decode($meta, true);
 
@@ -47,7 +48,6 @@ if (!empty($datasets)) {
                     return array_slice($i, 0, 5);
                 }, $data),
             0, 4);
-
 
 
         echo '<div>';

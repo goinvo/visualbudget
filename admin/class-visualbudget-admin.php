@@ -299,6 +299,8 @@ class VisualBudget_Admin {
 
         wp_enqueue_script( 'visualbudget_js', plugin_dir_url( __FILE__ ) . 'js/visualbudget-admin.js', array( 'jquery' ), VISUALBUDGET_VERSION, false );
 
+        wp_enqueue_script( 'd3', plugin_dir_url( __FILE__ ) . 'https://cdnjs.cloudflare.com/ajax/libs/d3/4.2.6/d3.min.js', array( 'jquery' ), VISUALBUDGET_VERSION, false );
+
     }
 
 }

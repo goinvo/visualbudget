@@ -27,6 +27,12 @@ class VisualBudget_Dataset {
     private $data;
 
     /**
+     * A flag for validity. False if dataset is contructed from a
+     * nonexistent file, for example.
+     */
+    private $valid;
+
+    /**
      * Initialize the class and set its properties.
      * @param  array  $properties    An array of properties, which may include:
      *                                   tmp_name
@@ -38,6 +44,9 @@ class VisualBudget_Dataset {
 
         // Copy over any properties which were passed into construction.
         $this->properties = $properties;
+
+        // Assume the dataset isn't valid until it has proved otherwise.
+        $this->valid = 0;
 
         // If the dataset has a 'id' property, that means
         // it already exits and we can construct the object that way.
@@ -102,13 +111,20 @@ class VisualBudget_Dataset {
     public function from_file() {
         $id = $this->properties['id'];
 
-        // FIXME: How to use $wp_filesystem here?
-        $meta = file_get_contents(VISUALBUDGET_UPLOAD_PATH . $id . '_meta.json');
-        $this->properties = json_decode($meta, true);
+        $filepath = VISUALBUDGET_UPLOAD_PATH . $id . '_meta.json';
 
-        // JSON data.
-        $json = file_get_contents($this->get_filepath()); // FIXME: Same.
-        $this->data = json_decode($json);
+        // FIXME: How to use $wp_filesystem here?
+        if (is_file($filepath)) {
+            $meta = file_get_contents($filepath);
+            $this->properties = json_decode($meta, true);
+
+            // JSON data.
+            $json = file_get_contents($this->get_filepath()); // FIXME: Same.
+            $this->data = json_decode($json);
+
+            // Everything worked.
+            $this->valid = 1;
+        }
     }
 
     // Create a dataset from an upload
@@ -169,7 +185,7 @@ class VisualBudget_Dataset {
       * @return    Either a single number or an array of numbers.
       *            Subtotals are calculated automatically.
       */
-    public function query($qlevels, $timepoints_str, $filters_str) {
+    public function query($qlevels, $timepoints_str=null, $filters_str=null) {
         // FIXME: $timepoints is currently ignored.
         // FIXME: $filters is currently ignored.
         // FIXME: Do error checking and validation on these inputs.
@@ -208,6 +224,7 @@ class VisualBudget_Dataset {
                             return true;
                         });
 
+        array_unshift($slice, $header);
         return $slice;
     }
 
@@ -391,6 +408,9 @@ class VisualBudget_Dataset {
         return $this->properties;
     }
 
-
+    // Is the dataset valid? Can it be safely queried?
+    public function is_valid() {
+        return $this->valid;
+    }
 
 }

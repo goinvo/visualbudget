@@ -352,9 +352,8 @@ class VisualBudget_Dataset {
     }
 
     // A preview of the dataset
-    public function corner() {
-        $rows = 4;
-        $cols = 5;
+    // Display $rows rows and $cols columns from the top left
+    public function corner($rows = 4, $cols = 5) {
         $corner = array_slice(
                 array_map(function($i) use ($cols) {
                     return array_slice($i, 0, $cols);

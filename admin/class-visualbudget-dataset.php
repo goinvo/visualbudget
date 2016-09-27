@@ -208,4 +208,33 @@ class VisualBudget_Dataset {
         return VISUALBUDGET_UPLOAD_PATH . $this->properties['original_filename'];
     }
 
+    // Vertical dimension of the dataset
+    public function num_rows() {
+        return count($this->data);
+    }
+
+    // Horizontal dimension of the dataset
+    public function num_cols() {
+        return count($this->data[0]);
+    }
+
+    // A preview of the dataset
+    public function corner() {
+        $rows = 4;
+        $cols = 5;
+        $corner = array_slice(
+                array_map(function($i) use ($cols) {
+                    return array_slice($i, 0, $cols);
+                }, $this->data),
+            0, $rows);
+        return $corner;
+    }
+
+    // Get the properties of the dataset
+    public function get_properties() {
+        return $this->properties;
+    }
+
+
+
 }

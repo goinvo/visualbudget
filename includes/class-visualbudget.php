@@ -23,7 +23,7 @@ class VisualBudget {
          * Define all constants related to this plugin.
          */
         date_default_timezone_set("America/New_York");
-        self::define_constants();
+        $this->define_constants();
         $this->load_dependencies();
         $this->set_locale();
         $this->define_admin_hooks();
@@ -33,13 +33,21 @@ class VisualBudget {
     }
 
     public static function define_constants() {
+        $trailingslashit = function ($s) { return rtrim( $s, '/\\' ) . '/'; };
+
         define('VISUALBUDGET_SLUG', 'visualbudget' );
         define('VISUALBUDGET_VERSION', '0.1.0' );
         define('VISUALBUDGET_UPLOAD_DIR', 'datasets/' );
-        define('VISUALBUDGET_PATH', plugin_dir_path( dirname( __FILE__ ) ) );
+        // define('VISUALBUDGET_PATH', plugin_dir_path( dirname( __FILE__ ) ) );
+        define('VISUALBUDGET_PATH', $trailingslashit(dirname(__FILE__, 2)));
         define('VISUALBUDGET_UPLOAD_PATH', VISUALBUDGET_PATH . VISUALBUDGET_UPLOAD_DIR );
-        define('VISUALBUDGET_URL', plugin_dir_url( dirname( __FILE__ ) ) );
-        define('VISUALBUDGET_UPLOAD_URL', VISUALBUDGET_URL . VISUALBUDGET_UPLOAD_DIR );
+
+        // We can only set the URL if there this is being called from an instance;
+        // i.e. cannot set the URL if being called statically.
+        if (isset($this)) {
+            define('VISUALBUDGET_URL', plugin_dir_url( dirname( __FILE__ ) ) );
+            define('VISUALBUDGET_UPLOAD_URL', VISUALBUDGET_URL . VISUALBUDGET_UPLOAD_DIR );
+        }
     }
 
     /**

@@ -160,7 +160,7 @@ class VisualBudget_Dataset {
 
      /**
       * Query the dataset á la the API.
-      * @param   String   $levels       A string of levels to filter by.
+      * @param   String   $qlevels      A string of levels to filter by.
       *                                 Case-insensitive.
       * @param   String   $timepoints   Optional. A date or date range.
       * @param   String   $filters      Optional. Metadata filters.
@@ -169,44 +169,54 @@ class VisualBudget_Dataset {
       * @return    Either a single number or an array of numbers.
       *            Subtotals are calculated automatically.
       */
-    public function query($levels, $timepoints_str, $filters_str) {
+    public function query($qlevels, $timepoints_str, $filters_str) {
         // FIXME: $timepoints is currently ignored.
         // FIXME: $filters is currently ignored.
         // FIXME: Do error checking and validation on these inputs.
         //        What should happen if someone tries to break it?
         //        Maybe display "Badly formed Visual Budget request."
 
-        // Parse the timepoints (FIXME, doesn't do anything yet).
-        $timepoints = self::parse_timepoints_query($timepoints_str);
-
         // Split the dataset into the header row and the rest of the sheet
-        $header = $this->data[0];            // Just the first row
-        $data = array_slice($this->data, 1); // Everything but the first row
-        $data = self::infer_levels($data);   // Fill in empty level entries
+        $header = $this->data[0];                  // Just the first row
+        $data = self::infer_levels($this->data);   // Get the inferred data
+        $data = array_slice($data, 1);             // Ignore the header row
 
-        // Categorize the columns
-        $categories = self::column_categories($header);
+        // Get an array of the LEVEL column titles, ordered properly
+        // and with the correct indices (i.e. indices referring to
+        // the levels of the original dataset). See function for details.
+        $ordered_levels = self::ordered_columns_of_type($header, 1);
+        $ordered_levels_indices = array_keys($ordered_levels);
+
+        // This is a safeguard against arrays whose keys have been
+        // tampered with. We want an array with numeric keys 0--N.
+        $qlevels = array_values($qlevels);
 
         // Now slice the array, getting only the relevant pieces.
-        $slice = array_filter($this->data,
-                        function ($row) use ($levels) {
-
+        $slice = array_filter($data,
+                        function ($row) use ($qlevels, $ordered_levels_indices) {
+                            // Loop through each level, checking to see if
+                            // each level matches. If not, return false
+                            // immediately.
+                            foreach ($qlevels as $n => $qlevel) {
+                                // Compare the queried level against the one of this row
+                                if ( strcasecmp($row[$ordered_levels_indices[$n]],
+                                                 $qlevels[$n]) ) {
+                                    return false;
+                                }
+                            }
+                            // Looks like this row matches the levels.
+                            return true;
                         });
-    }
 
-
-    /**
-     * Parse the timpoints query. Takes a string, returns an Array.
-     */
-    public static function parse_timepoints_query($timepoints_str) {
-        return $timepoints_str;
+        return $slice;
     }
 
     // Returns an array the same size as $header_row containing
     // the categories of each element of $header_row as determined
     // by the categorize_column() function.
     public static function column_categories($header_row) {
-        return array_map(Array('VisualBudget_Dataset','categorize_column'), $header_row);
+        return array_map( Array('VisualBudget_Dataset','categorize_column'),
+                    $header_row );
     }
 
     // Determines if a string is the title of a LEVEL column,
@@ -232,21 +242,10 @@ class VisualBudget_Dataset {
         $header = $data[0];            // Just the first row
         $data = array_slice($data, 1); // Everything but the first row
 
-        // Categorize the columns
-        $categories = self::column_categories($header);
-
-        // Filter out non-LEVEL columns. This gets us indices of all LEVEL cols.
-        $levels = array_filter($categories, function($i) { return $i === 1; });
-        $levels = array_keys($levels);
-
-        // This is what we're after: the indices of the columns of levels,
-        // in ascending order. E.g. [4,7,..] means LEVEL1 is column 4,
-        // LEVEL2 is column 7, etc.
-        $ordered_levels = array_filter($header,
-            function($i) use ($levels) {
-                return in_array($i, $levels);
-            }, ARRAY_FILTER_USE_KEY);
-        natcasesort($ordered_levels);
+        // Get an array of the LEVEL column titles, ordered properly
+        // and with the correct indices (i.e. indices referring to
+        // the levels of the original dataset). See function for details.
+        $ordered_levels = self::ordered_columns_of_type($header, 1);
 
         // Now loop through and fill in the blanks
         foreach ($data as $m => $row) {
@@ -289,6 +288,31 @@ class VisualBudget_Dataset {
         return $data;
     }
 
+    // Find out how columns should be ordered, and keep track of their indices.
+    // $category   is either -1, 0, or 1   as per the categorize_column() function.
+    public static function ordered_columns_of_type($header, $category) {
+
+        // Categorize the columns
+        $categories = self::column_categories($header);
+
+        // Filter out non-LEVEL columns. This gets us indices of all LEVEL cols.
+        $levels = array_filter($categories,
+                        function ($i) use ($category) {
+                            return $i === $category;
+                        });
+        $levels = array_keys($levels);
+
+        // This is what we're after: the indices of the columns of levels,
+        // in ascending order. E.g. [4,7,..] means LEVEL1 is column 4,
+        // LEVEL2 is column 7, etc.
+        $ordered_levels = array_filter($header,
+            function($i) use ($levels) {
+                return in_array($i, $levels);
+            }, ARRAY_FILTER_USE_KEY);
+        natcasesort($ordered_levels);
+
+        return $ordered_levels;
+    }
 
 
     public function get_meta_json() {

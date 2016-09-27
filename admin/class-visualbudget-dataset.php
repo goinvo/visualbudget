@@ -158,10 +158,138 @@ class VisualBudget_Dataset {
 
     }
 
-    // Get the JSON representation of this dataset.
-    public function get_json() {
-        return json_encode($this->data);
+     /**
+      * Query the dataset á la the API.
+      * @param   String   $levels       A string of levels to filter by.
+      *                                 Case-insensitive.
+      * @param   String   $timepoints   Optional. A date or date range.
+      * @param   String   $filters      Optional. Metadata filters.
+      *
+      * @example   query("Schools:Utilities:Water", "2012-2015")
+      * @return    Either a single number or an array of numbers.
+      *            Subtotals are calculated automatically.
+      */
+    public function query($levels, $timepoints_str, $filters_str) {
+        // FIXME: $timepoints is currently ignored.
+        // FIXME: $filters is currently ignored.
+        // FIXME: Do error checking and validation on these inputs.
+        //        What should happen if someone tries to break it?
+        //        Maybe display "Badly formed Visual Budget request."
+
+        // Parse the timepoints (FIXME, doesn't do anything yet).
+        $timepoints = self::parse_timepoints_query($timepoints_str);
+
+        // Split the dataset into the header row and the rest of the sheet
+        $header = $this->data[0];            // Just the first row
+        $data = array_slice($this->data, 1); // Everything but the first row
+        $data = self::infer_levels($data);   // Fill in empty level entries
+
+        // Categorize the columns
+        $categories = self::column_categories($header);
+
+        // Now slice the array, getting only the relevant pieces.
+        $slice = array_filter($this->data,
+                        function ($row) use ($levels) {
+
+                        });
     }
+
+
+    /**
+     * Parse the timpoints query. Takes a string, returns an Array.
+     */
+    public static function parse_timepoints_query($timepoints_str) {
+        return $timepoints_str;
+    }
+
+    // Returns an array the same size as $header_row containing
+    // the categories of each element of $header_row as determined
+    // by the categorize_column() function.
+    public static function column_categories($header_row) {
+        return array_map(Array('VisualBudget_Dataset','categorize_column'), $header_row);
+    }
+
+    // Determines if a string is the title of a LEVEL column,
+    // a timepoint column, or a metadata column.
+    // Returns 1 for LEVEL, 0 for timepoint, -1 for metadata
+    public static function categorize_column($string) {
+        if (preg_match('/^LEVEL[0-9]+$/i', $string)) {
+            return 1;  // level
+        } elseif (strtotime($string) !== false) {
+            return 0;  // timepoint
+        } else {
+            return -1; // metadata
+        }
+    }
+
+    /**
+     * Return a dataset equivalent to the input,
+     * but with inferred levels filled in.
+     */
+    public static function infer_levels($data) {
+
+        // Split the dataset into the header row and the rest of the sheet
+        $header = $data[0];            // Just the first row
+        $data = array_slice($data, 1); // Everything but the first row
+
+        // Categorize the columns
+        $categories = self::column_categories($header);
+
+        // Filter out non-LEVEL columns. This gets us indices of all LEVEL cols.
+        $levels = array_filter($categories, function($i) { return $i === 1; });
+        $levels = array_keys($levels);
+
+        // This is what we're after: the indices of the columns of levels,
+        // in ascending order. E.g. [4,7,..] means LEVEL1 is column 4,
+        // LEVEL2 is column 7, etc.
+        $ordered_levels = array_filter($header,
+            function($i) use ($levels) {
+                return in_array($i, $levels);
+            }, ARRAY_FILTER_USE_KEY);
+        natcasesort($ordered_levels);
+
+        // Now loop through and fill in the blanks
+        foreach ($data as $m => $row) {
+
+            // Skip the first row. There is nothing to infer from.
+            if ($m === 0) {
+                continue;
+            }
+
+            // $flag is set to true whenever inferences are (or seem to be) complete.
+            $flag = false;
+
+            // Loop through the level columns on each row, inferring as necessary.
+            foreach ($ordered_levels as $n => $level_name) {
+
+                // If this element is empty, it means we should infer.
+                if ($row[$n] == "") { // FIXME: Test for false or null?
+
+                    // If no flag, then all's well.
+                    if (!$flag) {
+
+                        // Infer the value from the row above.
+                        $data[$m][$n] = $data[$m-1][$n];
+
+                    } else {
+                        // This is a problem. It means that levels are being
+                        // inferred between other levels.
+                        // FIXME: add a warning for malformed dataset.
+                    }
+                } else {
+                    // $flag == true indicates that we have stopped inferring.
+                    // If there are any further inferences, we have a problem.
+                    $flag = true;
+                }
+            }
+        }
+
+        // Prepend the header row back on and then return it.
+        array_unshift($data, $header);
+        return $data;
+    }
+
+
 
     public function get_meta_json() {
         // Don't write all the meta properties to the meta file.
@@ -186,6 +314,11 @@ class VisualBudget_Dataset {
 
         // Return encoded JSON.
         return json_encode($props);
+    }
+
+    // Get the JSON representation of this dataset.
+    public function get_json() {
+        return json_encode($this->data);
     }
 
     // Get the original blob of this dataset, if it exists.

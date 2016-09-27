@@ -55,7 +55,7 @@ if (empty($datasets)) {
         echo '<small>Original: <a href="' . VISUALBUDGET_UPLOAD_URL . $props['original_filename'] . '">'
                     . $props['original_filename'] . '</a></small>';
         echo '</div><div class="col-md-7">';
-        $corner = $dataset->corner();
+        $corner = VisualBudget_Dataset::infer_levels($dataset->corner());
         // table code from http://stackoverflow.com/a/37727144/1516307
         $tbody = array_reduce(array_slice($corner,1), function($a, $b){return $a.="<tr><td>".implode("</td><td>",$b)."</td></tr>";});
         $thead = "<tr><th>" . implode("</th><th>", array_values($corner[0])) . "</th></tr>";

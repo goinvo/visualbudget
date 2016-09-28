@@ -8,7 +8,7 @@
 class VisualBudget_Admin {
 
     // The file manager object, for interacting with the filesystem.
-    public $filemanager;
+    public $datasetmanager;
 
     // All the active datasets, stored as an array of VisualBudget_Dataset objects.
     public $datasets;
@@ -29,10 +29,10 @@ class VisualBudget_Admin {
     private function load_dependencies() {
 
         // The class responsible for interacting with the filesystem.
-        // Note that we are not instatiating the filemanager here, but
-        // do so rather in the function setup_filesystem_manager(),
+        // Note that we are not instatiating the datasetmanager here, but
+        // do so rather in the function setup_dataset_manager(),
         // after the credentials are obtained.
-        require_once VISUALBUDGET_PATH . 'admin/class-visualbudget-filemanager.php';
+        require_once VISUALBUDGET_PATH . 'admin/class-visualbudget-datasetmanager.php';
 
         // Each dataset is represented as an object of the Dataset class.
         require_once VISUALBUDGET_PATH . 'admin/class-visualbudget-dataset.php';
@@ -44,9 +44,9 @@ class VisualBudget_Admin {
 
     /**
      * Get the credentials to read/write to the filesystem, and create a
-     * VisualBudget_FileManager object to interface with the filesystem.
+     * VisualBudget_DatasetManager object to interface with the filesystem.
      */
-    public function setup_filesystem_manager() {
+    public function setup_dataset_manager() {
         // The first thing to do is to get credentials to
         // get our fingers in the filesystem.
         $access_type = get_filesystem_method();
@@ -71,7 +71,7 @@ class VisualBudget_Admin {
         }
 
         // Finally, instantiate the file manager.
-        $this->filemanager = new VisualBudget_FileManager();
+        $this->datasetmanager = new VisualBudget_DatasetManager();
     }
 
     /**
@@ -118,7 +118,7 @@ class VisualBudget_Admin {
      * Determine if any files have been uploaded. If so, construct a
      * VisualBudget_Dataset object from them in order to validate the
      * data, and if everything looks good then pass them on to the
-     * filemanager for installation.
+     * datasetmanager for installation.
      */
     public function handle_file_uploads() {
 
@@ -146,11 +146,11 @@ class VisualBudget_Admin {
 
                     // Write the dataset and its meta information to the 'datasets' directory
                     // and write the original file to the 'datasets/orignals' directory.
-                    $this->filemanager->new_file( $dataset->get_filepath(),
+                    $this->datasetmanager->write_dataset( $dataset->get_filename(),
                                                   $dataset->get_json() );
-                    $this->filemanager->new_file( $dataset->get_meta_filepath(),
+                    $this->datasetmanager->write_dataset( $dataset->get_meta_filename(),
                                                   $dataset->get_meta_json() );
-                    $this->filemanager->new_file( $dataset->get_original_filepath(),
+                    $this->datasetmanager->write_dataset( $dataset->get_original_filename(),
                                                   $dataset->get_original_blob() );
                 }
             }
@@ -162,9 +162,9 @@ class VisualBudget_Admin {
      */
     public function handle_file_deletions() {
 
-        // Get the dataset inventory from the filemanager.
+        // Get the dataset inventory from the dataset manager.
         // The returned object is an array created by $wp_filesystem.
-        $datasets = $this->filemanager->get_datasets_inventory();
+        $datasets = $this->datasetmanager->get_datasets_inventory();
         $filenames = array_keys($datasets);
 
         // First check if we are supposed to delete any of them.
@@ -172,7 +172,7 @@ class VisualBudget_Admin {
         // a real file.
         $delete_num = false;
         if ( isset($_GET['delete'])
-            && $this->filemanager->is_file($_GET['delete'] . '_data.json') ) {
+            && $this->datasetmanager->is_file($_GET['delete'] . '_data.json') ) {
 
             $delete_num = $_GET[ 'delete' ];
         }
@@ -187,7 +187,7 @@ class VisualBudget_Admin {
                 });
 
             foreach ($filenames_to_delete as $filename) {
-                $this->filemanager->move_file($filename, 'trash/' . $filename);
+                $this->datasetmanager->move_dataset($filename, 'trash/' . $filename);
             }
 
             // Now we refresh the page, omitting the "delete" query string key.
@@ -208,7 +208,7 @@ class VisualBudget_Admin {
 
         // Get the inventory, which is an array of files created by
         // $wp_filesystem.
-        $file_array = $this->filemanager->get_datasets_inventory();
+        $file_array = $this->datasetmanager->get_datasets_inventory();
 
         // Just get the IDs of the datasets
         $ids = array_map(function($i) {

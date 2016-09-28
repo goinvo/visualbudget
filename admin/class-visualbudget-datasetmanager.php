@@ -1,17 +1,12 @@
 <?php
 
 /**
- * The file manager, for dealing with uploading/reading/writing of datasets.
- *
- * FIXME: The methods of this class are inconsistent: some require the full path
- *        to the datasets directory, while others simply require a filename.
- *        Should this class be called "datasets-manager" or such? Perhaps it is
- *        meant to be a specialized datasets manager, and not a general
- *        interface to the filesystem. (What else do we need to interact with
- *        the filesystem for, anyway?)
+ * The dataset manager, for dealing with uploading/reading/writing of datasets.
+ * This class is called "DatasetManager" rather than "GeneralFileManager"
+ * because it deals with things in the datasets directory: when a filename is
+ * given, it is assumed to be in the datasets upload directory.
  */
-
-class VisualBudget_FileManager {
+class VisualBudget_DatasetManager {
 
     /**
      * Initialize the class and set its properties.
@@ -33,7 +28,6 @@ class VisualBudget_FileManager {
         if ( !is_dir(VISUALBUDGET_UPLOAD_PATH . 'trash/') ) {
             $wp_filesystem->mkdir(VISUALBUDGET_UPLOAD_PATH . 'trash/');
         }
-
     }
 
     /**
@@ -56,32 +50,31 @@ class VisualBudget_FileManager {
         return $files;
     }
 
-
     /**
-     * Read a file.
+     * Read a dataset.
      *
-     * @param  string  $dataset_filename  The filename (not path) of the dataset.
+     * @param  string  $filename  The filename of the dataset.
      */
-    public function read_file($dataset_filename) {
+    public function read_dataset($filename) {
         global $wp_filesystem;
 
-        return $wp_filesystem->get_contents(VISUALBUDGET_UPLOAD_PATH . $dataset_filename);
+        return $wp_filesystem->get_contents(VISUALBUDGET_UPLOAD_PATH . $filename);
     }
 
     /**
-     * Upload a file.
+     * Write to a file.
      *
-     * @param    $path      The full path to the new file to be created.
-     * @param    $contents  The contents of the new file.
+     * @param  string  $filename  The filename of the new dataset.
+     * @param  string  $contents  The contents of the new file.
      */
-    public function new_file($path, $contents) {
+    public function write_dataset($filename, $contents) {
 
         try {
             // WordPress's own filesystem class.
             global $wp_filesystem;
 
             // Write the new file
-            $wp_filesystem->put_contents($path, $contents);
+            $wp_filesystem->put_contents(VISUALBUDGET_UPLOAD_PATH . $filename, $contents);
 
         } catch (Exception $e) {
             // FIXME: What to do with this error?
@@ -89,12 +82,14 @@ class VisualBudget_FileManager {
     }
 
     /**
-     * Move a file.
+     * Move a dataset.
      *
-     * @param  string  $current  The location of the existing file.
-     * @param  string  $new      The new location of the file.
+     * @param  string  $current  The location of the existing file,
+     *                           relative to the upload directory.
+     * @param  string  $new      The new location of the file,
+     *                           relative to the upload directory.
      */
-    public function move_file($current, $new) {
+    public function move_dataset($current, $new) {
         global $wp_filesystem;
 
         return $wp_filesystem->move(VISUALBUDGET_UPLOAD_PATH . $current,
@@ -102,11 +97,10 @@ class VisualBudget_FileManager {
     }
 
     /**
-     * Check to see if X a file.
+     * Check to see if X a file, where X is in the uploads directory.
      *
-     * @param  string  $filename  The filename (not path) of the file
-     *                            to be checked. This method looks in
-     *                            the datasets folder only.
+     * @param  string  $filename  Filename to be checked. Can also be
+     *                            a path relative to the uploads directory.
      */
     public function is_file($filename) {
         return is_file(VISUALBUDGET_UPLOAD_PATH . $filename);

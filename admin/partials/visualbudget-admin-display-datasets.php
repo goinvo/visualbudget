@@ -3,14 +3,14 @@
  * This file displays the content of the "Datasets" tab in the dashboard.
  */
 ?>
-<!-- <input type='hidden' name='MAX_FILE_SIZE' value='8388608' /> -->
 <form method="post" action="options.php" enctype="multipart/form-data">
 <?php
-// Grab the saved options
+// Grab the saved options.
 $this->settings->options = get_option( 'visualbudget_tab_datasets' );
-
+// Display the settings fields here.
 settings_fields( 'visualbudget_tab_datasets' );
 do_settings_sections( 'visualbudget_tab_datasets' );
+// Submit button for the upload.
 submit_button('Upload file');
 ?>
 </form>
@@ -22,17 +22,18 @@ submit_button('Upload file');
 </form>
 -->
 <h2>My datasets</h2>
-<div class='bootstrap-wrapper'>
+<div class='bootstrap-wrapper'><!-- Bootstrap styles work inside this div -->
 <p class='alert alert-danger'><em>Caveat emptor &mdash;</em> datasets are not yet validated upon upload.</p>
 <?php
 
+// Get all the existing datasets.
 $datasets = $this->datasets;
 
-// Test to see if there are any datasets
+// Test to see if there actually are any datasets.
 if (empty($datasets)) {
 
-    // If not, say so
-    echo 'There are no datasets.';
+    // If not, say so.
+    echo '<div><p>There are no datasets.</p></div>';
 
 } else {
 

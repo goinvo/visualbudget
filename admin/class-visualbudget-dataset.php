@@ -399,12 +399,27 @@ class VisualBudget_Dataset {
         return $this->original_blob;
     }
 
+    // Get the filename of this dataset.
+    public function get_filename() {
+        return $this->properties['filename'];
+    }
+
+    // Get the filename of this metadata to this dataset.
+    public function get_meta_filename() {
+        return $this->properties['meta_filename'];
+    }
+
+    // Get the filename of the original version of this dataset.
+    public function get_original_filename() {
+        return $this->properties['original_filename'];
+    }
+
     // Get the file path of this dataset.
     public function get_filepath() {
         return VISUALBUDGET_UPLOAD_PATH . $this->properties['filename'];
     }
 
-    // Get the file path of this dataset.
+    // Get the file path of this metadata to this dataset.
     public function get_meta_filepath() {
         return VISUALBUDGET_UPLOAD_PATH . $this->properties['meta_filename'];
     }

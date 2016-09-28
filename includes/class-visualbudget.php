@@ -44,12 +44,11 @@ class VisualBudget {
         define('VISUALBUDGET_PATH', $trailingslashit(dirname(__FILE__, 2)));
         define('VISUALBUDGET_UPLOAD_PATH', VISUALBUDGET_PATH . VISUALBUDGET_UPLOAD_DIR );
 
-        // We can only set the URL if there this is being called from an instance;
-        // i.e. cannot set the URL if being called statically.
-        if (isset($this)) {
-            define('VISUALBUDGET_URL', plugin_dir_url( dirname( __FILE__ ) ) );
-            define('VISUALBUDGET_UPLOAD_URL', VISUALBUDGET_URL . VISUALBUDGET_UPLOAD_DIR );
-        }
+        /* We cannot set the URL if being called statically. */
+        // if (isset($this)) {
+        define('VISUALBUDGET_URL', plugin_dir_url( dirname( __FILE__ ) ) );
+        define('VISUALBUDGET_UPLOAD_URL', VISUALBUDGET_URL . VISUALBUDGET_UPLOAD_DIR );
+        // }
     }
 
     /**
@@ -121,7 +120,7 @@ class VisualBudget {
         $this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
 
         // Set up the file manager, including getting the credentials.
-        $this->loader->add_action( 'admin_init', $plugin_admin, 'setup_filesystem_manager' );
+        $this->loader->add_action( 'admin_init', $plugin_admin, 'setup_dataset_manager' );
 
         // Set up the dashboard.
         $this->loader->add_action( 'admin_init', $plugin_admin, 'visualbudget_dashboard_init' );

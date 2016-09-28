@@ -59,6 +59,8 @@ class VisualBudget_FileManager {
 
     /**
      * Read a file.
+     *
+     * @param  string  $dataset_filename  The filename (not path) of the dataset.
      */
     public function read_file($dataset_filename) {
         global $wp_filesystem;
@@ -67,12 +69,10 @@ class VisualBudget_FileManager {
     }
 
     /**
-     * Upload a file. The file will be accessed via PHP's own $_FILES variable,
-     * and will specifically query  $_FILES[$group]['tmp_name'][$name]  to look
-     * for the uploaded file.
+     * Upload a file.
      *
-     * @param    $group   The settings group.
-     * @param    $name    The input name.
+     * @param    $path      The full path to the new file to be created.
+     * @param    $contents  The contents of the new file.
      */
     public function new_file($path, $contents) {
 
@@ -90,6 +90,9 @@ class VisualBudget_FileManager {
 
     /**
      * Move a file.
+     *
+     * @param  string  $current  The location of the existing file.
+     * @param  string  $new      The new location of the file.
      */
     public function move_file($current, $new) {
         global $wp_filesystem;
@@ -100,6 +103,10 @@ class VisualBudget_FileManager {
 
     /**
      * Check to see if X a file.
+     *
+     * @param  string  $filename  The filename (not path) of the file
+     *                            to be checked. This method looks in
+     *                            the datasets folder only.
      */
     public function is_file($filename) {
         return is_file(VISUALBUDGET_UPLOAD_PATH . $filename);

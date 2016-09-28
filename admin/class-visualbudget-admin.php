@@ -1,9 +1,10 @@
 <?php
 
 /**
- * The admin-specific functionality of the plugin.
+ * This class is handles the admin-specific functionality of the plugin.
+ * The dashboard, file uploads, and shortcode definitions are all handled
+ * here.
  */
-
 class VisualBudget_Admin {
 
     // The file manager object, for interacting with the filesystem.
@@ -42,7 +43,8 @@ class VisualBudget_Admin {
     }
 
     /**
-     * Required to read/write to the filesystem.
+     * Get the credentials to read/write to the filesystem, and create a
+     * VisualBudget_FileManager object to interface with the filesystem.
      */
     public function setup_filesystem_manager() {
         // The first thing to do is to get credentials to
@@ -73,7 +75,7 @@ class VisualBudget_Admin {
     }
 
     /**
-     * Add dashboard page
+     * Add dashboard sidelink to the WP admin screen.
      */
     public function visualbudget_add_dashboard_sidelink() {
         add_menu_page(
@@ -88,14 +90,16 @@ class VisualBudget_Admin {
     }
 
     /**
-     * Dashboard page callback. Simply display the page.
+     * Dashboard page callback. Simply display the admin page.
      */
     public function visualbudget_display_dashboard() {
         require_once VISUALBUDGET_PATH . 'admin/partials/visualbudget-admin-display.php';
     }
 
     /**
-     * Initialize the dashboard
+     * Initialize the dashboard. Register VB settings, handle any
+     * file uploads or deletions, and load in all the existing
+     * datasets for use by other methods.
      */
     public function visualbudget_dashboard_init() {
         $this->settings = new VisualBudget_Admin_Settings();
@@ -111,7 +115,10 @@ class VisualBudget_Admin {
     }
 
     /**
-     * Pass uploaded files on to the filemanager.
+     * Determine if any files have been uploaded. If so, construct a
+     * VisualBudget_Dataset object from them in order to validate the
+     * data, and if everything looks good then pass them on to the
+     * filemanager for installation.
      */
     public function handle_file_uploads() {
 
@@ -226,7 +233,7 @@ class VisualBudget_Admin {
 
 
     /**
-     * Display the tab nav at the top of the VB dashboard page
+     * Display the tab nav at the top of the VB dashboard page.
      */
     public function visualbudget_display_dashboard_tabs() {
         echo '<h2 class="nav-tab-wrapper">';
@@ -261,23 +268,11 @@ class VisualBudget_Admin {
      */
     public function enqueue_styles() {
 
-        /**
-         * This function is provided for demonstration purposes only.
-         *
-         * An instance of this class should be passed to the run() function
-         * defined in VisualBudget_Loader as all of the hooks are defined
-         * in that particular class.
-         *
-         * The VisualBudget_Loader will then create the relationship
-         * between the defined hooks and the functions defined in this
-         * class.
-         */
-
+        // Add the bootstrap CSS file
         wp_enqueue_style( 'bootstrap', plugin_dir_url( __FILE__ ) . 'css/bootstrap-wrapper.css', array(), VISUALBUDGET_VERSION, 'all' );
 
-        // FIXME: Why does bootstrap.css end up getting included, but the following doesn't?
+        // Add the VB admin CSS file
         wp_enqueue_style( 'visualbudget_css', plugin_dir_url( __FILE__ ) . 'css/visualbudget-admin.css', array(), VISUALBUDGET_VERSION, 'all' );
-
     }
 
     /**
@@ -285,20 +280,8 @@ class VisualBudget_Admin {
      */
     public function enqueue_scripts() {
 
-        /**
-         * This function is provided for demonstration purposes only.
-         *
-         * An instance of this class should be passed to the run() function
-         * defined in VisualBudget_Loader as all of the hooks are defined
-         * in that particular class.
-         *
-         * The VisualBudget_Loader will then create the relationship
-         * between the defined hooks and the functions defined in this
-         * class.
-         */
-
+        // Add the VB admin JS file
         wp_enqueue_script( 'visualbudget_js', plugin_dir_url( __FILE__ ) . 'js/visualbudget-admin.js', array( 'jquery' ), VISUALBUDGET_VERSION, false );
-
     }
 
 }

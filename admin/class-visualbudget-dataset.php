@@ -72,39 +72,27 @@ class VisualBudget_Dataset {
      * FIXME: Data is not currently validated according to our spec.
      */
     public function validate() {
+
         if ( isset($this->original_blob) ) {
 
-            // If the file was uploaded then we already know the type.
-            if ( isset($this->properties['uploaded_type']) ) {
-                switch ( $this->properties['uploaded_type'] ) {
-                    case 'text/csv':
-                        $csv = $this->original_blob;
-                        $this->data = array_map("str_getcsv", explode("\n", $csv));
-                        break;
+            // FIXME: For now we assume the file is CSV.
+            $csv = $this->original_blob;
+            $this->data = array_map("str_getcsv", explode("\n", $csv));
 
-                    default:
-                        // FIXME: Throw an exception for bad filetype?
-                        return 0;
-                }
+            // Everything worked, so set the meta properties.
+            $this->set_meta_properties();
 
-            // This means the dataset is being drawn from a URL
-            } else {
-                // FIXME: To do.
-                return 0;
-            }
-
-        } else if ( !isset($this->data) ) {
+        } else if ( isset($this->data) ) {
+            // This has been a validation of an existing dataset.
+            return 1;
+        } else {
             // FIXME: Perhaps this should throw an exception.
             //        However, it should never happen.
             return 0;
         }
 
-        // Everything worked, so set the meta properties
-        // and then return 1.
-        $this->set_meta_properties();
         return 1;
     }
-
 
     /**
      * Create a dataset from an existing file.
@@ -125,18 +113,49 @@ class VisualBudget_Dataset {
      * Create a dataset from an uploaded file.
      */
     public function from_upload() {
-        // Store the contents of the uploaded file in this object
-        $this->original_blob = file_get_contents($this->properties['tmp_name']);
 
-        // And set the original name
-        $this->properties['original_filename'] = $this->properties['uploaded_name'];
+        // Read the file.
+        $contents = file_get_contents($this->properties['tmp_name']);
+
+        // Make sure the contents aren't empty.
+        if ( !empty($contents) ) {
+            // Store the contents.
+            $this->original_blob = $contents;
+        } else {
+            // FIXME: Should this be an error?
+            // The file may be empty, or maybe it didn't exist.
+        }
     }
 
     /**
      * Create a dataset from a given URL.
      */
     public function from_url() {
-        // FIXME: To do.
+        $url = $this->properties['url'];
+        $response = wp_remote_request($url);
+
+        // Check to see if the request worked.
+        if ( is_wp_error($response) ) {
+            // FIXME: Something went wrong.
+        } else {
+            // The retrieval was successful.
+            // Check to see if there were errors on the other ense
+            // by looking at the response code.
+            if ( $response['response']['code'] == 200 ) {
+
+                // Everything looks good, so grab the body of the result.
+                $this->original_blob = $response['body'];
+
+                // Now add the original name of the uploaded file, per the URL.
+                $this->properties['uploaded_name'] = basename($url);
+
+                // FIXME: Maybe we want to look at the content-type?
+                // $response['headers']['content-type']
+
+            } else {
+                // FIXME: There was an error on the other end.
+            }
+        }
     }
 
     /**

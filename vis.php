@@ -16,7 +16,7 @@ header("Content-type: text/html");
 <script type='text/javascript'><?php
     require_once 'includes/class-visualbudget.php';
     require_once 'admin/class-visualbudget-dataset.php';
-    VisualBudget::define_constants();
+    // VisualBudget::define_constants();
     if (isset($_GET['data'])) {
         // FIXME: do validation here. What if the ID is not an ID?
         $qdata = explode(':', $_GET['data']);

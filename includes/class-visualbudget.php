@@ -38,16 +38,14 @@ class VisualBudget {
         define('VISUALBUDGET_SLUG', 'visualbudget' );
         define('VISUALBUDGET_VERSION', '0.1.0' );
         define('VISUALBUDGET_UPLOAD_DIR', 'datasets/' );
-        // define('VISUALBUDGET_PATH', plugin_dir_path( dirname( __FILE__ ) ) );
         define('VISUALBUDGET_PATH', $trailingslashit(dirname(__FILE__, 2)));
         define('VISUALBUDGET_UPLOAD_PATH', VISUALBUDGET_PATH . VISUALBUDGET_UPLOAD_DIR );
 
-        // We can only set the URL if there this is being called from an instance;
-        // i.e. cannot set the URL if being called statically.
-        if (isset($this)) {
-            define('VISUALBUDGET_URL', plugin_dir_url( dirname( __FILE__ ) ) );
-            define('VISUALBUDGET_UPLOAD_URL', VISUALBUDGET_URL . VISUALBUDGET_UPLOAD_DIR );
-        }
+        /* Don't set the URL if being called statically. */
+        // if (isset($this) && $this instanceof VisualBudget) {
+        define('VISUALBUDGET_URL', plugin_dir_url( dirname( __FILE__ ) ) );
+        define('VISUALBUDGET_UPLOAD_URL', VISUALBUDGET_URL . VISUALBUDGET_UPLOAD_DIR );
+        // }
     }
 
     /**
@@ -140,17 +138,17 @@ class VisualBudget {
     }
 
     private function define_shortcodes() {
-        // [visualbudget text="display me"]
+        // [visualbudget data=193826342:schools:utilities]
         add_shortcode( 'visualbudget', Array( $this, 'visualbudget_func' ) );
     }
 
 
     public function visualbudget_func( $atts ) {
         $a = shortcode_atts( array(
-            'text' => 'Default text.',
+            'data' => ''
         ), $atts );
 
-        return "<iframe src='" . VISUALBUDGET_URL . "vis.php?text=" . urlencode($a['text']) . "'"
+        return "<iframe src='" . VISUALBUDGET_URL . "vis.php?data=" . urlencode($a['data']) . "'"
             . " width='100%' height='100px' style='border:1px solid #aaa;'>"
             . "</iframe>";
     }

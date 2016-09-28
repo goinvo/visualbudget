@@ -1,10 +1,10 @@
 <?php
-/**
- * Class for working with dataset files. This class is used by the filemanager,
- * and is not responsible for editing or otherwise touching files. It is simply
- * a data structure for information about each file.
- */
 
+/**
+ * Class for representing datasets. This class is used by many other classes,
+ * since it is the main interface for slicing and querying datasets
+ * on the backend. This class does not, however, write to the filesystem.
+ */
 class VisualBudget_Dataset {
 
     // There was a big high wall there
@@ -16,8 +16,12 @@ class VisualBudget_Dataset {
     // That side was made for you and me.
 
     /**
-     * The contents of the original (uploaded or gotten from URL) dataset.
-
+     * The contents of the original dataset, which was either
+     * uploaded or retrieved from a given URL.
+     *
+     * FIXME: This property is only set when the object is being
+     * created from an upload or URL; not when the object
+     * is being constructed from an existing file in our system.
      */
     private $original_blob;
 
@@ -28,19 +32,20 @@ class VisualBudget_Dataset {
 
     /**
      * Initialize the class and set its properties.
-     * @param  array  $properties    An array of properties, which may include:
-     *                                   tmp_name
-     *                                   uploaded_name
-     *                                   uploaded_size
-     *                                   uploaded_type
+     * @param  array  $properties    An array of properties. The keys that are
+     *                               set determine how the object is constructed.
+     *                               If from uploaded file, 'tmp_name' and
+     *                                      'uploaded_name' should be set.
+     *                               If from URL, 'url' should be set.
+     *                               If from existing file, 'id' should be set.
      */
     public function __construct( $properties ) {
 
         // Copy over any properties which were passed into construction.
         $this->properties = $properties;
 
-        // If the dataset has a 'id' property, that means
-        // it already exits and we can construct the object that way.
+        // If the dataset has a 'id' property, that means it already exists
+        // in our system and we can construct the object from its file.
         if ( isset($this->properties['id']) ) {
             $this->from_file();
         }
@@ -63,6 +68,8 @@ class VisualBudget_Dataset {
      * Validate the dataset. This means making sure it is of the correct filetype,
      * making sure it is a valid instance of that filetype, and then converting
      * to JSON.
+     *
+     * FIXME: Data is not currently validated according to our spec.
      */
     public function validate() {
         if ( isset($this->original_blob) ) {
@@ -87,7 +94,8 @@ class VisualBudget_Dataset {
             }
 
         } else if ( !isset($this->data) ) {
-            // FIXME: Perhaps this should throw an exception
+            // FIXME: Perhaps this should throw an exception.
+            //        However, it should never happen.
             return 0;
         }
 
@@ -98,7 +106,9 @@ class VisualBudget_Dataset {
     }
 
 
-    // Create a dataset from an existing file
+    /**
+     * Create a dataset from an existing file.
+     */
     public function from_file() {
         $id = $this->properties['id'];
 
@@ -111,7 +121,9 @@ class VisualBudget_Dataset {
         $this->data = json_decode($json);
     }
 
-    // Create a dataset from an upload
+    /**
+     * Create a dataset from an uploaded file.
+     */
     public function from_upload() {
         // Store the contents of the uploaded file in this object
         $this->original_blob = file_get_contents($this->properties['tmp_name']);
@@ -120,13 +132,17 @@ class VisualBudget_Dataset {
         $this->properties['original_filename'] = $this->properties['uploaded_name'];
     }
 
-    // Create a dataset from a given URL
+    /**
+     * Create a dataset from a given URL.
+     */
     public function from_url() {
         // FIXME: To do.
     }
 
-
-    // Set the meta properties. This function is called after validation.
+    /**
+     * Set the meta properties. This function is called automatically
+     * at the end of a successful validation.
+     */
     public function set_meta_properties() {
 
         // We don't want to do this twice!
@@ -165,9 +181,10 @@ class VisualBudget_Dataset {
       * @param   String   $timepoints   Optional. A date or date range.
       * @param   String   $filters      Optional. Metadata filters.
       *
-      * @example   query("Schools:Utilities:Water", "2012-2015")
       * @return    Either a single number or an array of numbers.
       *            Subtotals are calculated automatically.
+      *
+      * @example   query("Schools:Utilities:Water", "2012-2015")
       */
     public function query($qlevels, $timepoints_str, $filters_str) {
         // FIXME: $timepoints is currently ignored.
@@ -201,27 +218,41 @@ class VisualBudget_Dataset {
                                 // Compare the queried level against the one of this row
                                 if ( strcasecmp($row[$ordered_levels_indices[$n]],
                                                  $qlevels[$n]) ) {
+                                    // This means the row doesn't match, so return false.
                                     return false;
                                 }
                             }
-                            // Looks like this row matches the levels.
+                            // Made it through all of them, so it looks like
+                            // this row matches the levels.
                             return true;
                         });
 
+        // FIXME: Should the $header be array_unshift'd
+        //back onto the front here?
         return $slice;
     }
 
-    // Returns an array the same size as $header_row containing
-    // the categories of each element of $header_row as determined
-    // by the categorize_column() function.
+    /**
+     * Returns an array the same size as $header_row containing
+     * the categories of each element of $header_row as determined
+     * by the categorize_column() function.
+     *
+     * @param  Array  $header_row  Array of strings, the first row of a dataset.
+     * @example  column_categories(array('2013','LEVEL1','TOOLTIP'))
+     *           returns Array(0, 1, -1)
+     */
     public static function column_categories($header_row) {
         return array_map( Array('VisualBudget_Dataset','categorize_column'),
                     $header_row );
     }
 
-    // Determines if a string is the title of a LEVEL column,
-    // a timepoint column, or a metadata column.
-    // Returns 1 for LEVEL, 0 for timepoint, -1 for metadata
+    /**
+     * Determines if a string is the title of a LEVEL column,
+     * a timepoint column, or a metadata column.
+     * Returns 1 for LEVEL, 0 for timepoint, -1 for metadata.
+     *
+     * @param  String  $string  The title of a dataset column.
+     */
     public static function categorize_column($string) {
         if (preg_match('/^LEVEL[0-9]+$/i', $string)) {
             return 1;  // level
@@ -288,8 +319,22 @@ class VisualBudget_Dataset {
         return $data;
     }
 
-    // Find out how columns should be ordered, and keep track of their indices.
-    // $category   is either -1, 0, or 1   as per the categorize_column() function.
+    /**
+     * Find out how columns should be ordered, and keep track of their indices.
+     *
+     * @param  array  $header    The first row of a dataset.
+     * @param  int    $category  The category whose indices should be returned.
+     *                           Should be either -1, 0, or 1 per the
+     *                           categorize_column() function.
+     * @return array  Returns an array of integers which represent the indices
+     *                of the columns of type $category arranged in ascending
+     *                order. For LEVEL columns, that means ascending order of
+     *                LEVEL. For timepoint columns, that means ascending order
+     *                of date. For metadata columns, that means alphabetical order.
+     * @example  For $category = 1, referring to LEVEL columns,
+     *           the returned array [4,7,..] would mean that LEVEL1 is column 4,
+     *           LEVEL2 is column 7, etc.
+     */
     public static function ordered_columns_of_type($header, $category) {
 
         // Categorize the columns
@@ -302,9 +347,8 @@ class VisualBudget_Dataset {
                         });
         $levels = array_keys($levels);
 
-        // This is what we're after: the indices of the columns of levels,
-        // in ascending order. E.g. [4,7,..] means LEVEL1 is column 4,
-        // LEVEL2 is column 7, etc.
+        // This is what we're after: the indices of the columns of type
+        // $category in ascending order.
         $ordered_levels = array_filter($header,
             function($i) use ($levels) {
                 return in_array($i, $levels);
@@ -315,6 +359,11 @@ class VisualBudget_Dataset {
     }
 
 
+    /**
+     * Get the JSON of metadata to be written to the _meta JSON file.
+     * Returns only the data of whitelisted $properties of
+     * this object.
+     */
     public function get_meta_json() {
         // Don't write all the meta properties to the meta file.
         // These are the ones to keep.
@@ -375,8 +424,8 @@ class VisualBudget_Dataset {
         return count($this->data[0]);
     }
 
-    // A preview of the dataset
-    // Display $rows rows and $cols columns from the top left
+    // Return the top-left corner of this dataset,
+    // keeping only $rows rows and $cols columns.
     public function corner($rows = 4, $cols = 5) {
         $corner = array_slice(
                 array_map(function($i) use ($cols) {
@@ -390,7 +439,5 @@ class VisualBudget_Dataset {
     public function get_properties() {
         return $this->properties;
     }
-
-
 
 }

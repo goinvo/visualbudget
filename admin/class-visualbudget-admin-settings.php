@@ -1,30 +1,34 @@
 <?php
 
 /**
- * All of the admin settings, which can be injected into whichever pages they're needed.
+ * This class is responsible for the VB settings, defined and managed
+ * using the WordPress Settings API.
  */
-
 class VisualBudget_Admin_Settings {
 
-    // Define both the settings group name and an array of input "name"
-    // attributes, so that the admin class can know while $_FILES[]
-    // to look for and what to do with them.
+    /**
+     * The option group and field names are defined here
+     * so that the admin class can retrieve them in order
+     * to know which $_FILES[] to look for during uploading.
+     */
     private $upload_field_names;
+    private $upload_group_name;
     private $settings_group_names;
 
     /**
-     * Initialize the class and set its properties.
+     * Initialize the class and set a few properties.
      */
     public function __construct() {
         $this->settings_group_names = Array(
                     'visualbudget_tab_config',
                     'visualbudget_tab_datasets'
                     );
+        $this->upload_group_name = 'visualbudget_tab_datasets';
         $this->upload_field_names = Array('upload');
     }
 
     /**
-     * Register and add settings
+     * Register and add settings, group by group.
      */
     public function register_settings() {
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -91,16 +95,6 @@ class VisualBudget_Admin_Settings {
             'visualbudget_tab_datasets',          // option name
             array( $this, 'sanitize' )            // sanitize
         );
-
-
-        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-         * FINALLY, REGISTER THE SETTINGS
-         * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-        // register_setting(
-        //     $this->settings_group_name,           // option group
-        //     $this->settings_group_name,           // option name
-        //     array( $this, 'sanitize' )            // sanitize
-        // );
     }
 
     /**
@@ -140,15 +134,15 @@ class VisualBudget_Admin_Settings {
         );
     }
 
-    // Callback for the upload
+    // Callback for the uploader
     public function upload_callback() {
         printf( '<input name="visualbudget_tab_datasets[upload]" id="upload" type="file" />' );
     }
 
-    // Get function for the settings group name.
+    // Get function for the upload settings group name.
     // The admin class uses this.
-    public function get_settings_group_names() {
-        return $this->settings_group_names;
+    public function get_upload_group_name() {
+        return $this->upload_group_name;
     }
 
     // Get function for the upload field names.

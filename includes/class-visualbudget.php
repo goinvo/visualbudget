@@ -14,31 +14,33 @@ class VisualBudget {
     /**
      * Define the core functionality of the plugin.
      *
-     * Set the plugin name and the plugin version that can be used throughout the plugin.
-     * Load the dependencies, define the locale, and set the hooks for the admin area and
-     * the public-facing side of the site.
+     * Set constants that can be used throughout the plugin.
+     * Load the dependencies, define the locale, and set the hooks
+     * for the admin area and the public-facing side of the site.
      */
     public function __construct() {
-        /**
-         * Define all constants related to this plugin.
-         */
+
+        // Set the timezone. FIXME: How to localize?
         date_default_timezone_set("America/New_York");
-        $this->define_constants();
-        $this->load_dependencies();
-        $this->set_locale();
-        $this->define_admin_hooks();
-        $this->define_public_hooks();
-        $this->define_shortcodes();
+
+        $this->define_constants();      // Define VB-related constants.
+        $this->load_dependencies();     // Load dependencies.
+        $this->set_locale();            // Set the locale, language.
+        $this->define_admin_hooks();    // Admin hooks.
+        $this->define_public_hooks();   // Public hooks.
+        $this->define_shortcodes();     // Define the VB shortcodes.
 
     }
 
+    /**
+     * Define the constants which can be used throughout the plugin code.
+     */
     public static function define_constants() {
         $trailingslashit = function ($s) { return rtrim( $s, '/\\' ) . '/'; };
 
         define('VISUALBUDGET_SLUG', 'visualbudget' );
         define('VISUALBUDGET_VERSION', '0.1.0' );
         define('VISUALBUDGET_UPLOAD_DIR', 'datasets/' );
-        // define('VISUALBUDGET_PATH', plugin_dir_path( dirname( __FILE__ ) ) );
         define('VISUALBUDGET_PATH', $trailingslashit(dirname(__FILE__, 2)));
         define('VISUALBUDGET_UPLOAD_PATH', VISUALBUDGET_PATH . VISUALBUDGET_UPLOAD_DIR );
 
@@ -139,12 +141,18 @@ class VisualBudget {
 
     }
 
+    /**
+     * Define the VB shortcode.
+     */
     private function define_shortcodes() {
         // [visualbudget text="display me"]
         add_shortcode( 'visualbudget', Array( $this, 'visualbudget_func' ) );
     }
 
-
+    /**
+     * This is the VB shortcode callback. It simply translates the shortcode attributes
+     * into a URL to vis.php with appropriate query string.
+     */
     public function visualbudget_func( $atts ) {
         $a = shortcode_atts( array(
             'text' => 'Default text.',

@@ -11,16 +11,9 @@ $this->settings->options = get_option( 'visualbudget_tab_datasets' );
 settings_fields( 'visualbudget_tab_datasets' );
 do_settings_sections( 'visualbudget_tab_datasets' );
 // Submit button for the upload.
-submit_button('Upload file');
+submit_button('Add new dataset');
 ?>
 </form>
-<!--
-<div><h3>From URL</h3></div>
-<form method="post" action="options.php">
-<input name='xxx' id='xxx' type='text' />
-<?php submit_button('Add file from URL'); ?>
-</form>
--->
 <h2>My datasets</h2>
 <div class='bootstrap-wrapper'><!-- Bootstrap styles work inside this div -->
 <p class='alert alert-danger'><em>Caveat emptor &mdash;</em> datasets are not yet validated upon upload.</p>

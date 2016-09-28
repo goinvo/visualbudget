@@ -123,36 +123,62 @@ class VisualBudget_Admin {
     public function handle_file_uploads() {
 
         // These are the field names to look for.
-        $group = $this->settings->get_upload_group_name();
-        $inputs = $this->settings->get_upload_field_names();
+        $group = $this->settings->get_dataset_tab_group_name();
+        $upload_input = $this->settings->get_upload_field_name();
+        $url_input = $this->settings->get_url_field_name();
+
+        // This array will have one set of properties for each dataset
+        // to be added, maxiumum two: one for uploaded, one for URL.
+        $props_array = array();
+
+        // First check for uploaded files.
+        if ( isset($_FILES[$group]) ) {
+            if ( $_FILES[$group]['error'][$upload_input] != 0 ) {
+                // FIXME: There was an error upon upload.
+            } else {
+                // Things are fine, so grab info about the uploaded file.
+                $properties = Array(
+                    "tmp_name" => $_FILES[$group]['tmp_name'][$upload_input],
+                    "uploaded_name" => $_FILES[$group]['name'][$upload_input],
+                    "uploaded_size" => $$_FILES[$group]['size'][$upload_input],
+                    "uploaded_type" => $_FILES[$group]['type'][$upload_input]
+                    );
+                array_unshift($props_array, $properties);
+            }
+        }
+
+        // Now check for datasets added by URL.
+        // FIXME: isset($_FILES[$group]) is a hack to determine whether
+        //        the upload/URL form was just submitted. This could be
+        //        avoided if there were a way to update VB settings from
+        //        right here, so we could simply unset the URL setting,
+        //        but I don't know how to do that. Otherwise, the URL gets
+        //        uploaded everytime someone visits the VB dashboard.
+        // FIXME UPDATE: The dataset actually ends up getting uploaded
+        //        *twice* for some reason. Will investigate.
+        $options = get_option('visualbudget_tab_datasets');
+        if ( isset($_FILES[$group]) && !empty($options[$url_input]) ) {
+            $properties = array('url' => $options[$url_input]);
+            array_unshift($props_array, $properties);
+        }
 
         // Try to upload each file.
-        foreach($inputs as $i => $input) {
-            // Check that the uploaded file exists and that there were no errors
-            if ( isset($_FILES[$group]) && $_FILES[$group]['error'][$input] == 0 ) {
-                // Grab the information about the uploaded file
-                $properties = Array(
-                    "tmp_name" => $_FILES[$group]['tmp_name'][$input],
-                    "uploaded_name" => $_FILES[$group]['name'][$input],
-                    "uploaded_size" => $_FILES[$group]['size'][$input],
-                    "uploaded_type" => $_FILES[$group]['type'][$input]
-                    );
+        foreach($props_array as $props) {
 
-                // Create a dataset object
-                $dataset = new VisualBudget_Dataset($properties);
+            // Create a dataset object
+            $dataset = new VisualBudget_Dataset($props);
 
-                // The validate() function also converts to JSON.
-                if ( $dataset->validate() ) {
+            // The validate() function also converts to JSON.
+            if ( $dataset->validate() ) {
 
-                    // Write the dataset and its meta information to the 'datasets' directory
-                    // and write the original file to the 'datasets/orignals' directory.
-                    $this->datasetmanager->write_dataset( $dataset->get_filename(),
-                                                  $dataset->get_json() );
-                    $this->datasetmanager->write_dataset( $dataset->get_meta_filename(),
-                                                  $dataset->get_meta_json() );
-                    $this->datasetmanager->write_dataset( $dataset->get_original_filename(),
-                                                  $dataset->get_original_blob() );
-                }
+                // Write the dataset and its meta information to the 'datasets' directory
+                // and write the original file to the 'datasets/orignals' directory.
+                $this->datasetmanager->write_dataset( $dataset->get_filename(),
+                                              $dataset->get_json() );
+                $this->datasetmanager->write_dataset( $dataset->get_meta_filename(),
+                                              $dataset->get_meta_json() );
+                $this->datasetmanager->write_dataset( $dataset->get_original_filename(),
+                                              $dataset->get_original_blob() );
             }
         }
     }

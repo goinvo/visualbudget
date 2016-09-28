@@ -11,20 +11,17 @@ class VisualBudget_Admin_Settings {
      * so that the admin class can retrieve them in order
      * to know which $_FILES[] to look for during uploading.
      */
-    private $upload_field_names;
-    private $upload_group_name;
-    private $settings_group_names;
+    private $upload_field_name;
+    private $url_field_name;
+    private $dataset_tab_group_name;
 
     /**
      * Initialize the class and set a few properties.
      */
     public function __construct() {
-        $this->settings_group_names = Array(
-                    'visualbudget_tab_config',
-                    'visualbudget_tab_datasets'
-                    );
-        $this->upload_group_name = 'visualbudget_tab_datasets';
-        $this->upload_field_names = Array('upload');
+        $this->dataset_tab_group_name = 'visualbudget_tab_datasets';
+        $this->upload_field_name = 'upload';
+        $this->url_field_name = 'url';
     }
 
     /**
@@ -75,24 +72,33 @@ class VisualBudget_Admin_Settings {
         // And add a new setting section for the uploader
         add_settings_section(
             'visualbudget_upload',                // section ID
-            'Upload a new dataset',               // section title
+            '',                                   // section title
             '',                                   // callback
-            'visualbudget_tab_datasets'           // page
+            $this->dataset_tab_group_name         // page
         );
 
         // Add the contact email setting
         add_settings_field(
-            'upload',
+            $this->upload_field_name,
             'Upload new dataset',
             array( $this, 'upload_callback' ),
-            'visualbudget_tab_datasets',
+            $this->dataset_tab_group_name,
+            'visualbudget_upload'
+        );
+
+        // Add the contact email setting
+        add_settings_field(
+            $this->url_field_name,
+            'Add dataset from URL',
+            array( $this, 'url_callback' ),
+            $this->dataset_tab_group_name,
             'visualbudget_upload'
         );
 
         // Now register the settings
         register_setting(
-            'visualbudget_tab_datasets',          // option group
-            'visualbudget_tab_datasets',          // option name
+            $this->dataset_tab_group_name,        // option group
+            $this->dataset_tab_group_name,        // option name
             array( $this, 'sanitize' )            // sanitize
         );
     }
@@ -113,6 +119,14 @@ class VisualBudget_Admin_Settings {
         // so we intercept them in the admin and upload them ourselves locally.
         if( isset( $input['upload'] ) ) {
             // Do nothing.
+        }
+
+        // We won't save this URL forever, but we will keep it saved until
+        // the dataset is retrieved, validated, & saved locally. This way we
+        // know the last URL fetched, which is useful e.g. for displaying
+        // retrieval errors.
+        if( isset( $input['url'] ) ) {
+            $new_input['url'] = esc_url_raw( $input['url'] );
         }
 
         return $new_input;
@@ -136,19 +150,32 @@ class VisualBudget_Admin_Settings {
 
     // Callback for the uploader
     public function upload_callback() {
-        printf( '<input name="visualbudget_tab_datasets[upload]" id="upload" type="file" />' );
+        printf( '<input name="%s[upload]" id="upload" type="file" />',
+                $this->dataset_tab_group_name );
+    }
+
+    // Callback for the uploader
+    public function url_callback() {
+        printf( '<input type="text" size="55" id="url" name="%s[url]" value="" />',
+                $this->dataset_tab_group_name );
     }
 
     // Get function for the upload settings group name.
     // The admin class uses this.
-    public function get_upload_group_name() {
-        return $this->upload_group_name;
+    public function get_dataset_tab_group_name() {
+        return $this->dataset_tab_group_name;
     }
 
     // Get function for the upload field names.
     // The admin class uses this.
-    public function get_upload_field_names() {
-        return $this->upload_field_names;
+    public function get_upload_field_name() {
+        return $this->upload_field_name;
+    }
+
+    // Get function for the URL field name.
+    // The admin class uses this.
+    public function get_url_field_name() {
+        return $this->url_field_name;
     }
 
 }

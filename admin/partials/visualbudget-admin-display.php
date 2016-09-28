@@ -1,6 +1,6 @@
 <?php
 /**
- * Provide an admin area view for the plugin.
+ * Inclusion of this file displays= the VB dashboard.
  */
 ?><div class="wrap">
 <h1></span>Visual Budget</h1>
@@ -27,5 +27,4 @@ switch ( $active_tab ) {
         echo "Nothing here yet.";
         break;
 }
-?>
-</div><!-- div.wrap -->
+?></div><!-- div.wrap -->

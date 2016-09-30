@@ -35,25 +35,34 @@ class VisualBudget_Admin_Settings {
         // And add a new setting section for configuration
         add_settings_section(
             'visualbudget_config',                // section ID
-            'Required configuration',             // section title
+            'Configuration options',              // section title
             '',                                   // callback
             'visualbudget_tab_config'             // page
         );
 
         // Add the name setting
         add_settings_field(
-            'org_name',                                      // setting ID
-            'Name of city, town, district, or organization', // setting title
-            array( $this, 'org_name_callback' ),             // callback function
+            'avg_tax_bill',                                  // setting ID
+            'Average tax bill ($)',                          // setting title
+            array( $this, 'avg_tax_bill_callback' ),         // callback function
             'visualbudget_tab_config',                       // page
             'visualbudget_config'                            // settings section
         );
 
-        // Add the contact email setting
+        // Add the default tax year setting
         add_settings_field(
-            'contact_email',
-            'Contact email address',
-            array( $this, 'contact_email_callback' ),
+            'default_tax_year',
+            'Default tax year to display',
+            array( $this, 'default_tax_year_callback' ),
+            'visualbudget_tab_config',
+            'visualbudget_config'
+        );
+
+        // Add the fiscal year start setting
+        add_settings_field(
+            'fiscal_year_start',
+            'Fiscal year start',
+            array( $this, 'fiscal_year_start_callback' ),
             'visualbudget_tab_config',
             'visualbudget_config'
         );
@@ -109,15 +118,27 @@ class VisualBudget_Admin_Settings {
      */
     public function sanitize( $input ) {
         $new_input = array();
-        if( isset( $input['org_name'] ) )
-            $new_input['org_name'] = sanitize_text_field( $input['org_name'] );
+        if ( isset($input['avg_tax_bill']) ) {
+            if ( $input['avg_tax_bill'] != "" ) {
+                $new_input['avg_tax_bill'] = absint($input['avg_tax_bill']);
+            } else {
+                $new_input['avg_tax_bill'] = '';
+            }
+        }
 
-        if( isset( $input['contact_email'] ) )
-            $new_input['contact_email'] = sanitize_text_field( $input['contact_email'] );
+        if( isset($input['default_tax_year']) ) {
+            $new_input['default_tax_year']
+                = sanitize_text_field($input['default_tax_year']);
+        }
+
+        if( isset($input['fiscal_year_start']) ) {
+            $new_input['fiscal_year_start']
+                = sanitize_text_field($input['fiscal_year_start']);
+        }
 
         // We don't want WP to save uploaded files to the database;
         // so we intercept them in the admin and upload them ourselves locally.
-        if( isset( $input['upload'] ) ) {
+        if ( isset($input['upload']) ) {
             // Do nothing.
         }
 
@@ -125,26 +146,69 @@ class VisualBudget_Admin_Settings {
         // the dataset is retrieved, validated, & saved locally. This way we
         // know the last URL fetched, which is useful e.g. for displaying
         // retrieval errors.
-        if( isset( $input['url'] ) ) {
+        if ( isset($input['url']) ) {
             $new_input['url'] = esc_url_raw( $input['url'] );
         }
 
         return $new_input;
     }
 
-    // Callback for the organization name setting
-    public function org_name_callback() {
+    // Callback for the average tax bill setting
+    public function avg_tax_bill_callback() {
         printf(
-            '<input type="text" size="35" id="org_name" name="visualbudget_tab_config[org_name]" value="%s" />',
-            isset( $this->options['org_name'] ) ? esc_attr( $this->options['org_name']) : ''
+            '<input type="text" size="35" id="avg_tax_bill" name="visualbudget_tab_config[avg_tax_bill]" value="%s" />',
+            isset( $this->options['avg_tax_bill'] ) ? esc_attr( $this->options['avg_tax_bill']) : ''
         );
     }
 
-    // Callback for the contact email setting
-    public function contact_email_callback() {
+    // Callback for the default tax year setting
+    public function default_tax_year_callback() {
+        $options = array(
+            'current' => 'current year',
+            'next' => 'next year'
+            );
+
+        $options_string = '';
+
+        foreach($options as $name=>$display_name) {
+            $selected = '';
+            if ( $this->options['default_tax_year'] == $name ) {
+                $selected = ' selected';
+            }
+            $options_string .= sprintf('<option value="%s"%s>%s</option>',
+                                        $name, $selected, $display_name);
+        }
+
         printf(
-            '<input type="text" size="35" id="contact_email" name="visualbudget_tab_config[contact_email]" value="%s" />',
-            isset( $this->options['contact_email'] ) ? esc_attr( $this->options['contact_email']) : ''
+            '<select name="visualbudget_tab_config[default_tax_year]" id="default_tax_year">'
+                . $options_string
+                . '</select>'
+        );
+    }
+
+    // Callback for the fiscal year start setting
+    public function fiscal_year_start_callback() {
+        $options = array(
+            'jan' => '1 Jan',
+            'jul' => '1 July',
+            'oct' => '1 October'
+            );
+
+        $options_string = '';
+
+        foreach($options as $name=>$display_name) {
+            $selected = '';
+            if ( $this->options['fiscal_year_start'] == $name ) {
+                $selected = ' selected';
+            }
+            $options_string .= sprintf('<option value="%s"%s>%s</option>',
+                                        $name, $selected, $display_name);
+        }
+
+        printf(
+            '<select name="visualbudget_tab_config[fiscal_year_start]" id="fiscal_year_start">'
+                . $options_string
+                . '</select>'
         );
     }
 

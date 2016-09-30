@@ -140,7 +140,7 @@ class VisualBudget_Admin {
                 $properties = Array(
                     "tmp_name" => $_FILES[$group]['tmp_name'][$upload_input],
                     "uploaded_name" => $_FILES[$group]['name'][$upload_input],
-                    "uploaded_size" => $$_FILES[$group]['size'][$upload_input],
+                    "uploaded_size" => $_FILES[$group]['size'][$upload_input],
                     "uploaded_type" => $_FILES[$group]['type'][$upload_input]
                     );
                 array_unshift($props_array, $properties);

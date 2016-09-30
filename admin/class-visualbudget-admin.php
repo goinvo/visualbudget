@@ -148,6 +148,10 @@ class VisualBudget_Admin {
         }
 
         // Now check for datasets added by URL.
+        // We do this simply by checking the $_POST variable. The URL
+        // will also be automatically saved to WordPress's database,
+        // but (1) that hasn't been updated at this point in the code,
+        // and (2) it is unnecessary.
         if ( !empty($_POST[$group][$url_input]) ) {
             $properties = array('url' => $_POST[$group][$url_input]);
             array_unshift($props_array, $properties);

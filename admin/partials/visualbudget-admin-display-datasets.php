@@ -16,7 +16,6 @@ submit_button('Add new dataset');
 </form>
 <h2>My datasets</h2>
 <div class='bootstrap-wrapper'><!-- Bootstrap styles work inside this div -->
-<p class='alert alert-danger'><em>Caveat emptor &mdash;</em> datasets are not yet validated upon upload.</p>
 <?php
 
 // Get all the existing datasets.

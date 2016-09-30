@@ -68,9 +68,17 @@ class VisualBudget_Dataset {
      * making sure it is a valid instance of that filetype, and then converting
      * to JSON.
      *
+     * Any warnings or error that occur are added to the notifications object
+     * which is passed in. Objects are passed by reference in PHP, so if we
+     * add them here they will stay where they need to be.
+     *
      * FIXME: Data is not currently validated according to our spec.
      */
-    public function validate() {
+    public function validate($notifier) {
+
+        // The methods in VisualBudget_Validator are all static,
+        // but we can create an object anyway.
+        $v = new VisualBudget_Validator();
 
         if ( isset($this->original_blob) ) {
 
@@ -471,6 +479,10 @@ class VisualBudget_Dataset {
     // Get the properties of the dataset
     public function get_properties() {
         return $this->properties;
+    }
+
+    public function get_notifications() {
+        return $this->notifications;
     }
 
 }

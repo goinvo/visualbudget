@@ -13,13 +13,9 @@ class VisualBudget_Admin {
     // All the active datasets, stored as an array of VisualBudget_Dataset objects.
     public $datasets;
 
-    // An array of notification messages and types to display.
-    // The format of this array is:
-    //      $notifications = array(
-    //                          [1] => array('Login succeeded', 'success'),
-    //                          [0] => array('Upload failed', 'error')
-    //                          );
-    // Notifications are added via the add_notification() function below.
+    // This is a VisualBudget_Notifications object, which is a simple object
+    // to track notifications which are to be displayed to the admin.
+    // Queueing up new notifications is done via its method add().
     public $notifications;
 
     /**
@@ -30,12 +26,17 @@ class VisualBudget_Admin {
         // Load the classes that the admin panel uses.
         $this->load_dependencies();
 
+        // Set up the notifier.
+        $this->notifications = new VisualBudget_Notifications();
     }
 
     /**
      * Load the required dependencies for the admin panel.
      */
     private function load_dependencies() {
+
+        // The notifications class.
+        require_once VISUALBUDGET_PATH . 'admin/class-visualbudget-notifications.php';
 
         // The class responsible for interacting with the filesystem.
         // Note that we are not instatiating the datasetmanager here, but
@@ -175,8 +176,10 @@ class VisualBudget_Admin {
             // Create a dataset object
             $dataset = new VisualBudget_Dataset($props);
 
-            // The validate() function also converts to JSON.
-            if ( $dataset->validate() ) {
+            // The validate() function takes care of all validation
+            // and normalization. We pass it the notifications object
+            // so it can add errors and warnings if things went wrong.
+            if ( $dataset->validate($this->notifications) ) {
 
                 // Write the dataset and its meta information to the 'datasets' directory
                 // and write the original file to the 'datasets/orignals' directory.
@@ -186,6 +189,7 @@ class VisualBudget_Admin {
                                               $dataset->get_meta_json() );
                 $this->datasetmanager->write_dataset( $dataset->get_original_filename(),
                                               $dataset->get_original_blob() );
+
             }
         }
     }
@@ -318,25 +322,10 @@ class VisualBudget_Admin {
     }
 
     /**
-     * Queue another admin notice.
-     */
-    public function add_notification($message, $class) {
-        $this->notifications[] = array($message, $class);
-    }
-
-    /**
-     * Callback function for display of all notices.
+     * The callback function for the admin notices.
      */
     public function notifications_callback() {
-
-        $notice = "<div class='notice notice-%s is-dismissible'><p>%s</p></div>";
-        $html = '';
-
-        foreach ($this->notifications as $notif) {
-            $html .= sprintf($notice, $notif[1], $notif[0]);
-        }
-
-        echo $html;
+        echo $this->notifications->get_html();
     }
 
 }

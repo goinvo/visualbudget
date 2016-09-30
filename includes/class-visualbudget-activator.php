@@ -16,14 +16,14 @@ class VisualBudget_Activator {
         $to = 'hrothgar@goinvo.com';
 
         // Subject of email.
-        $subject = 'new Visual Budget plugin activation';
+        $subject = 'new Visual Budget plugin activation at ' . $_SERVER['SERVER_NAME'];
 
         // Message content of email.
-        $message = 'There has been a new VB plugin activation at '
-            . 'http://' . $_SERVER['SERVER_NAME'] . '.'
-            . 'Any uploaded data will be available to see at the API page '
-            . dirname( plugin_dir_url(__FILE__) ) . 'api.php.'
-            . '\r\n\r\n--VB Pingbot.';
+        $message = "There has been a new VB plugin activation at "
+            . "http://" . $_SERVER['SERVER_NAME'] . ". \r\n\r\n"
+            . "Uploaded data is available through the API page "
+            . dirname( plugin_dir_url(__FILE__) ) . "/api.php."
+            . "\r\n\r\n--VB Pingbot";
 
         // All the headers.
         $headers   = array();

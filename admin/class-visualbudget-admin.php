@@ -148,17 +148,12 @@ class VisualBudget_Admin {
         }
 
         // Now check for datasets added by URL.
-        // FIXME: isset($_FILES[$group]) is a hack to determine whether
-        //        the upload/URL form was just submitted. This could be
-        //        avoided if there were a way to update VB settings from
-        //        right here, so we could simply unset the URL setting,
-        //        but I don't know how to do that. Otherwise, the URL gets
-        //        uploaded everytime someone visits the VB dashboard.
-        // FIXME UPDATE: The dataset actually ends up getting uploaded
-        //        *twice* for some reason. Will investigate.
-        $options = get_option('visualbudget_tab_datasets');
-        if ( isset($_FILES[$group]) && !empty($options[$url_input]) ) {
-            $properties = array('url' => $options[$url_input]);
+        // We do this simply by checking the $_POST variable. The URL
+        // will also be automatically saved to WordPress's database,
+        // but (1) that hasn't been updated at this point in the code,
+        // and (2) it is unnecessary.
+        if ( !empty($_POST[$group][$url_input]) ) {
+            $properties = array('url' => $_POST[$group][$url_input]);
             array_unshift($props_array, $properties);
         }
 

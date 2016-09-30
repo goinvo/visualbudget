@@ -37,7 +37,7 @@ class VisualBudget_Validator {
                     // For CSV there is nothing to be validated, really.
                     // Just explode it by linebreaks and commas.
                     case "csv":
-                        $string_or_array = array_map("str_getcsv", explode("\n", $csv));
+                        $string_or_array = array_map("str_getcsv", explode("\n", $string_or_array));
                         break;
 
                     // We must check to see if the JSON is valid, however.

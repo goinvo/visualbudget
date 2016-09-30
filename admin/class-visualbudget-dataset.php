@@ -83,11 +83,19 @@ class VisualBudget_Dataset {
         if ( isset($this->original_blob) ) {
 
             // FIXME: For now we assume the file is CSV.
-            $csv = $this->original_blob;
-            $this->data = array_map("str_getcsv", explode("\n", $csv));
+            $filetype = 'csvd';
+            $data_string = $this->original_blob;
+            $result = $v->validate($data_string, $filetype);
 
-            // Everything worked, so set the meta properties.
-            $this->set_meta_properties();
+            // If what we get back is an error, then add a new
+            // notice to the admin to explain what went wrong.
+            if (is_a($result, 'Error')) {
+                $notifier->add($result->getMessage(), 'error');
+            } else {
+                // It worked so store the data and set meta properties.
+                $this->data = $result;
+                $this->set_meta_properties();
+            }
 
         } else if ( isset($this->data) ) {
             // This has been a validation of an existing dataset.

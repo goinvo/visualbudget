@@ -17,7 +17,9 @@ class VisualBudget_Validator {
     }
 
     /**
-     * Validate a
+     * Validate a dataset. Input can be either (1) a string and corresponding
+     * filetype, or (2) a php array. This function returns a PHP array of
+     * validated & normalized data on success, or an error on failure.
      */
     public static function validate($string_or_array, $filetype=null) {
 
@@ -62,7 +64,9 @@ class VisualBudget_Validator {
 
     /**
      * Sanitize incoming data. The sanitization process includes:
-     *      - removing unallowed characters
+     *      - padding the array to make it rectangular
+     *      - removing empty rows and columns
+     *      - removing unallowed characters from header and level fields
      *      - making the headers all uppercase
      *      - inferring level fields
      *

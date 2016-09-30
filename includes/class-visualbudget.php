@@ -125,6 +125,9 @@ class VisualBudget {
         // Set up the dashboard.
         $this->loader->add_action( 'admin_init', $plugin_admin, 'visualbudget_dashboard_init' );
         $this->loader->add_action( 'admin_menu', $plugin_admin, 'visualbudget_add_dashboard_sidelink' );
+
+        // Display all the notices.
+        $this->loader->add_action( 'admin_notices', $plugin_admin, 'notifications_callback' );
     }
 
     /**

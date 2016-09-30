@@ -19,7 +19,7 @@ class VisualBudget_Validator {
     /**
      * Validate a dataset. Input can be either (1) a string and corresponding
      * filetype, or (2) a php array. This function returns a PHP array of
-     * validated & normalized data on success, or an error on failure.
+     * validated & normalized data on success, or an error object on failure.
      */
     public static function validate($string_or_array, $filetype=null) {
 
@@ -46,12 +46,14 @@ class VisualBudget_Validator {
                         if (is_array($result)) {
                             $string_or_array = $result;
                         } else {
-                            // FIXME: The string is not valid JSON.
+                            // Throw an error; the file apparently isn't valid JSON.
+                            return new Error("The file is not valid JSON.");
                         }
                         break;
 
                     default:
-                        // FIXME: Error, unrecognized filetype.
+                        // Error, unrecognized filetype.
+                        return new Error("Unrecognized filetype " . $strtolower($filetype));
                 }
             }
         }
@@ -60,6 +62,7 @@ class VisualBudget_Validator {
         // array of data. We proceed to check that array against the VB
         // data specification.
         $data_array = $string_or_array;
+        return $data_array;
     }
 
     /**

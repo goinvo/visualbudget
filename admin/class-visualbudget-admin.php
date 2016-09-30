@@ -13,6 +13,15 @@ class VisualBudget_Admin {
     // All the active datasets, stored as an array of VisualBudget_Dataset objects.
     public $datasets;
 
+    // An array of notification messages and types to display.
+    // The format of this array is:
+    //      $notifications = array(
+    //                          [1] => array('Login succeeded', 'success'),
+    //                          [0] => array('Upload failed', 'error')
+    //                          );
+    // Notifications are added via the add_notification() function below.
+    public $notifications;
+
     /**
      * Initialize the class and set its properties.
      */
@@ -34,8 +43,11 @@ class VisualBudget_Admin {
         // after the credentials are obtained.
         require_once VISUALBUDGET_PATH . 'admin/class-visualbudget-datasetmanager.php';
 
-        // Each dataset is represented as an object of the Dataset class.
+        // Each dataset is represented as an object of the dataset class.
         require_once VISUALBUDGET_PATH . 'admin/class-visualbudget-dataset.php';
+
+        // The validator class hold a bunch of static methods for validating data.
+        require_once VISUALBUDGET_PATH . 'admin/class-visualbudget-validator.php';
 
         // The class which handles all the settings of VB.
         require_once VISUALBUDGET_PATH . 'admin/class-visualbudget-admin-settings.php';
@@ -303,6 +315,28 @@ class VisualBudget_Admin {
 
         // Add the VB admin JS file
         wp_enqueue_script( 'visualbudget_js', plugin_dir_url( __FILE__ ) . 'js/visualbudget-admin.js', array( 'jquery' ), VISUALBUDGET_VERSION, false );
+    }
+
+    /**
+     * Queue another admin notice.
+     */
+    public function add_notification($message, $class) {
+        $this->notifications[] = array($message, $class);
+    }
+
+    /**
+     * Callback function for display of all notices.
+     */
+    public function notifications_callback() {
+
+        $notice = "<div class='notice notice-%s is-dismissible'><p>%s</p></div>";
+        $html = '';
+
+        foreach ($this->notifications as $notif) {
+            $html .= sprintf($notice, $notif[1], $notif[0]);
+        }
+
+        echo $html;
     }
 
 }

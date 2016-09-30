@@ -61,7 +61,6 @@ class VisualBudget_Dataset {
         else if ( isset($this->properties['url']) ) {
             $this->from_url();
         }
-
     }
 
     /**

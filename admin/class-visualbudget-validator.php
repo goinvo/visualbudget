@@ -42,7 +42,7 @@ class VisualBudget_Validator {
 
                     // We must check to see if the JSON is valid, however.
                     case "json":
-                        $result = json_decode($string, true);
+                        $result = json_decode($string_or_array, false);
                         if (is_array($result)) {
                             $string_or_array = $result;
                         } else {
@@ -63,6 +63,10 @@ class VisualBudget_Validator {
         // array of data. We proceed to check that array against the VB
         // data specification.
         $data_array = $string_or_array;
+
+        // Sanitize the new data.
+        $data_array = VisualBudget_Validator::sanitize_data($data_array);
+
         return $data_array;
     }
 
@@ -71,19 +75,43 @@ class VisualBudget_Validator {
      *      - padding the array to make it rectangular
      *      - removing empty rows and columns
      *      - removing unallowed characters from header and level fields
-     *      - making the headers all uppercase
+     *        (that is, slugifying them)
      *      - inferring level fields
+     *      - converting everything in timepoint columns to numbers
+     *        rather than strings
      *
      * The function returns a sanitized version of the data.
      */
     public static function sanitize_data($data_array) {
+        // $data_array = VisualBudget_Validator::pad_to_rectangle($data_array);
+        // $data_array = VisualBudget_Validator::remove_empty_rows($data_array);
+        // $data_array = VisualBudget_Validator::remove_empty_cols($data_array);
+        // $data_array = VisualBudget_Validator::slugify_headers($data_array);
+        // $data_array = VisualBudget_Validator::slugify_levels($data_array);
+        // $data_array = VisualBudget_Validator::infer_level_fields($data_array);
+
         return $data_array;
+    }
+
+    /**
+     * Transpose a two-dimensional array.
+     * This function taken from
+     * http://stackoverflow.com/a/3423692/1516307
+     */
+    function transpose($array) {
+        array_unshift($array, null);
+        return call_user_func_array('array_map', $array);
     }
 
     /**
      * Check to see whether a PHP is valid budget data according
      * to the VB spec. Returns true on success and an appropriate
      * error on failure.
+     *
+     * In particular, this function checks that:
+     *      - There is at least one LEVEL column
+     *      - There is at least one timepoint column
+     *      - There are at least two rows (header + line item)
      */
     public static function is_valid_vb_spec($data_array) {
         return true;

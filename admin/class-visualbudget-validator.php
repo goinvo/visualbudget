@@ -11,9 +11,15 @@
 class VisualBudget_Validator {
 
     /**
-     * These are all static methods. There is nothing to construct.
+     * This is a reference to the admin's notifier object.
      */
-    public function __construct() {
+    private $notifier;
+
+    /**
+     * The notifier is the only reason these methods are not all static.
+     */
+    public function __construct($notifier) {
+        $this->notifier = $notifier;
     }
 
     /**
@@ -21,14 +27,22 @@ class VisualBudget_Validator {
      * filetype, or (2) a php array. This function returns a PHP array of
      * validated & normalized data on success, or an error object on failure.
      */
-    public static function validate($string_or_array, $filetype=null) {
+    public function validate($string_or_array, $filetype=null) {
 
         // The first argument is either a string or an array.
         if (is_string($string_or_array)) {
+
             // If it's a string, we must know the filetype.
             if (empty($filetype)) {
-                // FIXME: The filetype must be specified if a string is passed.
+
+                // The uploaded file has no file extension. Let the user know
+                // that that is most definitely not kosher, not kosher at all.
+                $this->notifier->add('Uploaded file must have a file extension. '
+                                . 'Accepted filetypes are CSV and JSON.', 'error');
+                return 0;
+
             } else {
+
                 // We have a string and a filetype, so let's make sure it's
                 // well-formed of that filetype and then convert it to a
                 // PHP array.
@@ -46,15 +60,18 @@ class VisualBudget_Validator {
                         if (is_array($result)) {
                             $string_or_array = $result;
                         } else {
-                            // Throw an error; the file apparently isn't valid JSON.
-                            return new Error("The file is not valid JSON.");
+                            // The file apparently isn't valid JSON.
+                            $this->notifier->add('The file is not valid JSON.', 'error');
+                            return 0;
                         }
                         break;
 
                     default:
-                        // Error, unrecognized filetype.
-                        return new Error('Unrecognized filetype "'
-                                            . strtolower($filetype) . '".');
+                        // Unrecognized filetype.
+                        $this->notifier->add('Unrecognized filetype "'
+                                    . strtolower($filetype) . '". Data files must be'
+                                    . ' either CSV or JSON.', 'error');
+                        return 0;
                 }
             }
         }
@@ -65,11 +82,13 @@ class VisualBudget_Validator {
         $data_array = $string_or_array;
 
         // Sanitize the new data.
-        $data_array = self::sanitize_data($data_array);
+        $data_array = $this->sanitize_data($data_array);
 
         // Check to see that the data is valid according to our spec.
-        if ( ! self::is_valid_vb_spec($data_array) ) {
-            return new Error('Data is not valid VB budget data.');
+        if ( ! $this->is_valid_vb_spec($data_array) ) {
+            $this->notifier->add('The data uploaded is not valid according to '
+                            . 'the Visual Budget specification.', 'error');
+            return 0;
         }
 
         return $data_array;
@@ -87,7 +106,7 @@ class VisualBudget_Validator {
      *
      * The function returns a sanitized version of the data.
      */
-    public static function sanitize_data($data_array) {
+    public function sanitize_data($data_array) {
         // This sequence of events is pretty self-explanatory.
         $data_array = self::pad_to_rectangle($data_array);
         $data_array = self::trim_all_elements($data_array);
@@ -229,7 +248,7 @@ function transposeData($data)
      *      - There is at least one timepoint column
      *      - There are at least two rows (header + line item)
      */
-    public static function is_valid_vb_spec($data_array) {
+    public function is_valid_vb_spec($data_array) {
         return true;
     }
 

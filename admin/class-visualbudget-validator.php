@@ -83,12 +83,12 @@ class VisualBudget_Validator {
      * The function returns a sanitized version of the data.
      */
     public static function sanitize_data($data_array) {
-        $data_array = VisualBudget_Validator::pad_to_rectangle($data_array);
-        $data_array = VisualBudget_Validator::remove_empty_rows($data_array);
-        $data_array = VisualBudget_Validator::remove_empty_cols($data_array);
-        // $data_array = VisualBudget_Validator::slugify_headers($data_array);
-        // $data_array = VisualBudget_Validator::slugify_levels($data_array);
-        // $data_array = VisualBudget_Validator::infer_level_fields($data_array);
+        $data_array = self::pad_to_rectangle($data_array);
+        $data_array = self::remove_empty_rows($data_array);
+        $data_array = self::remove_empty_cols($data_array);
+        $data_array = self::slugify_headers($data_array);
+        // $data_array = self::slugify_levels($data_array);
+        // $data_array = self::infer_level_fields($data_array);
 
         return $data_array;
     }
@@ -135,7 +135,7 @@ class VisualBudget_Validator {
      */
     public static function remove_empty_cols($array) {
         // Just transpose and remove rows, then re-transpose.
-        return transpose(remove_empty_rows(transpose($array)));
+        return self::transpose(self::remove_empty_rows(self::transpose($array)));
     }
 
     /**
@@ -146,6 +146,44 @@ class VisualBudget_Validator {
     public static function transpose($array) {
         array_unshift($array, null);
         return call_user_func_array('array_map', $array);
+    }
+
+    /**
+     * Returns an array where the elements of the first row
+     * have been slugified (meaning they have been lowercased,
+     * have had spaces converted to underscores, and have had
+     * dangerous characters removed).
+     */
+    public static function slugify_headers($array) {
+        // Loop through and slugify each element of the first row of $array.
+        for ($i=0; $i<count($array[0]); $i++) {
+            $array[0][$i] = self::slugify($array[0][$i]);
+        }
+        return $array;
+    }
+
+
+    /**
+     * This function is based on code posted at
+     * http://stackoverflow.com/a/2955878/1516307
+     */
+    public static function slugify($text) {
+      // replace non letter or digits by underscores
+      $text = preg_replace('~[^\pL\d]+~u', '_', $text);
+      // transliterate
+      $text = iconv('utf-8', 'us-ascii//TRANSLIT', $text);
+      // remove unwanted characters
+      $text = preg_replace('~[^_\w]+~', '', $text);
+      // trim
+      $text = trim($text, '_');
+      // remove duplicate underscores
+      $text = preg_replace('~_+~', '_', $text);
+      // lowercase
+      $text = strtolower($text);
+      if (empty($text)) {
+        return 'empty_field_name';
+      }
+      return $text;
     }
 
     /**

@@ -110,7 +110,21 @@ class VisualBudget_Validator {
         return $array;
     }
 
+    /**
+     * Given an array, returns a new array where all empty rows have
+     * been eliminated.
+     * @param  array  $array  An array requiring empty-row removal.
+     */
+    public static function remove_empty_rows($array) {
+        $array = array_filter($array, function($a){
+                        // Note that with the following text, a row of all zeros
+                        // will be considered empty as well. That is fine for
+                        // our purposes.
+                        return !empty(array_sum($a));
+                    });
 
+        return $array;
+    }
 
     /**
      * Transpose a two-dimensional array.

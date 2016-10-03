@@ -84,8 +84,8 @@ class VisualBudget_Validator {
      */
     public static function sanitize_data($data_array) {
         $data_array = VisualBudget_Validator::pad_to_rectangle($data_array);
-        // $data_array = VisualBudget_Validator::remove_empty_rows($data_array);
-        // $data_array = VisualBudget_Validator::remove_empty_cols($data_array);
+        $data_array = VisualBudget_Validator::remove_empty_rows($data_array);
+        $data_array = VisualBudget_Validator::remove_empty_cols($data_array);
         // $data_array = VisualBudget_Validator::slugify_headers($data_array);
         // $data_array = VisualBudget_Validator::slugify_levels($data_array);
         // $data_array = VisualBudget_Validator::infer_level_fields($data_array);
@@ -124,6 +124,18 @@ class VisualBudget_Validator {
                     });
 
         return $array;
+    }
+
+    /**
+     * Given an array, returns a new array where all empty columns have
+     * been eliminated. Note that this function gives unpredictable
+     * results if the input is not a square 2-dimensional array.
+     *
+     * @param  array  $array  An array requiring empty-column removal.
+     */
+    public static function remove_empty_cols($array) {
+        // Just transpose and remove rows, then re-transpose.
+        return transpose(remove_empty_rows(transpose($array)));
     }
 
     /**

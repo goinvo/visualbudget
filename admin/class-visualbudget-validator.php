@@ -83,10 +83,12 @@ class VisualBudget_Validator {
      * The function returns a sanitized version of the data.
      */
     public static function sanitize_data($data_array) {
+        // This sequence of events is pretty self-explanatory.
         $data_array = self::pad_to_rectangle($data_array);
+        $data_array = self::trim_all_elements($data_array);
         $data_array = self::remove_empty_rows($data_array);
         $data_array = self::remove_empty_cols($data_array);
-        $data_array = self::slugify_headers($data_array);
+        $data_array = self::slugify_headers($data_array, 1);
         // $data_array = self::slugify_levels($data_array);
         // $data_array = self::infer_level_fields($data_array);
 
@@ -108,6 +110,14 @@ class VisualBudget_Validator {
             $array[$i] = array_pad($row, $max_length, $val);
         }
         return $array;
+    }
+
+    /**
+     * Trim whitespace from all elements in a two-dimensional array.
+     */
+    public static function trim_all_elements($array) {
+        $trimmed = array_map(function($a) { return array_map('trim', $a); }, $array);
+        return $trimmed;
     }
 
     /**
@@ -166,24 +176,32 @@ class VisualBudget_Validator {
     /**
      * This function is based on code posted at
      * http://stackoverflow.com/a/2955878/1516307
+     *
+     * @param  int  $case  If $case > 0, text will be capitalized.
+     *                     If $case < 0, text will be lowercased.
+     *                     If $case == 0, case is left alone.
      */
-    public static function slugify($text) {
-      // replace non letter or digits by underscores
-      $text = preg_replace('~[^\pL\d]+~u', '_', $text);
-      // transliterate
-      $text = iconv('utf-8', 'us-ascii//TRANSLIT', $text);
-      // remove unwanted characters
-      $text = preg_replace('~[^_\w]+~', '', $text);
-      // trim
-      $text = trim($text, '_');
-      // remove duplicate underscores
-      $text = preg_replace('~_+~', '_', $text);
-      // lowercase
-      $text = strtolower($text);
-      if (empty($text)) {
-        return 'empty_field_name';
-      }
-      return $text;
+    public static function slugify($text, $case=1) {
+        // replace non letter or digits by underscores
+        $text = preg_replace('~[^\pL\d]+~u', '_', $text);
+        // transliterate
+        $text = iconv('utf-8', 'us-ascii//TRANSLIT', $text);
+        // remove unwanted characters
+        $text = preg_replace('~[^_\w]+~', '', $text);
+        // trim
+        $text = trim($text, '_');
+        // remove duplicate underscores
+        $text = preg_replace('~_+~', '_', $text);
+        // lowercase
+        if ($case > 0) {
+          $text = strtoupper($text);
+        } elseif ($case < 0) {
+          $text = strtolower($text);
+        }
+        if (empty($text)) {
+          return 'empty_field_name';
+        }
+        return $text;
     }
 
     /**

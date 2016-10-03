@@ -65,7 +65,12 @@ class VisualBudget_Validator {
         $data_array = $string_or_array;
 
         // Sanitize the new data.
-        $data_array = VisualBudget_Validator::sanitize_data($data_array);
+        $data_array = self::sanitize_data($data_array);
+
+        // Check to see that the data is valid according to our spec.
+        if ( ! self::is_valid_vb_spec($data_array) ) {
+            return new Error('Data is not valid VB budget data.');
+        }
 
         return $data_array;
     }
@@ -89,7 +94,7 @@ class VisualBudget_Validator {
         $data_array = self::remove_empty_rows($data_array);
         $data_array = self::remove_empty_cols($data_array);
         $data_array = self::slugify_headers($data_array, 1);
-        // $data_array = self::slugify_levels($data_array);
+        // $data_array = self::slugify_levels($data_array, 0);
         // $data_array = self::infer_level_fields($data_array);
 
         return $data_array;

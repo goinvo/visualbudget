@@ -199,9 +199,18 @@ function transposeData($data)
      * dangerous characters removed).
      */
     public static function slugify_headers($array) {
+        // A counter for empty field names. If any nonempty column doesn't
+        // have a header, we will call it UNKNOWN_FIELD_N.
+        $empty_counter = 0;
+
         // Loop through and slugify each element of the first row of $array.
         for ($i=0; $i<count($array[0]); $i++) {
-            $array[0][$i] = self::slugify($array[0][$i]);
+            $slug = self::slugify($array[0][$i]);
+            if (empty($slug)) {
+                $slug = "UNKNOWN_FIELD_" . $empty_counter;
+                $empty_counter++;
+            }
+            $array[0][$i] = $slug;
         }
         return $array;
     }
@@ -231,9 +240,6 @@ function transposeData($data)
           $text = strtoupper($text);
         } elseif ($case < 0) {
           $text = strtolower($text);
-        }
-        if (empty($text)) {
-          return 'empty_field_name';
         }
         return $text;
     }

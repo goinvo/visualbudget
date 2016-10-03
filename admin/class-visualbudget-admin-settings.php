@@ -120,7 +120,7 @@ class VisualBudget_Admin_Settings {
         $new_input = array();
         if ( isset($input['avg_tax_bill']) ) {
             if ( $input['avg_tax_bill'] != "" ) {
-                $new_input['avg_tax_bill'] = absint($input['avg_tax_bill']);
+                $new_input['avg_tax_bill'] = floatval($input['avg_tax_bill']);
             } else {
                 $new_input['avg_tax_bill'] = '';
             }

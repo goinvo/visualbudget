@@ -83,7 +83,7 @@ class VisualBudget_Validator {
      * The function returns a sanitized version of the data.
      */
     public static function sanitize_data($data_array) {
-        // $data_array = VisualBudget_Validator::pad_to_rectangle($data_array);
+        $data_array = VisualBudget_Validator::pad_to_rectangle($data_array);
         // $data_array = VisualBudget_Validator::remove_empty_rows($data_array);
         // $data_array = VisualBudget_Validator::remove_empty_cols($data_array);
         // $data_array = VisualBudget_Validator::slugify_headers($data_array);
@@ -94,11 +94,30 @@ class VisualBudget_Validator {
     }
 
     /**
+     * Pad an array to rectangle. This function always pads on the right.
+     * @param  array   $array   The array to be padded.
+     * @param  string  $val     The value of newly created array elements.
+     */
+    public static function pad_to_rectangle($array, $val='') {
+        // Note that a 2-dimensional array can only be non-rectangular in
+        // the 2nd dimension (i.e. it can have a ragged side, but not a
+        // ragged top or bottom).
+        $row_lengths = array_map(function($a){return count($a);}, $array);
+        $max_length = max($row_lengths);
+        foreach($array as $i=>$row) {
+            $array[$i] = array_pad($row, $max_length, $val);
+        }
+        return $array;
+    }
+
+
+
+    /**
      * Transpose a two-dimensional array.
      * This function taken from
      * http://stackoverflow.com/a/3423692/1516307
      */
-    function transpose($array) {
+    public static function transpose($array) {
         array_unshift($array, null);
         return call_user_func_array('array_map', $array);
     }

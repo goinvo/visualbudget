@@ -135,7 +135,7 @@ class VisualBudget_Validator {
                         // Note that with the following text, a row of all zeros
                         // will be considered empty as well. That is fine for
                         // our purposes.
-                        return !empty(array_sum($a));
+                        return !empty(array_sum(array_map('boolval', $a)));
                     });
 
         return $array;
@@ -159,10 +159,20 @@ class VisualBudget_Validator {
      * http://stackoverflow.com/a/3423692/1516307
      */
     public static function transpose($array) {
-        array_unshift($array, null);
-        return call_user_func_array('array_map', $array);
+        // array_unshift($array, null);
+        // return call_user_func_array('array_map', $array);
+        return array_map(null, ...$array);
     }
-
+function transposeData($data)
+{
+  $retData = array();
+    foreach ($data as $row => $columns) {
+      foreach ($columns as $row2 => $column2) {
+          $retData[$row2][$row] = $column2;
+      }
+    }
+  return $retData;
+}
     /**
      * Returns an array where the elements of the first row
      * have been slugified (meaning they have been lowercased,

@@ -88,6 +88,7 @@ class VisualBudget_Dataset {
         } else {
             // FIXME: Perhaps this should throw an exception.
             //        However, it should never happen.
+            $notifier->add('Unknown error.', 'error');
             return 0;
         }
     }
@@ -136,8 +137,7 @@ class VisualBudget_Dataset {
     /**
      * Create a dataset from a given URL.
      */
-    public function from_url() {
-        $url = $this->properties['url'];
+    public function from_url($url) {
         $response = wp_remote_request($url);
 
         // Check to see if the request worked.

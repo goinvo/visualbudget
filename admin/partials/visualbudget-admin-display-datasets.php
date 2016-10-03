@@ -1,9 +1,15 @@
 <?php
 /**
  * This file displays the content of the "Datasets" tab in the dashboard.
+ *
+ * Note that the form in this page is not POST'd to options.php but rather
+ * to this page itself. WordPress does funny things when things to go
+ * options.php, and if we did that then the error notices would not
+ * display here.
  */
+
 ?>
-<form method="post" action="options.php" enctype="multipart/form-data">
+<form method="post" action="<?php echo $_SERVER['REQUEST_URI']?>" enctype="multipart/form-data">
 <?php
 // Grab the saved options.
 $this->settings->options = get_option( 'visualbudget_tab_datasets' );
@@ -16,7 +22,6 @@ submit_button('Add new dataset');
 </form>
 <h2>My datasets</h2>
 <div class='bootstrap-wrapper'><!-- Bootstrap styles work inside this div -->
-<p class='alert alert-danger'><em>Caveat emptor &mdash;</em> datasets are not yet validated upon upload.</p>
 <?php
 
 // Get all the existing datasets.

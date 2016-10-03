@@ -39,29 +39,9 @@ class VisualBudget_Dataset {
      *                               If from URL, 'url' should be set.
      *                               If from existing file, 'id' should be set.
      */
-    public function __construct( $properties ) {
+    public function __construct() {
 
-        // Copy over any properties which were passed into construction.
-        $this->properties = $properties;
-
-        // If the dataset has a 'id' property, that means it already exists
-        // in our system and we can construct the object from its file.
-        if ( isset($this->properties['id']) ) {
-            $this->from_file();
-        }
-
-        // If the dataset has a 'tmp_name' property, that mean
-        // it was just uploaded and we can create it that way.
-        else if ( isset($this->properties['tmp_name']) ) {
-            $this->from_upload();
-        }
-
-        // If the dataset has a 'url' property, that means
-        // it is to be created by grabbing the URL contents.
-        else if ( isset($this->properties['url']) ) {
-            $this->from_url();
-        }
-
+        $this->properties = array();
     }
 
     /**
@@ -69,18 +49,38 @@ class VisualBudget_Dataset {
      * making sure it is a valid instance of that filetype, and then converting
      * to JSON.
      *
+     * Any warnings or error that occur are added to the notifications object
+     * which is passed in. Objects are passed by reference in PHP, so if we
+     * add them here they will stay where they need to be.
+     *
      * FIXME: Data is not currently validated according to our spec.
      */
-    public function validate() {
+    public function validate($notifier) {
+
+        // The methods in VisualBudget_Validator are all static,
+        // but we can create an object anyway.
+        $v = new VisualBudget_Validator();
 
         if ( isset($this->original_blob) ) {
 
             // FIXME: For now we assume the file is CSV.
-            $csv = $this->original_blob;
-            $this->data = array_map("str_getcsv", explode("\n", $csv));
+            $filetype = $this->properties['original_extension'];
+            $data_string = $this->original_blob;
+            $result = $v->validate($data_string, $filetype);
 
-            // Everything worked, so set the meta properties.
-            $this->set_meta_properties();
+            // If what we get back is an error, then add a new
+            // notice to the admin to explain what went wrong.
+            if (is_a($result, 'Error')) {
+                // Something went wrong.
+                $notifier->add($result->getMessage(), 'error');
+                return 0;
+
+            } else {
+                // It worked so store the data and set meta properties.
+                $this->data = $result;
+                $this->set_meta_properties();
+                return 1;
+            }
 
         } else if ( isset($this->data) ) {
             // This has been a validation of an existing dataset.
@@ -90,37 +90,43 @@ class VisualBudget_Dataset {
             //        However, it should never happen.
             return 0;
         }
-
-        return 1;
     }
 
     /**
      * Create a dataset from an existing file.
      */
-    public function from_file() {
-        $id = $this->properties['id'];
+    public function from_file($id) {
 
         // FIXME: How to use $wp_filesystem here?
         $meta = file_get_contents(VISUALBUDGET_UPLOAD_PATH . $id . '_meta.json');
         $this->properties = json_decode($meta, true);
 
         // JSON data.
-        $json = file_get_contents($this->get_filepath()); // FIXME: Same.
-        $this->data = json_decode($json);
+        $data_json = file_get_contents($this->get_filepath()); // FIXME: Same.
+        $this->data = json_decode($data_json);
     }
 
     /**
      * Create a dataset from an uploaded file.
      */
-    public function from_upload() {
+    public function from_upload($tmp_name, $uploaded_name) {
 
         // Read the file.
-        $contents = file_get_contents($this->properties['tmp_name']);
+        $contents = file_get_contents($tmp_name);
 
         // Make sure the contents aren't empty.
         if ( !empty($contents) ) {
             // Store the contents.
             $this->original_blob = $contents;
+
+            // Add the uploaded filename to properties.
+            $this->properties['uploaded_name'] = $uploaded_name;
+
+            // And the file extension, used for checking filetype
+            // (MIME type is not always reliable).
+            $pathinfo = pathinfo($this->properties['uploaded_name']);
+            $this->properties['original_extension'] = $pathinfo['extension'];
+
         } else {
             // FIXME: Should this be an error?
             // The file may be empty, or maybe it didn't exist.
@@ -149,8 +155,10 @@ class VisualBudget_Dataset {
                 // Now add the original name of the uploaded file, per the URL.
                 $this->properties['uploaded_name'] = basename($url);
 
-                // FIXME: Maybe we want to look at the content-type?
-                // $response['headers']['content-type']
+                // And the file extension, used for checking filetype
+                // (MIME type is not always reliable).
+                $pathinfo = pathinfo($this->properties['uploaded_name']);
+                $this->properties['original_extension'] = $pathinfo['extension'];
 
             } else {
                 // FIXME: There was an error on the other end.
@@ -472,6 +480,10 @@ class VisualBudget_Dataset {
     // Get the properties of the dataset
     public function get_properties() {
         return $this->properties;
+    }
+
+    public function get_notifications() {
+        return $this->notifications;
     }
 
 }

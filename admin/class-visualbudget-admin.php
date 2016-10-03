@@ -13,6 +13,11 @@ class VisualBudget_Admin {
     // All the active datasets, stored as an array of VisualBudget_Dataset objects.
     public $datasets;
 
+    // This is a VisualBudget_Notifications object, which is a simple object
+    // to track notifications which are to be displayed to the admin.
+    // Queueing up new notifications is done via its method add().
+    public $notifier;
+
     /**
      * Initialize the class and set its properties.
      */
@@ -21,6 +26,8 @@ class VisualBudget_Admin {
         // Load the classes that the admin panel uses.
         $this->load_dependencies();
 
+        // Set up the notifier.
+        $this->notifier = new VisualBudget_Notifications();
     }
 
     /**
@@ -28,14 +35,20 @@ class VisualBudget_Admin {
      */
     private function load_dependencies() {
 
+        // The notifications class.
+        require_once VISUALBUDGET_PATH . 'admin/class-visualbudget-notifications.php';
+
         // The class responsible for interacting with the filesystem.
         // Note that we are not instatiating the datasetmanager here, but
         // do so rather in the function setup_dataset_manager(),
         // after the credentials are obtained.
         require_once VISUALBUDGET_PATH . 'admin/class-visualbudget-datasetmanager.php';
 
-        // Each dataset is represented as an object of the Dataset class.
+        // Each dataset is represented as an object of the dataset class.
         require_once VISUALBUDGET_PATH . 'admin/class-visualbudget-dataset.php';
+
+        // The validator class hold a bunch of static methods for validating data.
+        require_once VISUALBUDGET_PATH . 'admin/class-visualbudget-validator.php';
 
         // The class which handles all the settings of VB.
         require_once VISUALBUDGET_PATH . 'admin/class-visualbudget-admin-settings.php';
@@ -127,44 +140,39 @@ class VisualBudget_Admin {
         $upload_input = $this->settings->get_upload_field_name();
         $url_input = $this->settings->get_url_field_name();
 
-        // This array will have one set of properties for each dataset
-        // to be added, maxiumum two: one for uploaded, one for URL.
-        $props_array = array();
+        // This array will have up to two dataset objects to be added:
+        // one uploaded, one from URL.
+        $datasets = array();
 
         // First check for uploaded files.
         if ( isset($_FILES[$group]) ) {
             if ( $_FILES[$group]['error'][$upload_input] != 0 ) {
                 // FIXME: There was an error upon upload.
             } else {
-                // Things are fine, so grab info about the uploaded file.
-                $properties = Array(
-                    "tmp_name" => $_FILES[$group]['tmp_name'][$upload_input],
-                    "uploaded_name" => $_FILES[$group]['name'][$upload_input],
-                    "uploaded_size" => $$_FILES[$group]['size'][$upload_input],
-                    "uploaded_type" => $_FILES[$group]['type'][$upload_input]
-                    );
-                array_unshift($props_array, $properties);
+                // Things are fine, so append the new dataset to our array.
+                $tmp_name = $_FILES[$group]['tmp_name'][$upload_input];
+                $uploaded_name = $_FILES[$group]['name'][$upload_input];
+                $dataset = new VisualBudget_Dataset();
+                $dataset->from_upload($tmp_name, $uploaded_name);
+                array_unshift($datasets, $dataset);
             }
         }
 
         // Now check for datasets added by URL.
-        // We do this simply by checking the $_POST variable. The URL
-        // will also be automatically saved to WordPress's database,
-        // but (1) that hasn't been updated at this point in the code,
-        // and (2) it is unnecessary.
+        // We do this simply by checking the $_POST variable.
         if ( !empty($_POST[$group][$url_input]) ) {
-            $properties = array('url' => $_POST[$group][$url_input]);
-            array_unshift($props_array, $properties);
+            $dataset = new VisualBudget_Dataset();
+            $dataset->from_url($_POST[$group][$url_input]);
+            array_unshift($datasets, $dataset);
         }
 
         // Try to upload each file.
-        foreach($props_array as $props) {
+        foreach($datasets as $dataset) {
 
-            // Create a dataset object
-            $dataset = new VisualBudget_Dataset($props);
-
-            // The validate() function also converts to JSON.
-            if ( $dataset->validate() ) {
+            // The validate() function takes care of all validation
+            // and normalization. We pass it the notifications object
+            // so it can add errors and warnings if things went wrong.
+            if ( $dataset->validate($this->notifier) ) {
 
                 // Write the dataset and its meta information to the 'datasets' directory
                 // and write the original file to the 'datasets/orignals' directory.
@@ -174,6 +182,7 @@ class VisualBudget_Admin {
                                               $dataset->get_meta_json() );
                 $this->datasetmanager->write_dataset( $dataset->get_original_filename(),
                                               $dataset->get_original_blob() );
+
             }
         }
     }
@@ -244,8 +253,8 @@ class VisualBudget_Admin {
 
         // Construct one object for each id
         foreach ($ids as $id) {
-            $props = Array('id' => $id);
-            $dataset = new VisualBudget_Dataset($props);
+            $dataset = new VisualBudget_Dataset();
+            $dataset->from_file($id);
             $datasets[] = $dataset;
         }
 
@@ -303,6 +312,13 @@ class VisualBudget_Admin {
 
         // Add the VB admin JS file
         wp_enqueue_script( 'visualbudget_js', plugin_dir_url( __FILE__ ) . 'js/visualbudget-admin.js', array( 'jquery' ), VISUALBUDGET_VERSION, false );
+    }
+
+    /**
+     * The callback function for the admin notices.
+     */
+    public function notifications_callback() {
+        echo $this->notifier->get_html();
     }
 
 }

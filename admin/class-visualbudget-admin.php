@@ -63,7 +63,8 @@ class VisualBudget_Admin {
         // The first thing to do is to get credentials to
         // get our fingers in the filesystem.
         $access_type = get_filesystem_method();
-        if($access_type === 'direct') {
+
+        if ($access_type === 'direct') {
             // We can safely run request_filesystem_credentials()
             // without any issues and don't need to worry about passing in a URL
             $creds = request_filesystem_credentials(site_url() . '/wp-content/plugins/' . VISUALBUDGET_SLUG, '', false, false, array());
@@ -71,6 +72,8 @@ class VisualBudget_Admin {
             // Initialize the API
             if ( ! WP_Filesystem($creds) ) {
                 // Exit if there are any problems
+                $this->notifier->add('Unable to get write access to '
+                                    . 'WordPress filesystem.', 'error');
                 return false;
             }
 
@@ -80,7 +83,8 @@ class VisualBudget_Admin {
 
         } else {
             // We don't have direct write access. Prompt user with our notice.
-            // FIXME: Add notice of error.
+            $this->notifier->add('Unable to get write access to WordPress filesystem.',
+                                    'error');
         }
 
         // Finally, instantiate the file manager.
@@ -147,12 +151,14 @@ class VisualBudget_Admin {
         // First check for uploaded files.
         if ( isset($_FILES[$group]) ) {
             if ( $_FILES[$group]['error'][$upload_input] != 0 ) {
-                // FIXME: There was an error upon upload.
+                // There was an error upon upload.
+                $this->notifier->add('There was an error while trying to '
+                                . 'upload the file.', 'error');
             } else {
                 // Things are fine, so append the new dataset to our array.
                 $tmp_name = $_FILES[$group]['tmp_name'][$upload_input];
                 $uploaded_name = $_FILES[$group]['name'][$upload_input];
-                $dataset = new VisualBudget_Dataset();
+                $dataset = new VisualBudget_Dataset($this->notifier);
                 $dataset->from_upload($tmp_name, $uploaded_name);
                 array_unshift($datasets, $dataset);
             }
@@ -161,7 +167,7 @@ class VisualBudget_Admin {
         // Now check for datasets added by URL.
         // We do this simply by checking the $_POST variable.
         if ( !empty($_POST[$group][$url_input]) ) {
-            $dataset = new VisualBudget_Dataset();
+            $dataset = new VisualBudget_Dataset($this->notifier);
             $dataset->from_url($_POST[$group][$url_input]);
             array_unshift($datasets, $dataset);
         }
@@ -172,7 +178,7 @@ class VisualBudget_Admin {
             // The validate() function takes care of all validation
             // and normalization. We pass it the notifications object
             // so it can add errors and warnings if things went wrong.
-            if ( $dataset->validate($this->notifier) ) {
+            if ( $dataset->validate() ) {
 
                 // Write the dataset and its meta information to the 'datasets' directory
                 // and write the original file to the 'datasets/orignals' directory.
@@ -253,7 +259,7 @@ class VisualBudget_Admin {
 
         // Construct one object for each id
         foreach ($ids as $id) {
-            $dataset = new VisualBudget_Dataset();
+            $dataset = new VisualBudget_Dataset($this->notifier);
             $dataset->from_file($id);
             $datasets[] = $dataset;
         }

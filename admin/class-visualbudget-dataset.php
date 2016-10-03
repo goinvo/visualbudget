@@ -7,6 +7,11 @@
  */
 class VisualBudget_Dataset {
 
+    /**
+     * This is a reference to the admin's notifier object.
+     */
+    private $notifier;
+
     // There was a big high wall there
     // That tried to stop me
     // And a sign atop it said
@@ -19,9 +24,9 @@ class VisualBudget_Dataset {
      * The contents of the original dataset, which was either
      * uploaded or retrieved from a given URL.
      *
-     * FIXME: This property is only set when the object is being
-     * created from an upload or URL; not when the object
-     * is being constructed from an existing file in our system.
+     * FIXME: Whether or not this property is set is used as a check
+     * for whether the dataset is being uploaded. That seems inelegant
+     * and perhaps should change.
      */
     private $original_blob;
 
@@ -39,8 +44,13 @@ class VisualBudget_Dataset {
      *                               If from URL, 'url' should be set.
      *                               If from existing file, 'id' should be set.
      */
-    public function __construct() {
+    public function __construct($notifier) {
 
+        // The notifier is used to display notices, errors, and warnings
+        // to the dashboard.
+        $this->notifier = $notifier;
+
+        // Create the properties array.
         $this->properties = array();
     }
 
@@ -55,40 +65,45 @@ class VisualBudget_Dataset {
      *
      * FIXME: Data is not currently validated according to our spec.
      */
-    public function validate($notifier) {
+    public function validate() {
 
-        // The methods in VisualBudget_Validator are all static,
-        // but we can create an object anyway.
-        $v = new VisualBudget_Validator();
-
+        // If $this->original_blob is set, that means
+        // the dataset is being created right now.
+        // It needs to be validated and normalized.
         if ( isset($this->original_blob) ) {
 
-            // FIXME: For now we assume the file is CSV.
+            // Create a new validator object.
+            $v = new VisualBudget_Validator($this->notifier);
+
+            // Get the filetype and the blob, and try to validate it.
             $filetype = $this->properties['original_extension'];
             $data_string = $this->original_blob;
             $result = $v->validate($data_string, $filetype);
 
-            // If what we get back is an error, then add a new
-            // notice to the admin to explain what went wrong.
-            if (is_a($result, 'Error')) {
+            // Check to see if the validation worked.
+            if ( ! $result ) {
                 // Something went wrong.
-                $notifier->add($result->getMessage(), 'error');
+                // Any errors have already been logged by the validator.
                 return 0;
 
             } else {
-                // It worked so store the data and set meta properties.
+                // It worked, so store the data and set meta properties.
                 $this->data = $result;
                 $this->set_meta_properties();
                 return 1;
             }
 
         } else if ( isset($this->data) ) {
-            // This has been a validation of an existing dataset.
+            // This has been a validation of an existing dataset,
+            // so there is nothing to do.
             return 1;
+
         } else {
-            // FIXME: Perhaps this should throw an exception.
-            //        However, it should never happen.
-            $notifier->add('Unknown error.', 'error');
+            // The logic flow will reach this point only if there was
+            // previously an error in either from_url, from_file, or
+            // from_upload. In such a case, the notifier has already
+            // been updated with a new error notice. So here we just
+            // return false.
             return 0;
         }
     }
@@ -129,8 +144,9 @@ class VisualBudget_Dataset {
             $this->properties['original_extension'] = $pathinfo['extension'];
 
         } else {
-            // FIXME: Should this be an error?
-            // The file may be empty, or maybe it didn't exist.
+
+            // The user tried to upload an empty file.
+            $this->notifier->add('The uploaded file was empty.', 'error');
         }
     }
 
@@ -138,12 +154,18 @@ class VisualBudget_Dataset {
      * Create a dataset from a given URL.
      */
     public function from_url($url) {
+
+        // Try to fetch the external file.
         $response = wp_remote_request($url);
 
         // Check to see if the request worked.
         if ( is_wp_error($response) ) {
-            // FIXME: Something went wrong.
+
+            // Something went wrong in WordPress. Post the error to the admin.
+            $this->notifier->add($response->get_error_message(), 'error');
+
         } else {
+
             // The retrieval was successful.
             // Check to see if there were errors on the other ense
             // by looking at the response code.
@@ -161,7 +183,12 @@ class VisualBudget_Dataset {
                 $this->properties['original_extension'] = $pathinfo['extension'];
 
             } else {
-                // FIXME: There was an error on the other end.
+
+                // There was a problem on the other end.
+                $this->notifier->add('There was an error with the remote server, '
+                                . 'so the data file cannot be fetched from URL. '
+                                . 'Perhaps the file does not exist, or perhaps the '
+                                . 'server is down.', 'error');
             }
         }
     }

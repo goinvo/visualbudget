@@ -1,9 +1,15 @@
 <?php
 /**
  * This file displays the content of the "Datasets" tab in the dashboard.
+ *
+ * Note that the form in this page is not POST'd to options.php but rather
+ * to this page itself. WordPress does funny things when things to go
+ * options.php, and if we did that then the error notices would not
+ * display here.
  */
+
 ?>
-<form method="post" action="options.php" enctype="multipart/form-data">
+<form method="post" action="<?php echo $_SERVER['REQUEST_URI']?>" enctype="multipart/form-data">
 <?php
 // Grab the saved options.
 $this->settings->options = get_option( 'visualbudget_tab_datasets' );

@@ -152,9 +152,7 @@ class VisualBudget_Admin {
                 // Things are fine, so grab info about the uploaded file.
                 $properties = Array(
                     "tmp_name" => $_FILES[$group]['tmp_name'][$upload_input],
-                    "uploaded_name" => $_FILES[$group]['name'][$upload_input],
-                    "uploaded_size" => $_FILES[$group]['size'][$upload_input],
-                    "uploaded_type" => $_FILES[$group]['type'][$upload_input]
+                    "uploaded_name" => $_FILES[$group]['name'][$upload_input]
                     );
                 array_unshift($props_array, $properties);
             }

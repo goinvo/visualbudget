@@ -23,8 +23,8 @@ class VisualBudget_Notifications {
      * Add a new notification.
      */
     public function add($message, $class='warning') {
-        $this->notifications .= array('message' => $message,
-                                      'class' => $class);
+        $this->notifications[] = array('message' => $message,
+                                       'class' => $class);
     }
 
     /**

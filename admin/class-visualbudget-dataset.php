@@ -43,24 +43,6 @@ class VisualBudget_Dataset {
 
         // Copy over any properties which were passed into construction.
         $this->properties = $properties;
-
-        // If the dataset has a 'id' property, that means it already exists
-        // in our system and we can construct the object from its file.
-        if ( isset($this->properties['id']) ) {
-            $this->from_file();
-        }
-
-        // If the dataset has a 'tmp_name' property, that mean
-        // it was just uploaded and we can create it that way.
-        else if ( isset($this->properties['tmp_name']) ) {
-            $this->from_upload();
-        }
-
-        // If the dataset has a 'url' property, that means
-        // it is to be created by grabbing the URL contents.
-        else if ( isset($this->properties['url']) ) {
-            $this->from_url();
-        }
     }
 
     /**
@@ -83,18 +65,22 @@ class VisualBudget_Dataset {
         if ( isset($this->original_blob) ) {
 
             // FIXME: For now we assume the file is CSV.
-            $filetype = 'csvd';
+            $filetype = 'csvxxx';
             $data_string = $this->original_blob;
             $result = $v->validate($data_string, $filetype);
 
             // If what we get back is an error, then add a new
             // notice to the admin to explain what went wrong.
             if (is_a($result, 'Error')) {
+                // Something went wrong.
                 $notifier->add($result->getMessage(), 'error');
+                return 0;
+
             } else {
                 // It worked so store the data and set meta properties.
                 $this->data = $result;
                 $this->set_meta_properties();
+                return 1;
             }
 
         } else if ( isset($this->data) ) {
@@ -105,8 +91,6 @@ class VisualBudget_Dataset {
             //        However, it should never happen.
             return 0;
         }
-
-        return 1;
     }
 
     /**

@@ -53,7 +53,8 @@ class VisualBudget_Validator {
 
                     default:
                         // Error, unrecognized filetype.
-                        return new Error("Unrecognized filetype " . $strtolower($filetype));
+                        return new Error('Unrecognized filetype "'
+                                            . strtolower($filetype) . '".');
                 }
             }
         }

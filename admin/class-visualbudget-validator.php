@@ -86,8 +86,8 @@ class VisualBudget_Validator {
 
         // Check to see that the data is valid according to our spec.
         if ( ! $this->is_valid_vb_spec($data_array) ) {
-            $this->notifier->add('The data uploaded is not valid according to '
-                            . 'the Visual Budget specification.', 'error');
+            // The function is_valid_vb_spec will queue up any errors
+            // or warnings it finds. Simply return 0 here.
             return 0;
         }
 
@@ -210,6 +210,7 @@ class VisualBudget_Validator {
      * Slugify the values of LEVEL fields in each line item.
      */
     public static function slugify_levels($data, $case=-1, $custom_mappings=array()) {
+
         // Split the dataset into the header row and the rest of the sheet
         $header = $data[0];            // Just the first row
         $data = array_slice($data, 1); // Everything but the first row
@@ -433,9 +434,55 @@ class VisualBudget_Validator {
      *      - There is at least one LEVEL column
      *      - There is at least one timepoint column
      *      - There are at least two rows (header + line item)
+     *
+     * FIXME: This should also check that everything in a timepoint column
+     *        is a number.
      */
     public function is_valid_vb_spec($data_array) {
-        return true; // FIXME: Write this function.
+
+        // Check that there are at least two rows.
+        if ( count($data_array) < 2 ) {
+            $this->notifier->add('There must be at least two rows in the ',
+                        . 'uploaded dataset.', 'error');
+            return false;
+        }
+
+        // Split the dataset into the header row and the rest of the sheet
+        $header = $data[0];            // Just the first row
+        $data = array_slice($data, 1); // Everything but the first row
+
+        // Get the column categories
+        $categories = self::column_categories($header);
+
+        // Count the number of timepoint columns and check that there is
+        // at least one.
+        $num_timepoint_cols = array_sum(array_filter($categories, function($a) {
+                            return $a === 0;
+                        }));
+        if ($num_timepoint_cols < 1) {
+            $this->notifier->add('There must be at least one timepoint column. '
+                        . 'None were found. Note that syntax for timepoint column '
+                        . 'headers is strict: the fieldname must be machine-readable '
+                        . 'as a date. Try formats like "2012" or "2012-08" or "3Q 2008".',
+                        'error');
+            return false;
+        }
+
+        // Count the number of level columns and check that there is
+        // at least one.
+        $num_level_cols = array_sum(array_filter($categories, function($a) {
+                            return $a === 1;
+                        }));
+        if ($num_level_cols < 1) {
+            $this->notifier->add('There must be at least one LEVEL column. '
+                        . 'None were found. Note that syntax for LEVEL column '
+                        . 'headers is strict: the fieldname must be of the form '
+                        . 'LEVEL<N>, where <N> is an integer.',
+                        'error');
+            return false;
+        }
+
+        return true;
     }
 
 }

@@ -235,33 +235,6 @@ class VisualBudget_Validator {
     }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     /**
      * Return a dataset equivalent to the input,
      * but with inferred levels filled in.
@@ -394,7 +367,7 @@ class VisualBudget_Validator {
      *           returns Array(0, 1, -1)
      */
     public static function column_categories($header_row) {
-        return array_map( Array('VisualBudget_Validator','categorize_column'),
+        return array_map( Array(self,'categorize_column'),
                     $header_row );
     }
 
@@ -416,34 +389,6 @@ class VisualBudget_Validator {
     }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     /**
      * Check to see whether a PHP is valid budget data according
      * to the VB spec. Returns true on success and an appropriate
@@ -455,7 +400,7 @@ class VisualBudget_Validator {
      *      - There are at least two rows (header + line item)
      */
     public function is_valid_vb_spec($data_array) {
-        return true;
+        return true; // FIXME: Write this function.
     }
 
 }

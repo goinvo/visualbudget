@@ -113,7 +113,7 @@ class VisualBudget_Validator {
         $data_array = self::remove_empty_rows($data_array);
         $data_array = self::remove_empty_cols($data_array);
         $data_array = self::slugify_headers($data_array, 1);
-        // $data_array = self::slugify_levels($data_array, 0);
+        // $data_array = self::slugify_levels($data_array, 0, array('/#/'=>'num'));
         $data_array = $this->infer_levels($data_array);
 
         return $data_array;
@@ -214,23 +214,35 @@ class VisualBudget_Validator {
      *                     If $case < 0, text will be lowercased.
      *                     If $case == 0, case is left alone.
      */
-    public static function slugify($text, $case=1) {
-        // replace non letter or digits by underscores
+    public static function slugify($text, $case=1, $custom_mappings=array()) {
+
+        // If there are custom mappings, do them first.
+        foreach ($custom_mappings as $regex=>$replacement) {
+            $text = preg_replace($regex, $replacement, $text);
+        }
+
+        // Replace non letter or digits by underscores
         $text = preg_replace('~[^\pL\d]+~u', '_', $text);
-        // transliterate
+
+        // Transliterate
         $text = iconv('utf-8', 'us-ascii//TRANSLIT', $text);
-        // remove unwanted characters
+
+        // Remove unwanted characters
         $text = preg_replace('~[^_\w]+~', '', $text);
-        // trim
+
+        // Trim
         $text = trim($text, '_');
-        // remove duplicate underscores
+
+        // Remove duplicate underscores
         $text = preg_replace('~_+~', '_', $text);
-        // lowercase
+
+        // Change the case as necessary.
         if ($case > 0) {
           $text = strtoupper($text);
         } elseif ($case < 0) {
           $text = strtolower($text);
         }
+
         return $text;
     }
 

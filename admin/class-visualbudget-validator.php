@@ -182,16 +182,7 @@ class VisualBudget_Validator {
         // return call_user_func_array('array_map', $array);
         return array_map(null, ...$array);
     }
-function transposeData($data)
-{
-  $retData = array();
-    foreach ($data as $row => $columns) {
-      foreach ($columns as $row2 => $column2) {
-          $retData[$row2][$row] = $column2;
-      }
-    }
-  return $retData;
-}
+
     /**
      * Returns an array where the elements of the first row
      * have been slugified (meaning they have been lowercased,
@@ -214,7 +205,6 @@ function transposeData($data)
         }
         return $array;
     }
-
 
     /**
      * This function is based on code posted at

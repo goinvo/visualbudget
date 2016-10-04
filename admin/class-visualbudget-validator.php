@@ -114,7 +114,7 @@ class VisualBudget_Validator {
         $data_array = self::remove_empty_cols($data_array);
         $data_array = self::slugify_headers($data_array, 1);
         // $data_array = self::slugify_levels($data_array, 0);
-        $data_array = self::infer_levels($data_array);
+        $data_array = $this->infer_levels($data_array);
 
         return $data_array;
     }
@@ -239,7 +239,7 @@ class VisualBudget_Validator {
      * Return a dataset equivalent to the input,
      * but with inferred levels filled in.
      */
-    public static function infer_levels($data) {
+    public function infer_levels($data) {
 
         // Split the dataset into the header row and the rest of the sheet
         $header = $data[0];            // Just the first row
@@ -270,20 +270,21 @@ class VisualBudget_Validator {
                 // If this element is empty, it means we should infer.
                 if ( empty($row[$n]) ) {
 
-                    // If no flag, then all's well.
-                    if (!$flag) {
+                    // Infer the value from the row above.
+                    // Note that we infer even if we flagged this row:
+                    // after all, we need to know all the levels before
+                    // we can do anything with the data. So we fill it in
+                    // however we're able.
+                    $data[$m][$n] = $data[$m-1][$n];
 
-                        // Infer the value from the row above.
-                        $data[$m][$n] = $data[$m-1][$n];
-
-                    } elseif ($flag == 1) {
+                    if ($flag == 1) {
                         // This is a problem. It means that levels are being
                         // inferred between other levels. Add this row number
                         // to the list of flagged rows. We add 2 to the row
                         // number: +1 for the fact that we've axed the header,
                         // and +1 again because most people looking at this
                         // are going to 1-index the rows.
-                        array_shift($flagged_rows, $m+2);
+                        $flagged_rows[] = $m+2;
                     }
                 } else {
                     // $flag > 0 indicates that we have stopped inferring,
@@ -299,7 +300,7 @@ class VisualBudget_Validator {
         if ( !empty($flagged_rows) ) {
             // Prettify the text to be written in the notice.
             if (count($flagged_rows) == 1) {
-                $text = 'row ' . $flagged_rows[0] . '.';
+                $text = 'row ' . $flagged_rows[0];
             } elseif (count($flagged_rows) == 2) {
                 $text = 'rows ' . implode(' and ', $flagged_rows);
             } else {
@@ -309,7 +310,7 @@ class VisualBudget_Validator {
 
             // Add a warning to the admin dashboard.
             $this->notifier->add('Malformed dataset: Inference between LEVELs '
-                    . 'on ' . $text . '. Dataset has likely been incorrectly '
+                    . 'on ' . $text . '. Dataset may have been incorrectly '
                     . 'inferred.', 'warning');
         }
 

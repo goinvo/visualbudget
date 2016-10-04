@@ -148,8 +148,10 @@ class VisualBudget_Admin {
         // one uploaded, one from URL.
         $datasets = array();
 
-        // First check for uploaded files.
-        if ( isset($_FILES[$group]) ) {
+        // First check for uploaded files. Error code 4 means there
+        // was no uploaded file. Ignore this error.
+        if ( isset($_FILES[$group]) && $_FILES[$group]['error'][$upload_input] != 4) {
+            // Check for errors. Error code 0 means no error.
             if ( $_FILES[$group]['error'][$upload_input] != 0 ) {
                 // There was an error upon upload.
                 $this->notifier->add('There was an error while trying to '

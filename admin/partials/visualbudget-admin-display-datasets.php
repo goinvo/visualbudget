@@ -1,38 +1,37 @@
 <?php
 /**
  * This file displays the content of the "Datasets" tab in the dashboard.
+ *
+ * Note that the form in this page is not POST'd to options.php but rather
+ * to this page itself. WordPress does funny things when things to go
+ * options.php, and if we did that then the error notices would not
+ * display here.
  */
-?>
-<!-- <input type='hidden' name='MAX_FILE_SIZE' value='8388608' /> -->
-<form method="post" action="options.php" enctype="multipart/form-data">
-<?php
-// Grab the saved options
-$this->settings->options = get_option( 'visualbudget_tab_datasets' );
 
+?>
+<form method="post" action="<?php echo $_SERVER['REQUEST_URI']?>" enctype="multipart/form-data">
+<?php
+// Grab the saved options.
+$this->settings->options = get_option( 'visualbudget_tab_datasets' );
+// Display the settings fields here.
 settings_fields( 'visualbudget_tab_datasets' );
 do_settings_sections( 'visualbudget_tab_datasets' );
-submit_button('Upload file');
+// Submit button for the upload.
+submit_button('Add new dataset');
 ?>
 </form>
-<!--
-<div><h3>From URL</h3></div>
-<form method="post" action="options.php">
-<input name='xxx' id='xxx' type='text' />
-<?php submit_button('Add file from URL'); ?>
-</form>
--->
 <h2>My datasets</h2>
-<div class='bootstrap-wrapper'>
-<p class='alert alert-danger'><em>Caveat emptor &mdash;</em> datasets are not yet validated upon upload.</p>
+<div class='bootstrap-wrapper'><!-- Bootstrap styles work inside this div -->
 <?php
 
+// Get all the existing datasets.
 $datasets = $this->datasets;
 
-// Test to see if there are any datasets
+// Test to see if there actually are any datasets.
 if (empty($datasets)) {
 
-    // If not, say so
-    echo 'There are no datasets.';
+    // If not, say so.
+    echo '<div><p>There are no datasets.</p></div>';
 
 } else {
 

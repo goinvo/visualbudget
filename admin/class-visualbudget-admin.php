@@ -1,16 +1,22 @@
 <?php
 
 /**
- * The admin-specific functionality of the plugin.
+ * This class is handles the admin-specific functionality of the plugin.
+ * The dashboard, file uploads, and shortcode definitions are all handled
+ * here.
  */
-
 class VisualBudget_Admin {
 
     // The file manager object, for interacting with the filesystem.
-    public $filemanager;
+    public $datasetmanager;
 
     // All the active datasets, stored as an array of VisualBudget_Dataset objects.
     public $datasets;
+
+    // This is a VisualBudget_Notifications object, which is a simple object
+    // to track notifications which are to be displayed to the admin.
+    // Queueing up new notifications is done via its method add().
+    public $notifier;
 
     /**
      * Initialize the class and set its properties.
@@ -20,6 +26,8 @@ class VisualBudget_Admin {
         // Load the classes that the admin panel uses.
         $this->load_dependencies();
 
+        // Set up the notifier.
+        $this->notifier = new VisualBudget_Notifications();
     }
 
     /**
@@ -27,14 +35,20 @@ class VisualBudget_Admin {
      */
     private function load_dependencies() {
 
-        // The class responsible for interacting with the filesystem.
-        // Note that we are not instatiating the filemanager here, but
-        // do so rather in the function setup_filesystem_manager(),
-        // after the credentials are obtained.
-        require_once VISUALBUDGET_PATH . 'admin/class-visualbudget-filemanager.php';
+        // The notifications class.
+        require_once VISUALBUDGET_PATH . 'admin/class-visualbudget-notifications.php';
 
-        // Each dataset is represented as an object of the Dataset class.
+        // The class responsible for interacting with the filesystem.
+        // Note that we are not instatiating the datasetmanager here, but
+        // do so rather in the function setup_dataset_manager(),
+        // after the credentials are obtained.
+        require_once VISUALBUDGET_PATH . 'admin/class-visualbudget-datasetmanager.php';
+
+        // Each dataset is represented as an object of the dataset class.
         require_once VISUALBUDGET_PATH . 'admin/class-visualbudget-dataset.php';
+
+        // The validator class hold a bunch of static methods for validating data.
+        require_once VISUALBUDGET_PATH . 'admin/class-visualbudget-validator.php';
 
         // The class which handles all the settings of VB.
         require_once VISUALBUDGET_PATH . 'admin/class-visualbudget-admin-settings.php';
@@ -42,13 +56,15 @@ class VisualBudget_Admin {
     }
 
     /**
-     * Required to read/write to the filesystem.
+     * Get the credentials to read/write to the filesystem, and create a
+     * VisualBudget_DatasetManager object to interface with the filesystem.
      */
-    public function setup_filesystem_manager() {
+    public function setup_dataset_manager() {
         // The first thing to do is to get credentials to
         // get our fingers in the filesystem.
         $access_type = get_filesystem_method();
-        if($access_type === 'direct') {
+
+        if ($access_type === 'direct') {
             // We can safely run request_filesystem_credentials()
             // without any issues and don't need to worry about passing in a URL
             $creds = request_filesystem_credentials(site_url() . '/wp-content/plugins/' . VISUALBUDGET_SLUG, '', false, false, array());
@@ -56,6 +72,8 @@ class VisualBudget_Admin {
             // Initialize the API
             if ( ! WP_Filesystem($creds) ) {
                 // Exit if there are any problems
+                $this->notifier->add('Unable to get write access to '
+                                    . 'WordPress filesystem.', 'error');
                 return false;
             }
 
@@ -65,15 +83,16 @@ class VisualBudget_Admin {
 
         } else {
             // We don't have direct write access. Prompt user with our notice.
-            // FIXME: Add notice of error.
+            $this->notifier->add('Unable to get write access to WordPress filesystem.',
+                                    'error');
         }
 
         // Finally, instantiate the file manager.
-        $this->filemanager = new VisualBudget_FileManager();
+        $this->datasetmanager = new VisualBudget_DatasetManager();
     }
 
     /**
-     * Add dashboard page
+     * Add dashboard sidelink to the WP admin screen.
      */
     public function visualbudget_add_dashboard_sidelink() {
         add_menu_page(
@@ -88,14 +107,16 @@ class VisualBudget_Admin {
     }
 
     /**
-     * Dashboard page callback. Simply display the page.
+     * Dashboard page callback. Simply display the admin page.
      */
     public function visualbudget_display_dashboard() {
         require_once VISUALBUDGET_PATH . 'admin/partials/visualbudget-admin-display.php';
     }
 
     /**
-     * Initialize the dashboard
+     * Initialize the dashboard. Register VB settings, handle any
+     * file uploads or deletions, and load in all the existing
+     * datasets for use by other methods.
      */
     public function visualbudget_dashboard_init() {
         $this->settings = new VisualBudget_Admin_Settings();
@@ -111,41 +132,65 @@ class VisualBudget_Admin {
     }
 
     /**
-     * Pass uploaded files on to the filemanager.
+     * Determine if any files have been uploaded. If so, construct a
+     * VisualBudget_Dataset object from them in order to validate the
+     * data, and if everything looks good then pass them on to the
+     * datasetmanager for installation.
      */
     public function handle_file_uploads() {
 
         // These are the field names to look for.
-        $group = 'visualbudget_tab_datasets'; // FIXME: This should be get()'d
-        $inputs = $this->settings->get_upload_field_names();
+        $group = $this->settings->get_dataset_tab_group_name();
+        $upload_input = $this->settings->get_upload_field_name();
+        $url_input = $this->settings->get_url_field_name();
+
+        // This array will have up to two dataset objects to be added:
+        // one uploaded, one from URL.
+        $datasets = array();
+
+        // First check for uploaded files. Error code 4 means there
+        // was no uploaded file. Ignore this error.
+        if ( isset($_FILES[$group]) && $_FILES[$group]['error'][$upload_input] != 4) {
+            // Check for errors. Error code 0 means no error.
+            if ( $_FILES[$group]['error'][$upload_input] != 0 ) {
+                // There was an error upon upload.
+                $this->notifier->add('There was an error while trying to '
+                                . 'upload the file.', 'error');
+            } else {
+                // Things are fine, so append the new dataset to our array.
+                $tmp_name = $_FILES[$group]['tmp_name'][$upload_input];
+                $uploaded_name = $_FILES[$group]['name'][$upload_input];
+                $dataset = new VisualBudget_Dataset($this->notifier);
+                $dataset->from_upload($tmp_name, $uploaded_name);
+                array_unshift($datasets, $dataset);
+            }
+        }
+
+        // Now check for datasets added by URL.
+        // We do this simply by checking the $_POST variable.
+        if ( !empty($_POST[$group][$url_input]) ) {
+            $dataset = new VisualBudget_Dataset($this->notifier);
+            $dataset->from_url($_POST[$group][$url_input]);
+            array_unshift($datasets, $dataset);
+        }
 
         // Try to upload each file.
-        foreach($inputs as $i => $input) {
-            // Check that the uploaded file exists and that there were no errors
-            if ( isset($_FILES[$group]) && $_FILES[$group]['error'][$input] == 0 ) {
-                // Grab the information about the uploaded file
-                $properties = Array(
-                    "tmp_name" => $_FILES[$group]['tmp_name'][$input],
-                    "uploaded_name" => $_FILES[$group]['name'][$input],
-                    "uploaded_size" => $_FILES[$group]['size'][$input],
-                    "uploaded_type" => $_FILES[$group]['type'][$input]
-                    );
+        foreach($datasets as $dataset) {
 
-                // Create a dataset object
-                $dataset = new VisualBudget_Dataset($properties);
+            // The validate() function takes care of all validation
+            // and normalization. We pass it the notifications object
+            // so it can add errors and warnings if things went wrong.
+            if ( $dataset->validate() ) {
 
-                // The validate() function also converts to JSON.
-                if ( $dataset->validate() ) {
+                // Write the dataset and its meta information to the 'datasets' directory
+                // and write the original file to the 'datasets/orignals' directory.
+                $this->datasetmanager->write_dataset( $dataset->get_filename(),
+                                              $dataset->get_json() );
+                $this->datasetmanager->write_dataset( $dataset->get_meta_filename(),
+                                              $dataset->get_meta_json() );
+                $this->datasetmanager->write_dataset( $dataset->get_original_filename(),
+                                              $dataset->get_original_blob() );
 
-                    // Write the dataset and its meta information to the 'datasets' directory
-                    // and write the original file to the 'datasets/orignals' directory.
-                    $this->filemanager->new_file( $dataset->get_filepath(),
-                                                  $dataset->get_json() );
-                    $this->filemanager->new_file( $dataset->get_meta_filepath(),
-                                                  $dataset->get_meta_json() );
-                    $this->filemanager->new_file( $dataset->get_original_filepath(),
-                                                  $dataset->get_original_blob() );
-                }
             }
         }
     }
@@ -155,9 +200,9 @@ class VisualBudget_Admin {
      */
     public function handle_file_deletions() {
 
-        // Get the dataset inventory from the filemanager.
+        // Get the dataset inventory from the dataset manager.
         // The returned object is an array created by $wp_filesystem.
-        $datasets = $this->filemanager->get_datasets_inventory();
+        $datasets = $this->datasetmanager->get_datasets_inventory();
         $filenames = array_keys($datasets);
 
         // First check if we are supposed to delete any of them.
@@ -165,7 +210,7 @@ class VisualBudget_Admin {
         // a real file.
         $delete_num = false;
         if ( isset($_GET['delete'])
-            && $this->filemanager->is_file($_GET['delete'] . '_data.json') ) {
+            && $this->datasetmanager->is_file($_GET['delete'] . '_data.json') ) {
 
             $delete_num = $_GET[ 'delete' ];
         }
@@ -180,7 +225,7 @@ class VisualBudget_Admin {
                 });
 
             foreach ($filenames_to_delete as $filename) {
-                $this->filemanager->move_file($filename, 'trash/' . $filename);
+                $this->datasetmanager->move_dataset($filename, 'trash/' . $filename);
             }
 
             // Now we refresh the page, omitting the "delete" query string key.
@@ -201,7 +246,7 @@ class VisualBudget_Admin {
 
         // Get the inventory, which is an array of files created by
         // $wp_filesystem.
-        $file_array = $this->filemanager->get_datasets_inventory();
+        $file_array = $this->datasetmanager->get_datasets_inventory();
 
         // Just get the IDs of the datasets
         $ids = array_map(function($i) {
@@ -216,8 +261,8 @@ class VisualBudget_Admin {
 
         // Construct one object for each id
         foreach ($ids as $id) {
-            $props = Array('id' => $id);
-            $dataset = new VisualBudget_Dataset($props);
+            $dataset = new VisualBudget_Dataset($this->notifier);
+            $dataset->from_file($id);
             $datasets[] = $dataset;
         }
 
@@ -226,7 +271,7 @@ class VisualBudget_Admin {
 
 
     /**
-     * Display the tab nav at the top of the VB dashboard page
+     * Display the tab nav at the top of the VB dashboard page.
      */
     public function visualbudget_display_dashboard_tabs() {
         echo '<h2 class="nav-tab-wrapper">';
@@ -261,23 +306,11 @@ class VisualBudget_Admin {
      */
     public function enqueue_styles() {
 
-        /**
-         * This function is provided for demonstration purposes only.
-         *
-         * An instance of this class should be passed to the run() function
-         * defined in VisualBudget_Loader as all of the hooks are defined
-         * in that particular class.
-         *
-         * The VisualBudget_Loader will then create the relationship
-         * between the defined hooks and the functions defined in this
-         * class.
-         */
-
+        // Add the bootstrap CSS file
         wp_enqueue_style( 'bootstrap', plugin_dir_url( __FILE__ ) . 'css/bootstrap-wrapper.css', array(), VISUALBUDGET_VERSION, 'all' );
 
-        // FIXME: Why does bootstrap.css end up getting included, but the following doesn't?
+        // Add the VB admin CSS file
         wp_enqueue_style( 'visualbudget_css', plugin_dir_url( __FILE__ ) . 'css/visualbudget-admin.css', array(), VISUALBUDGET_VERSION, 'all' );
-
     }
 
     /**
@@ -285,22 +318,18 @@ class VisualBudget_Admin {
      */
     public function enqueue_scripts() {
 
-        /**
-         * This function is provided for demonstration purposes only.
-         *
-         * An instance of this class should be passed to the run() function
-         * defined in VisualBudget_Loader as all of the hooks are defined
-         * in that particular class.
-         *
-         * The VisualBudget_Loader will then create the relationship
-         * between the defined hooks and the functions defined in this
-         * class.
-         */
-
+        // Add the VB admin JS file
         wp_enqueue_script( 'visualbudget_js', plugin_dir_url( __FILE__ ) . 'js/visualbudget-admin.js', array( 'jquery' ), VISUALBUDGET_VERSION, false );
 
+        // Add D3.js.
         wp_enqueue_script( 'd3', plugin_dir_url( __FILE__ ) . 'https://cdnjs.cloudflare.com/ajax/libs/d3/4.2.6/d3.min.js', array( 'jquery' ), VISUALBUDGET_VERSION, false );
+    }
 
+    /**
+     * The callback function for the admin notices.
+     */
+    public function notifications_callback() {
+        echo $this->notifier->get_html();
     }
 
 }

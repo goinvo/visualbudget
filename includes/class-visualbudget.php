@@ -14,24 +14,27 @@ class VisualBudget {
     /**
      * Define the core functionality of the plugin.
      *
-     * Set the plugin name and the plugin version that can be used throughout the plugin.
-     * Load the dependencies, define the locale, and set the hooks for the admin area and
-     * the public-facing side of the site.
+     * Set constants that can be used throughout the plugin.
+     * Load the dependencies, define the locale, and set the hooks
+     * for the admin area and the public-facing side of the site.
      */
     public function __construct() {
-        /**
-         * Define all constants related to this plugin.
-         */
+
+        // Set the timezone. FIXME: How to localize?
         date_default_timezone_set("America/New_York");
-        $this->define_constants();
-        $this->load_dependencies();
-        $this->set_locale();
-        $this->define_admin_hooks();
-        $this->define_public_hooks();
-        $this->define_shortcodes();
+
+        $this->define_constants();      // Define VB-related constants.
+        $this->load_dependencies();     // Load dependencies.
+        $this->set_locale();            // Set the locale, language.
+        $this->define_admin_hooks();    // Admin hooks.
+        $this->define_public_hooks();   // Public hooks.
+        $this->define_shortcodes();     // Define the VB shortcodes.
 
     }
 
+    /**
+     * Define the constants which can be used throughout the plugin code.
+     */
     public static function define_constants() {
         $trailingslashit = function ($s) { return rtrim( $s, '/\\' ) . '/'; };
 
@@ -41,8 +44,8 @@ class VisualBudget {
         define('VISUALBUDGET_PATH', $trailingslashit(dirname(__FILE__, 2)));
         define('VISUALBUDGET_UPLOAD_PATH', VISUALBUDGET_PATH . VISUALBUDGET_UPLOAD_DIR );
 
-        /* Don't set the URL if being called statically. */
-        // if (isset($this) && $this instanceof VisualBudget) {
+        /* We cannot set the URL if being called statically. */
+        // if (isset($this)) {
         define('VISUALBUDGET_URL', plugin_dir_url( dirname( __FILE__ ) ) );
         define('VISUALBUDGET_UPLOAD_URL', VISUALBUDGET_URL . VISUALBUDGET_UPLOAD_DIR );
         // }
@@ -117,11 +120,14 @@ class VisualBudget {
         $this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
 
         // Set up the file manager, including getting the credentials.
-        $this->loader->add_action( 'admin_init', $plugin_admin, 'setup_filesystem_manager' );
+        $this->loader->add_action( 'admin_init', $plugin_admin, 'setup_dataset_manager' );
 
         // Set up the dashboard.
         $this->loader->add_action( 'admin_init', $plugin_admin, 'visualbudget_dashboard_init' );
         $this->loader->add_action( 'admin_menu', $plugin_admin, 'visualbudget_add_dashboard_sidelink' );
+
+        // Display all the notices.
+        $this->loader->add_action( 'admin_notices', $plugin_admin, 'notifications_callback' );
     }
 
     /**
@@ -137,12 +143,18 @@ class VisualBudget {
 
     }
 
+    /**
+     * Define the VB shortcode.
+     */
     private function define_shortcodes() {
         // [visualbudget data=193826342:schools:utilities]
         add_shortcode( 'visualbudget', Array( $this, 'visualbudget_func' ) );
     }
 
-
+    /**
+     * This is the VB shortcode callback. It simply translates the shortcode attributes
+     * into a URL to vis.php with appropriate query string.
+     */
     public function visualbudget_func( $atts ) {
         $a = shortcode_atts( array(
             'data' => ''

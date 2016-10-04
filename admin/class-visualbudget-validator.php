@@ -86,8 +86,8 @@ class VisualBudget_Validator {
 
         // Check to see that the data is valid according to our spec.
         if ( ! $this->is_valid_vb_spec($data_array) ) {
-            $this->notifier->add('The data uploaded is not valid according to '
-                            . 'the Visual Budget specification.', 'error');
+            // The function is_valid_vb_spec will queue up any errors
+            // or warnings it finds. Simply return 0 here.
             return 0;
         }
 
@@ -112,9 +112,9 @@ class VisualBudget_Validator {
         $data_array = self::trim_all_elements($data_array);
         $data_array = self::remove_empty_rows($data_array);
         $data_array = self::remove_empty_cols($data_array);
-        $data_array = self::slugify_headers($data_array, 1);
-        // $data_array = self::slugify_levels($data_array, 0);
-        // $data_array = self::infer_level_fields($data_array);
+        $data_array = self::slugify_headers($data_array, 0);
+        // $data_array = self::slugify_levels($data_array, 0, array('/#/'=>'num'));
+        $data_array = $this->infer_levels($data_array);
 
         return $data_array;
     }
@@ -182,30 +182,21 @@ class VisualBudget_Validator {
         // return call_user_func_array('array_map', $array);
         return array_map(null, ...$array);
     }
-function transposeData($data)
-{
-  $retData = array();
-    foreach ($data as $row => $columns) {
-      foreach ($columns as $row2 => $column2) {
-          $retData[$row2][$row] = $column2;
-      }
-    }
-  return $retData;
-}
+
     /**
      * Returns an array where the elements of the first row
      * have been slugified (meaning they have been lowercased,
      * have had spaces converted to underscores, and have had
      * dangerous characters removed).
      */
-    public static function slugify_headers($array) {
+    public static function slugify_headers($array, $case=1, $custom_mappings=array()) {
         // A counter for empty field names. If any nonempty column doesn't
         // have a header, we will call it UNKNOWN_FIELD_N.
         $empty_counter = 0;
 
         // Loop through and slugify each element of the first row of $array.
         for ($i=0; $i<count($array[0]); $i++) {
-            $slug = self::slugify($array[0][$i]);
+            $slug = self::slugify($array[0][$i], $case, $custom_mappings);
             if (empty($slug)) {
                 $slug = "UNKNOWN_FIELD_" . $empty_counter;
                 $empty_counter++;
@@ -215,6 +206,29 @@ function transposeData($data)
         return $array;
     }
 
+    /**
+     * Slugify the values of LEVEL fields in each line item.
+     */
+    public static function slugify_levels($data, $case=-1, $custom_mappings=array()) {
+
+        // Split the dataset into the header row and the rest of the sheet
+        $header = $data[0];            // Just the first row
+        $data = array_slice($data, 1); // Everything but the first row
+
+        // The categories of all columns. LEVEL cols have category == 1.
+        $ordered_levels = self::ordered_columns_of_type($header, 1);
+
+        // Loop through and slugify each LEVEL field of each row.
+        foreach ($data as $m => $row) {
+            foreach ($ordered_levels as $n => $level_name) {
+                $data[$m][$n] = self::slugify($data[$m][$n], $case, $custom_mappings);
+            }
+        }
+
+        // Prepend the header row back on and then return it.
+        array_unshift($data, $header);
+        return $data;
+    }
 
     /**
      * This function is based on code posted at
@@ -224,25 +238,195 @@ function transposeData($data)
      *                     If $case < 0, text will be lowercased.
      *                     If $case == 0, case is left alone.
      */
-    public static function slugify($text, $case=1) {
-        // replace non letter or digits by underscores
+    public static function slugify($text, $case=0, $custom_mappings=array()) {
+
+        // If there are custom mappings, do them first.
+        foreach ($custom_mappings as $regex=>$replacement) {
+            $text = preg_replace($regex, $replacement, $text);
+        }
+
+        // Replace non letter or digits by underscores
         $text = preg_replace('~[^\pL\d]+~u', '_', $text);
-        // transliterate
+
+        // Transliterate
         $text = iconv('utf-8', 'us-ascii//TRANSLIT', $text);
-        // remove unwanted characters
+
+        // Remove unwanted characters
         $text = preg_replace('~[^_\w]+~', '', $text);
-        // trim
+
+        // Trim
         $text = trim($text, '_');
-        // remove duplicate underscores
+
+        // Remove duplicate underscores
         $text = preg_replace('~_+~', '_', $text);
-        // lowercase
+
+        // Change the case as necessary.
         if ($case > 0) {
           $text = strtoupper($text);
         } elseif ($case < 0) {
           $text = strtolower($text);
         }
+
         return $text;
     }
+
+    /**
+     * Return a dataset equivalent to the input,
+     * but with inferred levels filled in.
+     */
+    public function infer_levels($data) {
+
+        // Split the dataset into the header row and the rest of the sheet
+        $header = $data[0];            // Just the first row
+        $data = array_slice($data, 1); // Everything but the first row
+
+        // Get an array of the LEVEL column titles, ordered properly
+        // and with the correct indices (i.e. indices referring to
+        // the levels of the original dataset). See function for details.
+        $ordered_levels = self::ordered_columns_of_type($header, 1);
+
+        // We will flag rows that aren't inferring properly.
+        $flagged_rows = array();
+
+        // Now loop through and fill in the blanks
+        foreach ($data as $m => $row) {
+
+            // Skip the first row. There is nothing to infer from.
+            if ($m === 0) {
+                continue;
+            }
+
+            // $flag is set to true whenever inferences are (or seem to be) complete.
+            $flag = 0;
+
+            // Loop through the level columns on each row, inferring as necessary.
+            foreach ($ordered_levels as $n => $level_name) {
+
+                // If this element is empty, it means we should infer.
+                if ( empty($row[$n]) ) {
+
+                    // Infer the value from the row above.
+                    // Note that we infer even if we flagged this row:
+                    // after all, we need to know all the levels before
+                    // we can do anything with the data. So we fill it in
+                    // however we're able.
+                    $data[$m][$n] = $data[$m-1][$n];
+
+                    if ($flag == 1) {
+                        // This is a problem. It means that levels are being
+                        // inferred between other levels. Add this row number
+                        // to the list of flagged rows. We add 2 to the row
+                        // number: +1 for the fact that we've axed the header,
+                        // and +1 again because most people looking at this
+                        // are going to 1-index the rows.
+                        $flagged_rows[] = $m+2;
+                    }
+                } else {
+                    // $flag > 0 indicates that we have stopped inferring,
+                    // and all LEVELs hereon should be defined explicitly.
+                    // If there are any further inferences, we have a problem.
+                    $flag++;
+                }
+            }
+        }
+
+        // If there are flagged rows, we'll want to notify the user of them
+        // via the notifier.
+        if ( !empty($flagged_rows) ) {
+            // Prettify the text to be written in the notice.
+            if (count($flagged_rows) == 1) {
+                $text = 'row ' . $flagged_rows[0];
+            } elseif (count($flagged_rows) == 2) {
+                $text = 'rows ' . implode(' and ', $flagged_rows);
+            } else {
+                $text = 'rows ' . implode(', ', array_slice($flagged_rows, 0, -1))
+                        . ', and ' . end($flagged_rows);
+            }
+
+            // Add a warning to the admin dashboard.
+            $this->notifier->add('Malformed dataset: Inference between LEVELs '
+                    . 'on ' . $text . '. Dataset may have been incorrectly '
+                    . 'inferred.', 'warning');
+        }
+
+        // Prepend the header row back on and then return it.
+        array_unshift($data, $header);
+        return $data;
+    }
+
+    /**
+     * Find out how columns should be ordered, and keep track of their indices.
+     *
+     * @param  array  $header    The first row of a dataset.
+     * @param  int    $category  The category whose indices should be returned.
+     *                           Should be either -1, 0, or 1 per the
+     *                           categorize_column() function.
+     * @return array  Returns an array of integers which represent the indices
+     *                of the columns of type $category arranged in ascending
+     *                order. For LEVEL columns, that means ascending order of
+     *                LEVEL. For timepoint columns, that means ascending order
+     *                of date. For metadata columns, that means alphabetical order.
+     * @example  For $category = 1, referring to LEVEL columns,
+     *           the returned array [4,7,..] would mean that LEVEL1 is column 4,
+     *           LEVEL2 is column 7, etc.
+     */
+    public static function ordered_columns_of_type($header, $category) {
+
+        // Categorize the columns
+        $categories = self::column_categories($header);
+
+        // Filter out non-LEVEL columns. This gets us indices of all LEVEL cols.
+        $levels = array_filter($categories,
+                        function ($i) use ($category) {
+                            return $i === $category;
+                        });
+        $levels = array_keys($levels);
+
+        // This is what we're after: the indices of the columns of type
+        // $category in ascending order.
+        $ordered_levels = array_filter($header,
+            function($i) use ($levels) {
+                return in_array($i, $levels);
+            }, ARRAY_FILTER_USE_KEY);
+        natcasesort($ordered_levels);
+
+        return $ordered_levels;
+    }
+
+    /**
+     * Returns an array the same size as $header_row containing
+     * the categories of each element of $header_row as determined
+     * by the categorize_column() function.
+     *
+     * @param  Array  $header_row  Array of strings, the first row of a dataset.
+     * @example  column_categories(array('2013','LEVEL1','TOOLTIP'))
+     *           returns Array(0, 1, -1)
+     */
+    public static function column_categories($header_row) {
+        return array_map( Array(self,'categorize_column'),
+                    $header_row );
+    }
+
+    /**
+     * Determines if a string is the title of a LEVEL column,
+     * a timepoint column, or a metadata column.
+     * Returns 1 for LEVEL, 0 for timepoint, -1 for metadata.
+     *
+     * @param  String  $string  The title of a dataset column.
+     *
+     * FIXME: Does not understand the format "1Q 2012" or similar
+     *        for quarters.
+     */
+    public static function categorize_column($string) {
+        if (preg_match('/^LEVEL[0-9]+$/i', $string)) {
+            return 1;  // level
+        } elseif (strtotime($string) !== false) {
+            return 0;  // timepoint
+        } else {
+            return -1; // metadata
+        }
+    }
+
 
     /**
      * Check to see whether a PHP is valid budget data according
@@ -253,8 +437,47 @@ function transposeData($data)
      *      - There is at least one LEVEL column
      *      - There is at least one timepoint column
      *      - There are at least two rows (header + line item)
+     *
+     * FIXME: This should also check that everything in a timepoint column
+     *        is a number.
      */
     public function is_valid_vb_spec($data_array) {
+
+        // Check that there are at least two rows.
+        if ( count($data_array) < 2 ) {
+            $this->notifier->add('There must be at least two rows in the '
+                        . 'uploaded dataset.', 'error');
+            return false;
+        }
+
+        // Split the dataset into the header row and the rest of the sheet
+        $header = $data_array[0];                   // Just the first row
+        $data_array = array_slice($data_array, 1);  // Everything but the first row
+
+        // Count the number of timepoint columns and check that there is
+        // at least one.
+        $num_timepoint_cols = count(self::ordered_columns_of_type($header, 0));
+        if ($num_timepoint_cols < 1) {
+            $this->notifier->add(esc_html('There must be at least one timepoint column. '
+                        . 'None were found. Note that syntax for timepoint column '
+                        . 'headers is strict: the fieldname must be machine-readable '
+                        . 'as a date. Try formats like "2012" or "2012-08" or "3Q 2008".'),
+                        'error');
+            return false;
+        }
+
+        // Count the number of level columns and check that there is
+        // at least one.
+        $num_level_cols = count(self::ordered_columns_of_type($header, 1));
+        if ($num_level_cols < 1) {
+            $this->notifier->add(esc_html('There must be at least one LEVEL column. '
+                        . 'None were found. Note that syntax for LEVEL column '
+                        . 'headers is strict: the fieldname must be of the form '
+                        . 'LEVEL<N>, where <N> is an integer.'),
+                        'error');
+            return false;
+        }
+
         return true;
     }
 

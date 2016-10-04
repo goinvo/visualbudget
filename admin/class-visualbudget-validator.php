@@ -413,6 +413,9 @@ class VisualBudget_Validator {
      * Returns 1 for LEVEL, 0 for timepoint, -1 for metadata.
      *
      * @param  String  $string  The title of a dataset column.
+     *
+     * FIXME: Does not understand the format "1Q 2012" or similar
+     *        for quarters.
      */
     public static function categorize_column($string) {
         if (preg_match('/^LEVEL[0-9]+$/i', $string)) {
@@ -442,42 +445,35 @@ class VisualBudget_Validator {
 
         // Check that there are at least two rows.
         if ( count($data_array) < 2 ) {
-            $this->notifier->add('There must be at least two rows in the ',
+            $this->notifier->add('There must be at least two rows in the '
                         . 'uploaded dataset.', 'error');
             return false;
         }
 
         // Split the dataset into the header row and the rest of the sheet
-        $header = $data[0];            // Just the first row
-        $data = array_slice($data, 1); // Everything but the first row
-
-        // Get the column categories
-        $categories = self::column_categories($header);
+        $header = $data_array[0];                   // Just the first row
+        $data_array = array_slice($data_array, 1);  // Everything but the first row
 
         // Count the number of timepoint columns and check that there is
         // at least one.
-        $num_timepoint_cols = array_sum(array_filter($categories, function($a) {
-                            return $a === 0;
-                        }));
+        $num_timepoint_cols = count(self::ordered_columns_of_type($header, 0));
         if ($num_timepoint_cols < 1) {
-            $this->notifier->add('There must be at least one timepoint column. '
+            $this->notifier->add(esc_html('There must be at least one timepoint column. '
                         . 'None were found. Note that syntax for timepoint column '
                         . 'headers is strict: the fieldname must be machine-readable '
-                        . 'as a date. Try formats like "2012" or "2012-08" or "3Q 2008".',
+                        . 'as a date. Try formats like "2012" or "2012-08" or "3Q 2008".'),
                         'error');
             return false;
         }
 
         // Count the number of level columns and check that there is
         // at least one.
-        $num_level_cols = array_sum(array_filter($categories, function($a) {
-                            return $a === 1;
-                        }));
+        $num_level_cols = count(self::ordered_columns_of_type($header, 1));
         if ($num_level_cols < 1) {
-            $this->notifier->add('There must be at least one LEVEL column. '
+            $this->notifier->add(esc_html('There must be at least one LEVEL column. '
                         . 'None were found. Note that syntax for LEVEL column '
                         . 'headers is strict: the fieldname must be of the form '
-                        . 'LEVEL<N>, where <N> is an integer.',
+                        . 'LEVEL<N>, where <N> is an integer.'),
                         'error');
             return false;
         }

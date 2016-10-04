@@ -112,7 +112,7 @@ class VisualBudget_Validator {
         $data_array = self::trim_all_elements($data_array);
         $data_array = self::remove_empty_rows($data_array);
         $data_array = self::remove_empty_cols($data_array);
-        $data_array = self::slugify_headers($data_array, 1);
+        $data_array = self::slugify_headers($data_array, 0);
         // $data_array = self::slugify_levels($data_array, 0, array('/#/'=>'num'));
         $data_array = $this->infer_levels($data_array);
 
@@ -189,14 +189,14 @@ class VisualBudget_Validator {
      * have had spaces converted to underscores, and have had
      * dangerous characters removed).
      */
-    public static function slugify_headers($array) {
+    public static function slugify_headers($array, $case=1, $custom_mappings=array()) {
         // A counter for empty field names. If any nonempty column doesn't
         // have a header, we will call it UNKNOWN_FIELD_N.
         $empty_counter = 0;
 
         // Loop through and slugify each element of the first row of $array.
         for ($i=0; $i<count($array[0]); $i++) {
-            $slug = self::slugify($array[0][$i]);
+            $slug = self::slugify($array[0][$i], $case, $custom_mappings);
             if (empty($slug)) {
                 $slug = "UNKNOWN_FIELD_" . $empty_counter;
                 $empty_counter++;
@@ -207,6 +207,29 @@ class VisualBudget_Validator {
     }
 
     /**
+     * Slugify the values of LEVEL fields in each line item.
+     */
+    public static function slugify_levels($data, $case=-1, $custom_mappings=array()) {
+        // Split the dataset into the header row and the rest of the sheet
+        $header = $data[0];            // Just the first row
+        $data = array_slice($data, 1); // Everything but the first row
+
+        // The categories of all columns. LEVEL cols have category == 1.
+        $ordered_levels = self::ordered_columns_of_type($header, 1);
+
+        // Loop through and slugify each LEVEL field of each row.
+        foreach ($data as $m => $row) {
+            foreach ($ordered_levels as $n => $level_name) {
+                $data[$m][$n] = self::slugify($data[$m][$n], $case, $custom_mappings);
+            }
+        }
+
+        // Prepend the header row back on and then return it.
+        array_unshift($data, $header);
+        return $data;
+    }
+
+    /**
      * This function is based on code posted at
      * http://stackoverflow.com/a/2955878/1516307
      *
@@ -214,7 +237,7 @@ class VisualBudget_Validator {
      *                     If $case < 0, text will be lowercased.
      *                     If $case == 0, case is left alone.
      */
-    public static function slugify($text, $case=1, $custom_mappings=array()) {
+    public static function slugify($text, $case=0, $custom_mappings=array()) {
 
         // If there are custom mappings, do them first.
         foreach ($custom_mappings as $regex=>$replacement) {
@@ -245,7 +268,6 @@ class VisualBudget_Validator {
 
         return $text;
     }
-
 
     /**
      * Return a dataset equivalent to the input,

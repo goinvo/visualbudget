@@ -114,7 +114,7 @@ class VisualBudget_Validator {
         $data_array = self::remove_empty_cols($data_array);
         $data_array = self::slugify_headers($data_array, 1);
         // $data_array = self::slugify_levels($data_array, 0);
-        // $data_array = self::infer_level_fields($data_array);
+        $data_array = self::infer_levels($data_array);
 
         return $data_array;
     }
@@ -233,6 +233,216 @@ class VisualBudget_Validator {
         }
         return $text;
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    /**
+     * Return a dataset equivalent to the input,
+     * but with inferred levels filled in.
+     */
+    public static function infer_levels($data) {
+
+        // Split the dataset into the header row and the rest of the sheet
+        $header = $data[0];            // Just the first row
+        $data = array_slice($data, 1); // Everything but the first row
+
+        // Get an array of the LEVEL column titles, ordered properly
+        // and with the correct indices (i.e. indices referring to
+        // the levels of the original dataset). See function for details.
+        $ordered_levels = self::ordered_columns_of_type($header, 1);
+
+        // We will flag rows that aren't inferring properly.
+        $flagged_rows = array();
+
+        // Now loop through and fill in the blanks
+        foreach ($data as $m => $row) {
+
+            // Skip the first row. There is nothing to infer from.
+            if ($m === 0) {
+                continue;
+            }
+
+            // $flag is set to true whenever inferences are (or seem to be) complete.
+            $flag = 0;
+
+            // Loop through the level columns on each row, inferring as necessary.
+            foreach ($ordered_levels as $n => $level_name) {
+
+                // If this element is empty, it means we should infer.
+                if ( empty($row[$n]) ) {
+
+                    // If no flag, then all's well.
+                    if (!$flag) {
+
+                        // Infer the value from the row above.
+                        $data[$m][$n] = $data[$m-1][$n];
+
+                    } elseif ($flag == 1) {
+                        // This is a problem. It means that levels are being
+                        // inferred between other levels. Add this row number
+                        // to the list of flagged rows. We add 2 to the row
+                        // number: +1 for the fact that we've axed the header,
+                        // and +1 again because most people looking at this
+                        // are going to 1-index the rows.
+                        array_shift($flagged_rows, $m+2);
+                    }
+                } else {
+                    // $flag > 0 indicates that we have stopped inferring,
+                    // and all LEVELs hereon should be defined explicitly.
+                    // If there are any further inferences, we have a problem.
+                    $flag++;
+                }
+            }
+        }
+
+        // If there are flagged rows, we'll want to notify the user of them
+        // via the notifier.
+        if ( !empty($flagged_rows) ) {
+            // Prettify the text to be written in the notice.
+            if (count($flagged_rows) == 1) {
+                $text = 'row ' . $flagged_rows[0] . '.';
+            } elseif (count($flagged_rows) == 2) {
+                $text = 'rows ' . implode(' and ', $flagged_rows);
+            } else {
+                $text = 'rows ' . implode(', ', array_slice($flagged_rows, 0, -1))
+                        . ', and ' . end($flagged_rows);
+            }
+
+            // Add a warning to the admin dashboard.
+            $this->notifier->add('Malformed dataset: Inference between LEVELs '
+                    . 'on ' . $text . '. Dataset has likely been incorrectly '
+                    . 'inferred.', 'warning');
+        }
+
+        // Prepend the header row back on and then return it.
+        array_unshift($data, $header);
+        return $data;
+    }
+
+    /**
+     * Find out how columns should be ordered, and keep track of their indices.
+     *
+     * @param  array  $header    The first row of a dataset.
+     * @param  int    $category  The category whose indices should be returned.
+     *                           Should be either -1, 0, or 1 per the
+     *                           categorize_column() function.
+     * @return array  Returns an array of integers which represent the indices
+     *                of the columns of type $category arranged in ascending
+     *                order. For LEVEL columns, that means ascending order of
+     *                LEVEL. For timepoint columns, that means ascending order
+     *                of date. For metadata columns, that means alphabetical order.
+     * @example  For $category = 1, referring to LEVEL columns,
+     *           the returned array [4,7,..] would mean that LEVEL1 is column 4,
+     *           LEVEL2 is column 7, etc.
+     */
+    public static function ordered_columns_of_type($header, $category) {
+
+        // Categorize the columns
+        $categories = self::column_categories($header);
+
+        // Filter out non-LEVEL columns. This gets us indices of all LEVEL cols.
+        $levels = array_filter($categories,
+                        function ($i) use ($category) {
+                            return $i === $category;
+                        });
+        $levels = array_keys($levels);
+
+        // This is what we're after: the indices of the columns of type
+        // $category in ascending order.
+        $ordered_levels = array_filter($header,
+            function($i) use ($levels) {
+                return in_array($i, $levels);
+            }, ARRAY_FILTER_USE_KEY);
+        natcasesort($ordered_levels);
+
+        return $ordered_levels;
+    }
+
+    /**
+     * Returns an array the same size as $header_row containing
+     * the categories of each element of $header_row as determined
+     * by the categorize_column() function.
+     *
+     * @param  Array  $header_row  Array of strings, the first row of a dataset.
+     * @example  column_categories(array('2013','LEVEL1','TOOLTIP'))
+     *           returns Array(0, 1, -1)
+     */
+    public static function column_categories($header_row) {
+        return array_map( Array('VisualBudget_Validator','categorize_column'),
+                    $header_row );
+    }
+
+    /**
+     * Determines if a string is the title of a LEVEL column,
+     * a timepoint column, or a metadata column.
+     * Returns 1 for LEVEL, 0 for timepoint, -1 for metadata.
+     *
+     * @param  String  $string  The title of a dataset column.
+     */
+    public static function categorize_column($string) {
+        if (preg_match('/^LEVEL[0-9]+$/i', $string)) {
+            return 1;  // level
+        } elseif (strtotime($string) !== false) {
+            return 0;  // timepoint
+        } else {
+            return -1; // metadata
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     /**
      * Check to see whether a PHP is valid budget data according

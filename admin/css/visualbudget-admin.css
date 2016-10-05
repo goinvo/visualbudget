@@ -6,7 +6,6 @@
 
 
 /* Dataset listings div */
-
 .dataset-listings a.tablelink {
     color: #6a778d;
 }
@@ -17,6 +16,8 @@
 .dataset-listings a.tablelink:active {
     text-decoration: none;
 }
+
+/* The dataset preview/corner table */
 .dataset-listings table {
     background-color: #f9f9f9;
 }
@@ -45,15 +46,18 @@
     background-color: #b52f2b; /* #d9534f */
 }
 
-
-    .jquerymodal table {
-        margin: 0 !important;
+/* The modal table */
+.jquerymodal {
+    min-width: 35%;
+}
+.jquerymodal table {
+    margin: 0 !important;
+}
+    .jquerymodal table td,
+    .jquerymodal table th {
+        text-align: left;
     }
-        .jquerymodal table td,
-        .jquerymodal table th {
-            text-align: left;
-        }
-        .jquerymodal table .tablecell {
-            max-height: 4em;
-            overflow: scroll;
-        }
+    .jquerymodal table .tablecell {
+        max-height: 4em;
+        overflow: scroll;
+    }

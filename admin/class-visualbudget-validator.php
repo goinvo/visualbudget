@@ -108,11 +108,11 @@ class VisualBudget_Validator {
      */
     public function sanitize_data($data_array) {
         // This sequence of events is pretty self-explanatory.
-        $data_array = self::pad_to_rectangle($data_array);
+        $data_array = $this->pad_to_rectangle($data_array);
         $data_array = self::trim_all_elements($data_array);
         $data_array = self::remove_empty_rows($data_array);
         $data_array = self::remove_empty_cols($data_array);
-        $data_array = self::slugify_headers($data_array, 0);
+        $data_array = $this->slugify_headers($data_array, 0);
         // $data_array = self::slugify_levels($data_array, 0, array('/#/'=>'num'));
         $data_array = $this->infer_levels($data_array);
 
@@ -124,11 +124,19 @@ class VisualBudget_Validator {
      * @param  array   $array   The array to be padded.
      * @param  string  $val     The value of newly created array elements.
      */
-    public static function pad_to_rectangle($array, $val='') {
-        // Note that a 2-dimensional array can only be non-rectangular in
+    public function pad_to_rectangle($array, $val='') {
+        // Note that due to the nature of the data structure,
+        // a 2-dimensional array can only be non-rectangular in
         // the 2nd dimension (i.e. it can have a ragged side, but not a
         // ragged top or bottom).
         $row_lengths = array_map(function($a){return count($a);}, $array);
+
+        if (count(array_unique($row_lengths)) > 1) {
+            $this->notifier->add('Not all rows of the uploaded dataset were '
+                            . 'the same length. Rows have been extended on the '
+                            . 'right to rectangularize the dataset.', 'warning');
+        }
+
         $max_length = max($row_lengths);
         foreach($array as $i=>$row) {
             $array[$i] = array_pad($row, $max_length, $val);
@@ -189,7 +197,7 @@ class VisualBudget_Validator {
      * have had spaces converted to underscores, and have had
      * dangerous characters removed).
      */
-    public static function slugify_headers($array, $case=1, $custom_mappings=array()) {
+    public function slugify_headers($array, $case=1, $custom_mappings=array()) {
         // A counter for empty field names. If any nonempty column doesn't
         // have a header, we will call it UNKNOWN_FIELD_N.
         $empty_counter = 0;
@@ -198,11 +206,23 @@ class VisualBudget_Validator {
         for ($i=0; $i<count($array[0]); $i++) {
             $slug = self::slugify($array[0][$i], $case, $custom_mappings);
             if (empty($slug)) {
-                $slug = "UNKNOWN_FIELD_" . $empty_counter;
+                $slug = "UNKNOWN_FIELD_" . ($empty_counter+1);
                 $empty_counter++;
             }
             $array[0][$i] = $slug;
         }
+
+        if ($empty_counter) {
+            if ($empty_counter == 1) {
+                $text = "One header field was found to be empty. It has "
+                        . "been named " . $slug . ".";
+            } else {
+                $text = $empty_counter . " header fields were found be empty. "
+                        . "They have been named by the system.";
+            }
+            $this->notifier->add($text, 'warning');
+        }
+
         return $array;
     }
 

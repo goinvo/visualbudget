@@ -296,23 +296,49 @@ class VisualBudget_Validator {
                 continue;
             }
 
-            // $flag is set to true whenever inferences are (or seem to be) complete.
-            $flag = 0;
+            // Two flags. One for checking if we've finished scanning
+            // through empty levels. These are the LEVELs of highest
+            // number which may not be used. E.g. LEVEL1--3 may be
+            // defined, and then there might be an unused LEVEL4 column
+            // which should not affect inference.
+            $through_scanning_unused_levels = 0;
+
+            // This flag is set to true when inference begins. We use
+            // it to check for malformed rows.
+            $inference_has_begun = 0;
 
             // Loop through the level columns on each row, inferring as necessary.
-            foreach ($ordered_levels as $n => $level_name) {
+            // We use a while loop rather than a foreach loop because we are
+            // walking backwards through the array.
+            $n = count($ordered_levels) - 1;
+            while ($n+1) {
 
-                // If this element is empty, it means we should infer.
+                // Check to see if the LEVEL field is empty.
                 if ( empty($row[$n]) ) {
 
-                    // Infer the value from the row above.
-                    // Note that we infer even if we flagged this row:
-                    // after all, we need to know all the levels before
-                    // we can do anything with the data. So we fill it in
-                    // however we're able.
-                    $data[$m][$n] = $data[$m-1][$n];
+                    // Check to see if we are done with unused unused LEVELs.
+                    if ($through_scanning_unused_levels) {
 
-                    if ($flag == 1) {
+                        // Infer the value from the row above.
+                        // Note that we infer even if we flagged this row:
+                        // after all, we need to know all the levels before
+                        // we can do anything with the data. So we fill it in
+                        // however we're able.
+                        $data[$m][$n] = $data[$m-1][$n];
+
+                        // Inference has begun.
+                        $inference_has_begun++;
+                    }
+
+                } else {
+                    // $flag > 0 indicates that we have stopped inferring,
+                    // and all LEVELs hereon should be defined explicitly.
+                    // If there are any further inferences, we have a problem.
+                    $through_scanning_unused_levels++;
+
+                    // Check to see if the row violates inference rules.
+                    // If so, flag it.
+                    if ($inference_has_begun) {
                         // This is a problem. It means that levels are being
                         // inferred between other levels. Add this row number
                         // to the list of flagged rows. We add 2 to the row
@@ -321,17 +347,16 @@ class VisualBudget_Validator {
                         // are going to 1-index the rows.
                         $flagged_rows[] = $m+2;
                     }
-                } else {
-                    // $flag > 0 indicates that we have stopped inferring,
-                    // and all LEVELs hereon should be defined explicitly.
-                    // If there are any further inferences, we have a problem.
-                    $flag++;
                 }
+
+                // Decrement the index.
+                $n--;
             }
         }
 
         // If there are flagged rows, we'll want to notify the user of them
         // via the notifier.
+        $flagged_rows = array_unique($flagged_rows);
         if ( !empty($flagged_rows) ) {
             // Prettify the text to be written in the notice.
             if (count($flagged_rows) == 1) {

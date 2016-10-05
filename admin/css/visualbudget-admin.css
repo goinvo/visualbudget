@@ -20,31 +20,40 @@
 .dataset-listings table {
     background-color: #f9f9f9;
 }
+    .dataset-listings table th,
+    .dataset-listings table td {
+        text-align: left;
+    }
 .dataset-listings table:hover {
     background-color: #fdfdfd;
 }
 
-    /* Glyphicons in the info section */
-    .dataset-info span.glyphicon {
-        margin-right: 5px;
-    }
+/* Glyphicons in the info section */
+.dataset-info span.glyphicon {
+    margin-right: 5px;
+}
 
-        /* Dataset actions buttons */
-        .dataset-info .dataset-actions a,
-        .dataset-info .dataset-actions a:visited,
-        .dataset-info .dataset-actions a:hover,
-        .dataset-info .dataset-actions a:focus,
-        .dataset-info .dataset-actions a:active {
-            text-decoration: none;
-        }
-        .dataset-info .dataset-actions a .label-danger:hover {
-            background-color: #b52f2b; /* #d9534f */
-        }
+/* Dataset actions buttons */
+.dataset-info .dataset-actions a,
+.dataset-info .dataset-actions a:visited,
+.dataset-info .dataset-actions a:hover,
+.dataset-info .dataset-actions a:focus,
+.dataset-info .dataset-actions a:active {
+    text-decoration: none;
+}
+.dataset-info .dataset-actions a .label-danger:hover {
+    background-color: #b52f2b; /* #d9534f */
+}
 
 
     .jquerymodal table {
         margin: 0 !important;
     }
-        .jquerymodal table td {
-            overflow: hidden;
+        .jquerymodal table td,
+        .jquerymodal table th {
+            text-align: left;
+        }
+        .jquerymodal table .tablecell {
+            max-height: 4em;
+            overflow: scroll;
         }

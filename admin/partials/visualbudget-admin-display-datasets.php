@@ -12,7 +12,7 @@
 // Table generation code from http://stackoverflow.com/a/37727144/1516307
 function make_html_table($data) {
     $tbody = array_reduce(array_slice($data,1), function($a, $b) {
-                    return $a.="<tr><td>".implode("</td><td>",$b)."</td></tr>";
+                    return $a.="<tr><td><div class='tablecell'>".implode("</div></td><td><div class='tablecell'>",$b)."</div></td></tr>";
                 });
     $thead = "<tr><th>" . implode("</th><th>", array_values($data[0])) . "</th></tr>";
     $html = "<table class='table table-condensed table-responsive table-bordered'>\n$thead\n$tbody\n</table>";

@@ -47,9 +47,6 @@
 }
 
 /* The modal table */
-.jquerymodal {
-    min-width: 35%;
-}
 .jquerymodal table {
     margin: 0 !important;
 }

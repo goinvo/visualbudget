@@ -77,7 +77,7 @@ if (empty($datasets)) {
         echo '<div id="datamodal' . $n . '" style="display:none;" class="bootstrap-wrapper"><small>' . make_html_table($alldata) . '</small></div>';
 
         echo '<a href="#datamodal' . $n . '" rel="modal:open" class="tablelink">';
-        echo "<small>" . make_html_table($corner) . "</small>";
+        echo "<div class='tablewrap'><small>" . make_html_table($corner) . "</small></div>";
         echo '</a>';
 
         echo '</div></div>';

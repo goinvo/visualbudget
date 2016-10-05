@@ -12,7 +12,7 @@
   padding: 20px;
   box-sizing: border-box;
   background-color: rgb(0,0,0);
-  background-color: rgba(0,0,0,0.75);
+  background-color: rgba(0,0,0,0.65);
   text-align: center;
 }
 .jquerymodal-blocker:before{
@@ -26,35 +26,34 @@
   background-color: transparent;
 }
 .jquerymodal {
+  overflow: scroll;
   display: inline-block;
   vertical-align: middle;
   position: relative;
-  overflow: scroll;
   z-index: 9996;
-  /*max-width: 500px;*/
   box-sizing: border-box;
-  max-width: 90%;
+  min-width: 35%;
+  max-width: 85%;
+  max-height: 85%;
   background: #fcfcfc;
   padding: 5px;
-/*  -webkit-border-radius: 8px;
-  -moz-border-radius: 8px;
-  -o-border-radius: 8px;
-  -ms-border-radius: 8px;
-  border-radius: 8px;*/
+  -webkit-border-radius: 2px;
+  -moz-border-radius: 2px;
+  -o-border-radius: 2px;
+  -ms-border-radius: 2px;
+  border-radius: 2px;
   -webkit-box-shadow: 0 0 5px #000;
   -moz-box-shadow: 0 0 5px #000;
   -o-box-shadow: 0 0 5px #000;
   -ms-box-shadow: 0 0 5px #000;
   box-shadow: 0 0 5px #000;
-  /*text-align: left;*/
 }
 
 .jquerymodal a.close-modal {
   position: absolute;
   top: -12.5px;
   right: -12.5px;
-  /*display: block;*/
-  display: none;
+  display: none;   /*display: block;*/
   width: 30px;
   height: 30px;
   text-indent: -9999px;

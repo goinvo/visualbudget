@@ -61,3 +61,39 @@
         max-height: 4em;
         overflow: scroll;
     }
+
+
+/* *****************************************************
+                    TABLE ROW NUMBERS
+   ***************************************************** */
+.dataset-listings table,
+.jquerymodal table {
+    counter-reset: rowNumber;
+}
+.dataset-listings table tr,
+.jquerymodal table tr {
+    counter-increment: rowNumber;
+}
+.dataset-listings table tr th:first-child::before,
+.dataset-listings table tr td:first-child::before,
+.jquerymodal table tr th:first-child::before,
+.jquerymodal table tr td:first-child::before {
+    content: counter(rowNumber);
+    position: absolute;
+    min-width: 1em;
+    margin-right: 0.5em;
+    font-weight: normal;
+}
+
+/* Positioning for the preview/corner table */
+.dataset-listings table tr td:first-child::before,
+.dataset-listings table tr th:first-child::before {
+    left: 0px;
+}
+/* Positioning for the modal table */
+.jquerymodal table tr td:first-child::before,
+.jquerymodal table tr th:first-child::before {
+    position: fixed;
+    margin-left: -28px;
+    color: white;
+}

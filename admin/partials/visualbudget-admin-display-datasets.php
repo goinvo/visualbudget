@@ -51,10 +51,10 @@ if (empty($datasets)) {
 
         echo '<br/>';
         echo '<div class="row"><div class="col-md-4 dataset-info">';
-        echo '<span class="glyphicon glyphicon-ok" aria-hidden="true"></span>';
+        // echo '<span class="glyphicon glyphicon-ok" aria-hidden="true"></span>';
         echo '<strong>' . $props['uploaded_name'] . '</strong>';
         echo '<br/>';
-        echo '<span class="glyphicon glyphicon-th" aria-hidden="true"></span>';
+        // echo '<span class="glyphicon glyphicon-th" aria-hidden="true"></span>';
         echo $dataset->num_rows() . ' rows &times; ' . $dataset->num_cols() . ' columns';
         echo '<br/>';
         echo '<span class="glyphicon glyphicon-time" aria-hidden="true"></span>';
@@ -66,7 +66,7 @@ if (empty($datasets)) {
         echo ' &middot; <small><a href="' . VISUALBUDGET_UPLOAD_URL . $props['original_filename'] . '">'
                     . 'Original</a></small>';
         echo '<br/>';
-        echo '<span class="glyphicon glyphicon-trash" aria-hidden="true"></span>';
+        // echo '<span class="glyphicon glyphicon-trash" aria-hidden="true"></span>';
         echo '<span class="dataset-actions"><a href="?' . http_build_query($_GET) . '&delete=' . $props['id'] . '"><span class="label label-danger">delete</span></a></span>';
 
         echo '</div><div class="col-md-8">';
@@ -74,7 +74,7 @@ if (empty($datasets)) {
         $corner = VisualBudget_Dataset::infer_levels($dataset->corner());
         $alldata = $dataset->get_data();
 
-        echo '<div id="datamodal' . $n . '" style="display:none;"><p><small>' . make_html_table($alldata) . '</small></p></div>';
+        echo '<div id="datamodal' . $n . '" style="display:none;" class="bootstrap-wrapper"><small>' . make_html_table($alldata) . '</small></div>';
 
         echo '<a href="#datamodal' . $n . '" rel="modal:open" class="tablelink">';
         echo "<small>" . make_html_table($corner) . "</small>";

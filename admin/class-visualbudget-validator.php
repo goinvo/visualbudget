@@ -46,6 +46,10 @@ class VisualBudget_Validator {
                 // We have a string and a filetype, so let's make sure it's
                 // well-formed of that filetype and then convert it to a
                 // PHP array.
+
+                // Before anything, standardize the line endings of our string.
+                $string_or_array = preg_replace('~\R~u', "\r\n", $string_or_array);
+
                 switch (strtolower($filetype)) {
 
                     // For CSV there is nothing to be validated, really.

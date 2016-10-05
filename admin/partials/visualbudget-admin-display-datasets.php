@@ -8,6 +8,16 @@
  * display here.
  */
 
+
+// Table generation code from http://stackoverflow.com/a/37727144/1516307
+function make_html_table($data) {
+    $tbody = array_reduce(array_slice($data,1), function($a, $b) {
+                    return $a.="<tr><td>".implode("</td><td>",$b)."</td></tr>";
+                });
+    $thead = "<tr><th>" . implode("</th><th>", array_values($data[0])) . "</th></tr>";
+    $html = "<table class='table table-condensed table-responsive table-bordered'>\n$thead\n$tbody\n</table>";
+    return $html;
+}
 ?>
 <form method="post" action="<?php echo $_SERVER['REQUEST_URI']?>" enctype="multipart/form-data">
 <?php
@@ -21,7 +31,7 @@ submit_button('Add new dataset');
 ?>
 </form>
 <h2>My datasets</h2>
-<div class='bootstrap-wrapper'><!-- Bootstrap styles work inside this div -->
+<div class='bootstrap-wrapper dataset-listings'><!-- Bootstrap styles work inside this div -->
 <?php
 
 // Get all the existing datasets.
@@ -36,30 +46,40 @@ if (empty($datasets)) {
 } else {
 
     // If there are datasets, print some information for each one
-    foreach ($datasets as $dataset) {
+    foreach ($datasets as $n=>$dataset) {
         $props = $dataset->get_properties();
 
         echo '<br/>';
-        echo '<div class="row"><div class="col-md-5">';
+        echo '<div class="row"><div class="col-md-4 dataset-info">';
+        echo '<span class="glyphicon glyphicon-ok" aria-hidden="true"></span>';
         echo '<strong>' . $props['uploaded_name'] . '</strong>';
-        echo ' [<a href="?' . http_build_query($_GET) . '&delete=' . $props['id'] . '">delete</a>]';
         echo '<br/>';
+        echo '<span class="glyphicon glyphicon-th" aria-hidden="true"></span>';
         echo $dataset->num_rows() . ' rows &times; ' . $dataset->num_cols() . ' columns';
         echo '<br/>';
-        echo 'added ' . date('H:i', $props['created']) . ' on '. date('j M Y', $props['created']);
+        echo '<span class="glyphicon glyphicon-time" aria-hidden="true"></span>';
+        echo date('H:i', $props['created']) . ' on '. date('j M Y', $props['created']);
         echo '<br/>';
-        echo '<small>JSON: <a href="' . VISUALBUDGET_UPLOAD_URL . $props['filename'] . '">'
-                    . $props['filename'] . '</a></small>';
+        echo '<span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span>';
+        echo '<small><a href="' . VISUALBUDGET_UPLOAD_URL . $props['filename'] . '">'
+                    . 'JSON</a></small>';
+        echo ' &middot; <small><a href="' . VISUALBUDGET_UPLOAD_URL . $props['original_filename'] . '">'
+                    . 'Original</a></small>';
         echo '<br/>';
-        echo '<small>Original: <a href="' . VISUALBUDGET_UPLOAD_URL . $props['original_filename'] . '">'
-                    . $props['original_filename'] . '</a></small>';
-        echo '</div><div class="col-md-7">';
-        $corner = VisualBudget_Dataset::infer_levels($dataset->corner());
-        // table code from http://stackoverflow.com/a/37727144/1516307
-        $tbody = array_reduce(array_slice($corner,1), function($a, $b){return $a.="<tr><td>".implode("</td><td>",$b)."</td></tr>";});
-        $thead = "<tr><th>" . implode("</th><th>", array_values($corner[0])) . "</th></tr>";
+        echo '<span class="glyphicon glyphicon-trash" aria-hidden="true"></span>';
+        echo '<span class="dataset-actions"><a href="?' . http_build_query($_GET) . '&delete=' . $props['id'] . '"><span class="label label-danger">delete</span></a></span>';
 
-        echo "<small><table class='table table-condensed table-responsive'>\n$thead\n$tbody\n</table></small>";
+        echo '</div><div class="col-md-8">';
+
+        $corner = VisualBudget_Dataset::infer_levels($dataset->corner());
+        $alldata = $dataset->get_data();
+
+        echo '<div id="datamodal' . $n . '" style="display:none;"><p><small>' . make_html_table($alldata) . '</small></p></div>';
+
+        echo '<a href="#datamodal' . $n . '" rel="modal:open" class="tablelink">';
+        echo "<small>" . make_html_table($corner) . "</small>";
+        echo '</a>';
+
         echo '</div></div>';
     }
 }

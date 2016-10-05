@@ -311,6 +311,9 @@ class VisualBudget_Admin {
 
         // Add the VB admin CSS file
         wp_enqueue_style( 'visualbudget_css', plugin_dir_url( __FILE__ ) . 'css/visualbudget-admin.css', array(), VISUALBUDGET_VERSION, 'all' );
+
+        // Add the VB admin CSS file
+        wp_enqueue_style( 'jquerymodal_css', plugin_dir_url( __FILE__ ) . 'css/jquery.modal.css', array(), VISUALBUDGET_VERSION, 'all' );
     }
 
     /**
@@ -320,6 +323,9 @@ class VisualBudget_Admin {
 
         // Add the VB admin JS file
         wp_enqueue_script( 'visualbudget_js', plugin_dir_url( __FILE__ ) . 'js/visualbudget-admin.js', array( 'jquery' ), VISUALBUDGET_VERSION, false );
+
+        // Add the VB admin JS file
+        wp_enqueue_script( 'jquerymodal_js', plugin_dir_url( __FILE__ ) . 'js/jquery.modal.js', array( 'jquery' ), VISUALBUDGET_VERSION, false );
     }
 
     /**

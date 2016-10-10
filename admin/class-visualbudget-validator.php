@@ -469,13 +469,30 @@ class VisualBudget_Validator {
     public static function categorize_column($string) {
         if (preg_match('/^LEVEL[0-9]+$/i', $string)) {
             return 1;  // level
-        } elseif (strtotime($string) !== false) {
+        } elseif (self::is_date($string)) {
             return 0;  // timepoint
         } else {
             return -1; // metadata
         }
     }
 
+    /**
+     * Recognize dates, including those of the form "2Q2016" or "Q2 16"
+     */
+    public static function is_date($string) {
+        // "Normal" dates.
+        if (strtotime($string) !== false) {
+            return true;
+        }
+
+        // Quarterly dates.
+        if ( preg_match("/([1-4]q|q[1-4])\s*([\d]{2,4})/i")
+            || preg_match("/([\d]{2,4})\s*([1-4]q|q[1-4])/i") ) {
+            return true;
+        }
+
+        return false;
+    }
 
     /**
      * Check to see whether a PHP is valid budget data according

@@ -24,7 +24,7 @@ switch ( $active_tab ) {
         break;
 
     case 'visualizations':
-        echo "Nothing here yet.";
+        include VISUALBUDGET_PATH . 'admin/partials/visualbudget-admin-display-visualizations.php';
         break;
 }
 ?></div><!-- div.wrap -->

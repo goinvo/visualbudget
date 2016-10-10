@@ -4,10 +4,10 @@
  * Visualization page, using the API specified in the Github wiki.
  */
 
-// $text = (isset($_GET['text'])) ? $_GET['text'] : '';
-// echo "<p>I, the vis, say '" . $text . "'.</p>";
-
 header("Content-type: text/html");
+
+// FIXME: Maybe add a $_GET['iframe'] variable -- if true,
+// return an iframe. Otherwise return a div.
 ?><!DOCTYPE html>
 <html>
 <head>
@@ -39,10 +39,19 @@ header("Content-type: text/html");
     }
 ?>
 
+<?php /* FIXME: inject the data directly into a JS variable. */ ?>
 $( document ).ready(function() {
+
+    // var data = "";
+    // var dsv = d3.dsvFormat(delimiter);
+    // var parsed_data = dsv.parse(data);
+    // d3.data(parsed_data);
+
     d3.json("api.php?dataset=<?php echo $id; ?>_data.json", function(data) {
         $('#data').html(data);
     });
+
+
 });
 
 </script>

@@ -46,6 +46,10 @@ class VisualBudget_Validator {
                 // We have a string and a filetype, so let's make sure it's
                 // well-formed of that filetype and then convert it to a
                 // PHP array.
+
+                // Before anything, standardize the line endings of our string.
+                $string_or_array = preg_replace('~\R~u', "\r\n", $string_or_array);
+
                 switch (strtolower($filetype)) {
 
                     // For CSV there is nothing to be validated, really.
@@ -108,11 +112,11 @@ class VisualBudget_Validator {
      */
     public function sanitize_data($data_array) {
         // This sequence of events is pretty self-explanatory.
-        $data_array = self::pad_to_rectangle($data_array);
+        $data_array = $this->pad_to_rectangle($data_array);
         $data_array = self::trim_all_elements($data_array);
         $data_array = self::remove_empty_rows($data_array);
         $data_array = self::remove_empty_cols($data_array);
-        $data_array = self::slugify_headers($data_array, 0);
+        $data_array = $this->slugify_headers($data_array, 0);
         // $data_array = self::slugify_levels($data_array, 0, array('/#/'=>'num'));
         $data_array = $this->infer_levels($data_array);
 
@@ -124,11 +128,19 @@ class VisualBudget_Validator {
      * @param  array   $array   The array to be padded.
      * @param  string  $val     The value of newly created array elements.
      */
-    public static function pad_to_rectangle($array, $val='') {
-        // Note that a 2-dimensional array can only be non-rectangular in
+    public function pad_to_rectangle($array, $val='') {
+        // Note that due to the nature of the data structure,
+        // a 2-dimensional array can only be non-rectangular in
         // the 2nd dimension (i.e. it can have a ragged side, but not a
         // ragged top or bottom).
         $row_lengths = array_map(function($a){return count($a);}, $array);
+
+        if (count(array_unique($row_lengths)) > 1) {
+            $this->notifier->add('Not all rows of the uploaded dataset were '
+                            . 'the same length. Rows have been extended on the '
+                            . 'right to rectangularize the dataset.', 'warning');
+        }
+
         $max_length = max($row_lengths);
         foreach($array as $i=>$row) {
             $array[$i] = array_pad($row, $max_length, $val);
@@ -189,7 +201,7 @@ class VisualBudget_Validator {
      * have had spaces converted to underscores, and have had
      * dangerous characters removed).
      */
-    public static function slugify_headers($array, $case=1, $custom_mappings=array()) {
+    public function slugify_headers($array, $case=1, $custom_mappings=array()) {
         // A counter for empty field names. If any nonempty column doesn't
         // have a header, we will call it UNKNOWN_FIELD_N.
         $empty_counter = 0;
@@ -198,11 +210,23 @@ class VisualBudget_Validator {
         for ($i=0; $i<count($array[0]); $i++) {
             $slug = self::slugify($array[0][$i], $case, $custom_mappings);
             if (empty($slug)) {
-                $slug = "UNKNOWN_FIELD_" . $empty_counter;
+                $slug = "UNKNOWN_FIELD_" . ($empty_counter+1);
                 $empty_counter++;
             }
             $array[0][$i] = $slug;
         }
+
+        if ($empty_counter) {
+            if ($empty_counter == 1) {
+                $text = "One header field was found to be empty. It has "
+                        . "been named " . $slug . ".";
+            } else {
+                $text = $empty_counter . " header fields were found be empty. "
+                        . "They have been named by the system.";
+            }
+            $this->notifier->add($text, 'warning');
+        }
+
         return $array;
     }
 
@@ -296,23 +320,49 @@ class VisualBudget_Validator {
                 continue;
             }
 
-            // $flag is set to true whenever inferences are (or seem to be) complete.
-            $flag = 0;
+            // Two flags. One for checking if we've finished scanning
+            // through empty levels. These are the LEVELs of highest
+            // number which may not be used. E.g. LEVEL1--3 may be
+            // defined, and then there might be an unused LEVEL4 column
+            // which should not affect inference.
+            $through_scanning_unused_levels = 0;
+
+            // This flag is set to true when inference begins. We use
+            // it to check for malformed rows.
+            $inference_has_begun = 0;
 
             // Loop through the level columns on each row, inferring as necessary.
-            foreach ($ordered_levels as $n => $level_name) {
+            // We use a while loop rather than a foreach loop because we are
+            // walking backwards through the array.
+            $n = count($ordered_levels) - 1;
+            while ($n+1) {
 
-                // If this element is empty, it means we should infer.
+                // Check to see if the LEVEL field is empty.
                 if ( empty($row[$n]) ) {
 
-                    // Infer the value from the row above.
-                    // Note that we infer even if we flagged this row:
-                    // after all, we need to know all the levels before
-                    // we can do anything with the data. So we fill it in
-                    // however we're able.
-                    $data[$m][$n] = $data[$m-1][$n];
+                    // Check to see if we are done with unused unused LEVELs.
+                    if ($through_scanning_unused_levels) {
 
-                    if ($flag == 1) {
+                        // Infer the value from the row above.
+                        // Note that we infer even if we flagged this row:
+                        // after all, we need to know all the levels before
+                        // we can do anything with the data. So we fill it in
+                        // however we're able.
+                        $data[$m][$n] = $data[$m-1][$n];
+
+                        // Inference has begun.
+                        $inference_has_begun++;
+                    }
+
+                } else {
+                    // $flag > 0 indicates that we have stopped inferring,
+                    // and all LEVELs hereon should be defined explicitly.
+                    // If there are any further inferences, we have a problem.
+                    $through_scanning_unused_levels++;
+
+                    // Check to see if the row violates inference rules.
+                    // If so, flag it.
+                    if ($inference_has_begun) {
                         // This is a problem. It means that levels are being
                         // inferred between other levels. Add this row number
                         // to the list of flagged rows. We add 2 to the row
@@ -321,17 +371,16 @@ class VisualBudget_Validator {
                         // are going to 1-index the rows.
                         $flagged_rows[] = $m+2;
                     }
-                } else {
-                    // $flag > 0 indicates that we have stopped inferring,
-                    // and all LEVELs hereon should be defined explicitly.
-                    // If there are any further inferences, we have a problem.
-                    $flag++;
                 }
+
+                // Decrement the index.
+                $n--;
             }
         }
 
         // If there are flagged rows, we'll want to notify the user of them
         // via the notifier.
+        $flagged_rows = array_unique($flagged_rows);
         if ( !empty($flagged_rows) ) {
             // Prettify the text to be written in the notice.
             if (count($flagged_rows) == 1) {
@@ -420,13 +469,30 @@ class VisualBudget_Validator {
     public static function categorize_column($string) {
         if (preg_match('/^LEVEL[0-9]+$/i', $string)) {
             return 1;  // level
-        } elseif (strtotime($string) !== false) {
+        } elseif (self::is_date($string)) {
             return 0;  // timepoint
         } else {
             return -1; // metadata
         }
     }
 
+    /**
+     * Recognize dates, including those of the form "2Q2016" or "Q2 16"
+     */
+    public static function is_date($string) {
+        // "Normal" dates.
+        if (strtotime($string) !== false) {
+            return true;
+        }
+
+        // Quarterly dates.
+        if (    preg_match("/([1-4]q|q[1-4])\s*([\d]{2,4})/i", $string)
+             || preg_match("/([\d]{2,4})\s*([1-4]q|q[1-4])/i", $string) ) {
+            return true;
+        }
+
+        return false;
+    }
 
     /**
      * Check to see whether a PHP is valid budget data according

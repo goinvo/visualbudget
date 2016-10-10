@@ -311,6 +311,9 @@ class VisualBudget_Admin {
 
         // Add the VB admin CSS file
         wp_enqueue_style( 'visualbudget_css', plugin_dir_url( __FILE__ ) . 'css/visualbudget-admin.css', array(), VISUALBUDGET_VERSION, 'all' );
+
+        // Add the VB admin CSS file
+        wp_enqueue_style( 'jquerymodal_css', plugin_dir_url( __FILE__ ) . 'css/jquery.modal.css', array(), VISUALBUDGET_VERSION, 'all' );
     }
 
     /**
@@ -318,11 +321,14 @@ class VisualBudget_Admin {
      */
     public function enqueue_scripts() {
 
-        // Add the VB admin JS file
+        // Add the VB admin javascript file
         wp_enqueue_script( 'visualbudget_js', plugin_dir_url( __FILE__ ) . 'js/visualbudget-admin.js', array( 'jquery' ), VISUALBUDGET_VERSION, false );
 
-        // Add D3.js.
+        // Add D3
         wp_enqueue_script( 'd3', plugin_dir_url( __FILE__ ) . 'https://cdnjs.cloudflare.com/ajax/libs/d3/4.2.6/d3.min.js', array( 'jquery' ), VISUALBUDGET_VERSION, false );
+
+        // Add jQuery
+        wp_enqueue_script( 'jquerymodal_js', plugin_dir_url( __FILE__ ) . 'js/jquery.modal.js', array( 'jquery' ), VISUALBUDGET_VERSION, false );
     }
 
     /**

@@ -443,6 +443,11 @@ class VisualBudget_Dataset {
         return json_encode($props);
     }
 
+    // Get the data.
+    public function get_data() {
+        return $this->data;
+    }
+
     // Get the JSON representation of this dataset.
     public function get_json() {
         return json_encode($this->data);

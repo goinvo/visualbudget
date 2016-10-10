@@ -486,8 +486,8 @@ class VisualBudget_Validator {
         }
 
         // Quarterly dates.
-        if ( preg_match("/([1-4]q|q[1-4])\s*([\d]{2,4})/i")
-            || preg_match("/([\d]{2,4})\s*([1-4]q|q[1-4])/i") ) {
+        if (    preg_match("/([1-4]q|q[1-4])\s*([\d]{2,4})/i", $string)
+             || preg_match("/([\d]{2,4})\s*([1-4]q|q[1-4])/i", $string) ) {
             return true;
         }
 

@@ -128,6 +128,9 @@ class VisualBudget {
 
         // Display all the notices.
         $this->loader->add_action( 'admin_notices', $plugin_admin, 'notifications_callback' );
+
+        // FIXME: this doesn't work.
+        $this->loader->add_action('wp_enqueue_scripts', array($this, 'no_more_jquery'));
     }
 
     /**
@@ -140,6 +143,9 @@ class VisualBudget {
 
         $this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_styles' );
         $this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
+
+        $this->loader->add_action('wp_enqueue_scripts', array($this, 'no_more_jquery'));
+
 
     }
 
@@ -162,7 +168,7 @@ class VisualBudget {
             'iframe' => null
         ), $atts );
 
-        $vis_url = VISUALBUDGET_URL . "vis.php?" . http_build_query($a);
+        $vis_url = VISUALBUDGET_URL . "vis/vis.php?" . http_build_query($a);
 
         // If the "iframe" variable was passed, then return an iframe element.
         if ($a['iframe']) {
@@ -175,6 +181,15 @@ class VisualBudget {
             return file_get_contents($vis_url);
         }
 
+    }
+
+    /**
+     * Prevent WP from loading old verions of jquery.
+     */
+    private function use_new_jquery(){
+        wp_deregister_script('jquery');
+        wp_register_script('jquery', "https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js", false, null);
+        wp_enqueue_script('jquery');
     }
 
     /**

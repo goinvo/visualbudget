@@ -327,7 +327,7 @@ class VisualBudget_Admin {
         // Add D3
         wp_enqueue_script( 'd3', plugin_dir_url( __FILE__ ) . 'https://cdnjs.cloudflare.com/ajax/libs/d3/4.2.6/d3.min.js', array( 'jquery' ), VISUALBUDGET_VERSION, false );
 
-        // Add jQuery
+        // Add jQuery modal
         wp_enqueue_script( 'jquerymodal_js', plugin_dir_url( __FILE__ ) . 'js/jquery.modal.js', array( 'jquery' ), VISUALBUDGET_VERSION, false );
     }
 

@@ -29,6 +29,6 @@ if (empty($datasets)) {
 
 ?>
 </p>
-<iframe src='/wp-content/plugins/visualbudget/vis.php?data=1475700821' style='width:100%; height:500px'></iframe>
+<iframe src='/wp-content/plugins/visualbudget/vis/vis.php?data=1475700821&iframe' style='width:100%; height:500px'></iframe>
 
 </div>

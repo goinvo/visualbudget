@@ -157,10 +157,12 @@ class VisualBudget {
      */
     public function visualbudget_func( $atts ) {
         $a = shortcode_atts( array(
-            'data' => ''
+            'data' => '',
+            'vis' => '',
+            'iframe' => null
         ), $atts );
 
-        return "<iframe src='" . VISUALBUDGET_URL . "vis.php?data=" . urlencode($a['data']) . "'"
+        return "<iframe src='" . VISUALBUDGET_URL . "vis.php?" . http_build_query($a) . "'"
             . " width='100%' height='100px' style='border:1px solid #aaa;'>"
             . "</iframe>";
     }

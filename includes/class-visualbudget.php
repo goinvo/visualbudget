@@ -162,9 +162,19 @@ class VisualBudget {
             'iframe' => null
         ), $atts );
 
-        return "<iframe src='" . VISUALBUDGET_URL . "vis.php?" . http_build_query($a) . "'"
-            . " width='100%' height='100px' style='border:1px solid #aaa;'>"
-            . "</iframe>";
+        $vis_url = VISUALBUDGET_URL . "vis.php?" . http_build_query($a);
+
+        // If the "iframe" variable was passed, then return an iframe element.
+        if ($a['iframe']) {
+            return "<iframe src='" . $vis_url . "'"
+                . " width='100%' height='300px' style='border:1px solid #aaa;'>"
+                . "</iframe>";
+        } else {
+            // Otherwise, return a div. We'll get the div by requesting the same page
+            // with the iframe variable unset.
+            return file_get_contents($vis_url);
+        }
+
     }
 
     /**

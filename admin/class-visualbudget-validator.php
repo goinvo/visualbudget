@@ -416,8 +416,8 @@ class VisualBudget_Validator {
      *                LEVEL. For timepoint columns, that means ascending order
      *                of date. For metadata columns, that means alphabetical order.
      * @example  For $category = 1, referring to LEVEL columns,
-     *           the returned array [4,7,..] would mean that LEVEL1 is column 4,
-     *           LEVEL2 is column 7, etc.
+     *           the returned array [4 => "LEVEL1", 7 => "LEVEL2",..]
+     *           would mean that LEVEL1 is column 4, LEVEL2 is column 7, etc.
      */
     public static function ordered_columns_of_type($header, $category) {
 

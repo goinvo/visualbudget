@@ -51,41 +51,12 @@ class VisualBudget_Dataset_Restructure {
 
         // Loop through and add each row as a leaf to the tree.
         foreach ($data as $m => $row) {
-            $tree = self::recursive_leaf_append($tree, $row, $ordered_column_categories);
+            $level_names = 
+            $new_leaf = create_leaf($row, $ordered_column_categories);
+            insert_into($tree, $level_names, $leaf);
         }
 
         return $tree;
-    }
-
-    /**
-     * Recursive function to add a leaf to the tree. Given a $tree, returns
-     * a new tree with the leaf represented by $row added.
-     */
-    public static function recursive_leaf_append($tree, $row, $ordered_column_categories) {
-
-        // If there is only one ordered_level left or if the next LEVEL field is
-        // empty, then that means we've hit the end of the line and we should
-        // append a leaf.
-
-        if (empty($row[$ordered_levels[1]])) {
-            // Append the leaf.
-            $tree =
-        } else {
-
-        }
-
-        foreach ($ordered_levels as $i => $n) {
-            // Check to see if $n is the highest LEVEL which is nonempty,
-            // or if it is the maximum LEVEL number (both are achieved
-            // with this one test).
-            if (empty($data[$m][$ordered_levels[$n+1]])) {
-
-            } else {
-                // This is not a leaf of the tree. Just make sure the
-                // node exists and has the right properties.
-                $tree
-            }
-        }
     }
 
     /**
@@ -120,7 +91,58 @@ class VisualBudget_Dataset_Restructure {
                     );
         }
 
+        // No children.
+        $leaf['children'] = array();
+
         return $leaf;
+    }
+
+    /**
+     * Given a multidimensional array and a list of names,
+     * insert a new item into it at arbitrary depth.
+     *
+     * This function is loosely based on code from
+     * http://stackoverflow.com/a/2447631/1516307
+     */
+    public static function insert_into(&$tree, array $names, $leaf) {
+        // We simply don't do anything with the last name.
+        // It is the name of the leaf, which was already created.
+        $last = array_pop($names);
+
+        // Dive into the tree one dimension at a time, eventually
+        // setting the appropriate value.
+        foreach($names as $name) {
+
+            // Create the "name" property if necessary.
+            if( empty($tree['name']) ) {
+                $tree['name'] = $name;
+            }
+
+            // Create the "children" property if necessary.
+            if( empty($tree['children']) ) {
+                $tree['children'] = array();
+            }
+
+            // Create the "meta" property if necessary.
+            if( empty($tree['meta']) ) {
+                $tree['meta'] = array();
+            }
+
+            // Check to see if the next child exists; create it if not.
+            if( empty(array_filter($tree['children'],
+                    function($a) use ($name) { return $a['name'] == $name; } )) ) {
+                array_push($tree['children'], array('name' => $name));
+            }
+
+            // Now find the right child and set the pointer to it.
+            $index = array_keys(array_filter($tree['children'],
+                        function($a) use ($name) { return $a['name'] == $name; } ));
+
+            $tree = &$tree['children'][$index[0]];
+        }
+
+        // Now add the leaf to the tree.
+        array_push($tree['children'], $leaf);
     }
 
     /**

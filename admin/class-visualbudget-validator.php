@@ -307,7 +307,7 @@ class VisualBudget_Validator {
         // Get an array of the LEVEL column titles, ordered properly
         // and with the correct indices (i.e. indices referring to
         // the levels of the original dataset). See function for details.
-        $ordered_levels = self::ordered_columns_of_type($header, 1);
+        $ordered_levels = array_keys(self::ordered_columns_of_type($header, 1));
 
         // We will flag rows that aren't inferring properly.
         $flagged_rows = array();
@@ -338,7 +338,7 @@ class VisualBudget_Validator {
             while ($n+1) {
 
                 // Check to see if the LEVEL field is empty.
-                if ( empty($row[$n]) ) {
+                if ( empty($row[$ordered_levels[$n]]) ) {
 
                     // Check to see if we are done with unused unused LEVELs.
                     if ($through_scanning_unused_levels) {
@@ -348,7 +348,7 @@ class VisualBudget_Validator {
                         // after all, we need to know all the levels before
                         // we can do anything with the data. So we fill it in
                         // however we're able.
-                        $data[$m][$n] = $data[$m-1][$n];
+                        $data[$m][$ordered_levels[$n]] = $data[$m-1][$ordered_levels[$n]];
 
                         // Inference has begun.
                         $inference_has_begun++;
@@ -440,6 +440,14 @@ class VisualBudget_Validator {
         natcasesort($ordered_levels);
 
         return $ordered_levels;
+    }
+
+
+    /**
+     * Return the number of columns of category $category in $header.
+     */
+    public static function number_of_columns_of_type($header, $category) {
+        return count(self::ordered_columns_of_type($header, $category));
     }
 
     /**

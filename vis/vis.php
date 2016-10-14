@@ -12,7 +12,7 @@ $hash = hash('crc32', $query_string);
 $dataset_id = $_GET['data'];
 $vis_type = $_GET['vis'];
 $dataset_url = dirname(dirname($_SERVER["REQUEST_URI"]))
-                . "/datasets/" . $dataset_id . "_data.json";
+                . "/datasets/" . $dataset_id . ".json";
 
 // Build the chart div.
 $chart_div = "<div "

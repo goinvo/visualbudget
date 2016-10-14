@@ -192,6 +192,9 @@ class VisualBudget_Dataset_Restructure {
             $tree['dollarAmounts'] = $dollars_sum;
         }
 
+        // Hash this node of the tree.
+        $tree['hash'] = hash('crc32', serialize($tree));
+
         return $tree;
     }
 

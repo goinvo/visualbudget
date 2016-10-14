@@ -50,6 +50,11 @@ class VisualBudget_Admin {
         // The validator class hold a bunch of static methods for validating data.
         require_once VISUALBUDGET_PATH . 'admin/class-visualbudget-validator.php';
 
+        // The validator class hold a bunch of static methods for restructuring data
+        // from flat spreadsheets (2-D arrays) to associative nested ones for export
+        // as JSON of the kind D3 likes.
+        require_once VISUALBUDGET_PATH . 'admin/class-visualbudget-dataset-restructure.php';
+
         // The class which handles all the settings of VB.
         require_once VISUALBUDGET_PATH . 'admin/class-visualbudget-admin-settings.php';
 

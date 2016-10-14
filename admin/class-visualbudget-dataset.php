@@ -450,7 +450,8 @@ class VisualBudget_Dataset {
 
     // Get the JSON representation of this dataset.
     public function get_json() {
-        return json_encode($this->data);
+        $restructured_data = VisualBudget_Dataset_Restructure::restructure($this->data);
+        return json_encode($restructured_data);
     }
 
     // Get the original blob of this dataset, if it exists.

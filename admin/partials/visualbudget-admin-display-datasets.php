@@ -46,7 +46,7 @@ if (empty($datasets)) {
 } else {
 
     // If there are datasets, print some information for each one
-    foreach ($datasets as $n=>$dataset) {
+    foreach ($datasets as $n => $dataset) {
         $props = $dataset->get_properties();
 
         echo '<br/>';
@@ -61,9 +61,9 @@ if (empty($datasets)) {
         echo date('H:i', $props['created']) . ' on '. date('j M Y', $props['created']);
         echo '<br/>';
         echo '<span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span>';
-        echo '<small><a href="' . VISUALBUDGET_UPLOAD_URL . $props['filename'] . '">'
+        echo '<small><a href="' . VISUALBUDGET_UPLOAD_URL . $props['filename_json'] . '">'
                     . 'JSON</a></small>';
-        echo ' &middot; <small><a href="' . VISUALBUDGET_UPLOAD_URL . $props['original_filename'] . '">'
+        echo ' &middot; <small><a href="' . VISUALBUDGET_UPLOAD_URL . $props['filename_original'] . '">'
                     . 'Original</a></small>';
         echo '<br/>';
         // echo '<span class="glyphicon glyphicon-trash" aria-hidden="true"></span>';
@@ -71,7 +71,7 @@ if (empty($datasets)) {
 
         echo '</div><div class="col-md-8">';
 
-        $corner = VisualBudget_Dataset::infer_levels($dataset->corner());
+        $corner = $dataset->corner();
         $alldata = $dataset->get_data();
 
         echo '<div id="datamodal' . $n . '" style="display:none;" class="bootstrap-wrapper"><small>' . make_html_table($alldata) . '</small></div>';

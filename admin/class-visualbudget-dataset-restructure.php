@@ -172,7 +172,11 @@ class VisualBudget_Dataset_Restructure {
     public static function sum_tree($tree) {
 
         if ( empty($tree['children']) ) {
-            // Do nothing. This is a leaf, so nothing to sum. Base case.
+            // This is a leaf, so nothing to sum. Base case.
+            // We will, however, make sure everything is a number.
+            foreach ($tree['dollarAmounts'] as &$item) {
+                $item['dollarAmount'] += 0; // Convert from string to number.
+            }
 
         } else {
             // We will create an array of sums.

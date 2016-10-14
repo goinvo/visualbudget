@@ -212,6 +212,10 @@ class VisualBudget_Dataset {
             // (But don't create the file itself yet)
             $this->properties['filename'] = $this->properties['created'] . '_data.json';
 
+            // The filename, since it needs one
+            // (But don't create the file itself yet)
+            $this->properties['restructured_filename'] = $this->properties['created'] . '_data2.json';
+
             // The meta filename
             $this->properties['meta_filename'] = $this->properties['created'] . '_meta.json';
 
@@ -425,6 +429,7 @@ class VisualBudget_Dataset {
                 'id',
                 'created',
                 'filename',
+                'restructured_filename',
                 'meta_filename',
                 'original_filename',
                 'uploaded_name',
@@ -450,6 +455,11 @@ class VisualBudget_Dataset {
 
     // Get the JSON representation of this dataset.
     public function get_json() {
+        return json_encode($this->data);
+    }
+
+    // Get the restructured JSON representation of this dataset.
+    public function get_restructured_json() {
         $restructured_data = VisualBudget_Dataset_Restructure::restructure($this->data);
         return json_encode($restructured_data);
     }
@@ -462,6 +472,11 @@ class VisualBudget_Dataset {
     // Get the filename of this dataset.
     public function get_filename() {
         return $this->properties['filename'];
+    }
+
+    // Get the filename of this dataset.
+    public function get_restructured_filename() {
+        return $this->properties['restructured_filename'];
     }
 
     // Get the filename of this metadata to this dataset.

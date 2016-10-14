@@ -191,6 +191,8 @@ class VisualBudget_Admin {
                 // and write the original file to the 'datasets/orignals' directory.
                 $this->datasetmanager->write_dataset( $dataset->get_filename(),
                                               $dataset->get_json() );
+                $this->datasetmanager->write_dataset( $dataset->get_restructured_filename(),
+                                              $dataset->get_restructured_json() );
                 $this->datasetmanager->write_dataset( $dataset->get_meta_filename(),
                                               $dataset->get_meta_json() );
                 $this->datasetmanager->write_dataset( $dataset->get_original_filename(),

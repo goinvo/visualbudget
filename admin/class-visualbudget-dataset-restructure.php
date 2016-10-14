@@ -36,6 +36,7 @@ class VisualBudget_Dataset_Restructure {
      */
     public static function generate_tree($data_array, $title) {
 
+        // FIXME: Is this require necessary?
         require_once 'class-visualbudget-validator.php';
 
         $header = $data_array[0];            // Just the first row
@@ -61,16 +62,18 @@ class VisualBudget_Dataset_Restructure {
                                     },
                                     array_keys($ordered_column_categories[1]));
 
+            // This filters out all empty names.
+            $level_names = array_filter($level_names);
+
             // We don't need the last name, which is the name of the leaf itself.
             array_pop($level_names);
 
             // Create the new leaf.
             $new_leaf = self::create_leaf($row, $ordered_column_categories);
 
+            // Add the new leaf to the tree.
             self::insert_into($tree, $level_names, $new_leaf);
         }
-
-        error_log(print_r($tree, true));
 
         return $tree;
     }
@@ -79,6 +82,8 @@ class VisualBudget_Dataset_Restructure {
      * Create a new leaf.
      */
     public static function create_leaf($row, $ordered_column_categories) {
+
+        // Create a new array for the leaf.
         $leaf = array();
 
         // The last defined LEVEL is the "name" of the leaf.
@@ -153,9 +158,9 @@ class VisualBudget_Dataset_Restructure {
 
             $tree = &$tree['children'][$index[0]];
         }
+
         // Now add the leaf to the tree.
         array_push($tree['children'], $leaf);
-
     }
 
     /**

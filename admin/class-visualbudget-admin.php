@@ -50,6 +50,11 @@ class VisualBudget_Admin {
         // The validator class hold a bunch of static methods for validating data.
         require_once VISUALBUDGET_PATH . 'admin/class-visualbudget-validator.php';
 
+        // The validator class hold a bunch of static methods for restructuring data
+        // from flat spreadsheets (2-D arrays) to associative nested ones for export
+        // as JSON of the kind D3 likes.
+        require_once VISUALBUDGET_PATH . 'admin/class-visualbudget-dataset-restructure.php';
+
         // The class which handles all the settings of VB.
         require_once VISUALBUDGET_PATH . 'admin/class-visualbudget-admin-settings.php';
 
@@ -186,6 +191,8 @@ class VisualBudget_Admin {
                 // and write the original file to the 'datasets/orignals' directory.
                 $this->datasetmanager->write_dataset( $dataset->get_filename(),
                                               $dataset->get_json() );
+                $this->datasetmanager->write_dataset( $dataset->get_restructured_filename(),
+                                              $dataset->get_restructured_json() );
                 $this->datasetmanager->write_dataset( $dataset->get_meta_filename(),
                                               $dataset->get_meta_json() );
                 $this->datasetmanager->write_dataset( $dataset->get_original_filename(),

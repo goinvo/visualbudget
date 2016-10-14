@@ -50,6 +50,11 @@ class VisualBudget_Admin {
         // The validator class hold a bunch of static methods for validating data.
         require_once VISUALBUDGET_PATH . 'admin/class-visualbudget-validator.php';
 
+        // The validator class hold a bunch of static methods for restructuring data
+        // from flat spreadsheets (2-D arrays) to associative nested ones for export
+        // as JSON of the kind D3 likes.
+        require_once VISUALBUDGET_PATH . 'admin/class-visualbudget-dataset-restructure.php';
+
         // The class which handles all the settings of VB.
         require_once VISUALBUDGET_PATH . 'admin/class-visualbudget-admin-settings.php';
 
@@ -184,11 +189,13 @@ class VisualBudget_Admin {
 
                 // Write the dataset and its meta information to the 'datasets' directory
                 // and write the original file to the 'datasets/orignals' directory.
-                $this->datasetmanager->write_dataset( $dataset->get_filename(),
-                                              $dataset->get_json() );
-                $this->datasetmanager->write_dataset( $dataset->get_meta_filename(),
+                $this->datasetmanager->write_dataset( $dataset->get_filename('json'),
+                                              $dataset->get_data('json') );
+                $this->datasetmanager->write_dataset( $dataset->get_filename('csv'),
+                                              $dataset->get_data('csv') );
+                $this->datasetmanager->write_dataset( $dataset->get_filename('meta'),
                                               $dataset->get_meta_json() );
-                $this->datasetmanager->write_dataset( $dataset->get_original_filename(),
+                $this->datasetmanager->write_dataset( $dataset->get_filename('original'),
                                               $dataset->get_original_blob() );
 
             }
@@ -210,14 +217,14 @@ class VisualBudget_Admin {
         // a real file.
         $delete_num = false;
         if ( isset($_GET['delete'])
-            && $this->datasetmanager->is_file($_GET['delete'] . '_data.json') ) {
+            && $this->datasetmanager->is_file($_GET['delete'] . '_meta.json') ) {
 
             $delete_num = $_GET[ 'delete' ];
         }
 
         if ($delete_num) {
             // We must delete every file with the $delete_num value in the filename;
-            // $delete_num is a number, and we search for NUMBER_data.json
+            // $delete_num is a number, and we search for NUMBER.json
             // NUMBER_meta.json, etc.
             $filenames_to_delete = array_filter($filenames,
                 function($filename) use ($delete_num) {
@@ -250,7 +257,8 @@ class VisualBudget_Admin {
 
         // Just get the IDs of the datasets
         $ids = array_map(function($i) {
-                return explode('_', $i['name'])[0];
+                $temp = explode('_', $i['name'])[0];
+                return explode('.', $temp)[0];
             }, $file_array);
 
         // We'll have duplicates, so get a unique set

@@ -76,7 +76,7 @@ class VisualBudget_Dataset {
             $v = new VisualBudget_Validator($this->notifier);
 
             // Get the filetype and the blob, and try to validate it.
-            $filetype = $this->properties['original_extension'];
+            $filetype = $this->properties['uploaded_extension'];
             $data_string = $this->original_blob;
             $result = $v->validate($data_string, $filetype);
 
@@ -117,9 +117,8 @@ class VisualBudget_Dataset {
         $meta = file_get_contents(VISUALBUDGET_UPLOAD_PATH . $id . '_meta.json');
         $this->properties = json_decode($meta, true);
 
-        // JSON data.
-        $data_json = file_get_contents($this->get_filepath()); // FIXME: Same.
-        $this->data = json_decode($data_json);
+        // Set the data.
+        $this->data = array_map('str_getcsv', file($this->get_filepath('csv')));
     }
 
     /**
@@ -141,7 +140,7 @@ class VisualBudget_Dataset {
             // And the file extension, used for checking filetype
             // (MIME type is not always reliable).
             $pathinfo = pathinfo($this->properties['uploaded_name']);
-            $this->properties['original_extension'] = $pathinfo['extension'];
+            $this->properties['uploaded_extension'] = $pathinfo['extension'];
 
         } else {
 
@@ -180,7 +179,7 @@ class VisualBudget_Dataset {
                 // And the file extension, used for checking filetype
                 // (MIME type is not always reliable).
                 $pathinfo = pathinfo($this->properties['uploaded_name']);
-                $this->properties['original_extension'] = $pathinfo['extension'];
+                $this->properties['uploaded_extension'] = $pathinfo['extension'];
 
             } else {
 
@@ -208,210 +207,27 @@ class VisualBudget_Dataset {
             // The same as 'created', for now
             $this->properties['id'] = $this->properties['created'];
 
-            // The filename, since it needs one
-            // (But don't create the file itself yet)
-            $this->properties['filename'] = $this->properties['created'] . '_data.json';
+            // The filename for the deep JSON
+            $this->properties['filename_csv'] = $this->properties['id'] . '.csv';
+
+            // The filename for the flat JSON
+            $this->properties['filename_json'] = $this->properties['id'] . '.json';
 
             // The meta filename
-            $this->properties['meta_filename'] = $this->properties['created'] . '_meta.json';
+            $this->properties['filename_meta'] = $this->properties['id'] . '_meta.json';
 
             // What is the original extension?
             if ( isset($this->properties['uploaded_name']) ) {
                 $pathinfo = pathinfo($this->properties['uploaded_name']);
-                $this->properties['original_extension'] = $pathinfo['extension'];
+                $this->properties['uploaded_extension'] = $pathinfo['extension'];
             }
 
             // The original filename
-            $this->properties['original_filename'] =
-                $this->properties['created'] . '_orig.' . $this->properties['original_extension'];
+            $this->properties['filename_original'] =
+                $this->properties['id'] . '_orig.' . $this->properties['uploaded_extension'];
         }
 
     }
-
-     /**
-      * Query the dataset á la the API.
-      * @param   String   $qlevels      A string of levels to filter by.
-      *                                 Case-insensitive.
-      * @param   String   $timepoints   Optional. A date or date range.
-      * @param   String   $filters      Optional. Metadata filters.
-      *
-      * @return    Either a single number or an array of numbers.
-      *            Subtotals are calculated automatically.
-      *
-      * @example   query("Schools:Utilities:Water", "2012-2015")
-      */
-    public function query($qlevels, $timepoints_str, $filters_str) {
-        // FIXME: $timepoints is currently ignored.
-        // FIXME: $filters is currently ignored.
-        // FIXME: Do error checking and validation on these inputs.
-        //        What should happen if someone tries to break it?
-        //        Maybe display "Badly formed Visual Budget request."
-
-        // Split the dataset into the header row and the rest of the sheet
-        $header = $this->data[0];                  // Just the first row
-        $data = self::infer_levels($this->data);   // Get the inferred data
-        $data = array_slice($data, 1);             // Ignore the header row
-
-        // Get an array of the LEVEL column titles, ordered properly
-        // and with the correct indices (i.e. indices referring to
-        // the levels of the original dataset). See function for details.
-        $ordered_levels = self::ordered_columns_of_type($header, 1);
-        $ordered_levels_indices = array_keys($ordered_levels);
-
-        // This is a safeguard against arrays whose keys have been
-        // tampered with. We want an array with numeric keys 0--N.
-        $qlevels = array_values($qlevels);
-
-        // Now slice the array, getting only the relevant pieces.
-        $slice = array_filter($data,
-                        function ($row) use ($qlevels, $ordered_levels_indices) {
-                            // Loop through each level, checking to see if
-                            // each level matches. If not, return false
-                            // immediately.
-                            foreach ($qlevels as $n => $qlevel) {
-                                // Compare the queried level against the one of this row
-                                if ( strcasecmp($row[$ordered_levels_indices[$n]],
-                                                 $qlevels[$n]) ) {
-                                    // This means the row doesn't match, so return false.
-                                    return false;
-                                }
-                            }
-                            // Made it through all of them, so it looks like
-                            // this row matches the levels.
-                            return true;
-                        });
-
-        // FIXME: Should the $header be array_unshift'd
-        //back onto the front here?
-        return $slice;
-    }
-
-    /**
-     * Returns an array the same size as $header_row containing
-     * the categories of each element of $header_row as determined
-     * by the categorize_column() function.
-     *
-     * @param  Array  $header_row  Array of strings, the first row of a dataset.
-     * @example  column_categories(array('2013','LEVEL1','TOOLTIP'))
-     *           returns Array(0, 1, -1)
-     */
-    public static function column_categories($header_row) {
-        return array_map( Array('VisualBudget_Dataset','categorize_column'),
-                    $header_row );
-    }
-
-    /**
-     * Determines if a string is the title of a LEVEL column,
-     * a timepoint column, or a metadata column.
-     * Returns 1 for LEVEL, 0 for timepoint, -1 for metadata.
-     *
-     * @param  String  $string  The title of a dataset column.
-     */
-    public static function categorize_column($string) {
-        if (preg_match('/^LEVEL[0-9]+$/i', $string)) {
-            return 1;  // level
-        } elseif (strtotime($string) !== false) {
-            return 0;  // timepoint
-        } else {
-            return -1; // metadata
-        }
-    }
-
-    /**
-     * Return a dataset equivalent to the input,
-     * but with inferred levels filled in.
-     */
-    public static function infer_levels($data) {
-
-        // Split the dataset into the header row and the rest of the sheet
-        $header = $data[0];            // Just the first row
-        $data = array_slice($data, 1); // Everything but the first row
-
-        // Get an array of the LEVEL column titles, ordered properly
-        // and with the correct indices (i.e. indices referring to
-        // the levels of the original dataset). See function for details.
-        $ordered_levels = self::ordered_columns_of_type($header, 1);
-
-        // Now loop through and fill in the blanks
-        foreach ($data as $m => $row) {
-
-            // Skip the first row. There is nothing to infer from.
-            if ($m === 0) {
-                continue;
-            }
-
-            // $flag is set to true whenever inferences are (or seem to be) complete.
-            $flag = false;
-
-            // Loop through the level columns on each row, inferring as necessary.
-            foreach ($ordered_levels as $n => $level_name) {
-
-                // If this element is empty, it means we should infer.
-                if ($row[$n] == "") { // FIXME: Test for false or null?
-
-                    // If no flag, then all's well.
-                    if (!$flag) {
-
-                        // Infer the value from the row above.
-                        $data[$m][$n] = $data[$m-1][$n];
-
-                    } else {
-                        // This is a problem. It means that levels are being
-                        // inferred between other levels.
-                        // FIXME: add a warning for malformed dataset.
-                    }
-                } else {
-                    // $flag == true indicates that we have stopped inferring.
-                    // If there are any further inferences, we have a problem.
-                    $flag = true;
-                }
-            }
-        }
-
-        // Prepend the header row back on and then return it.
-        array_unshift($data, $header);
-        return $data;
-    }
-
-    /**
-     * Find out how columns should be ordered, and keep track of their indices.
-     *
-     * @param  array  $header    The first row of a dataset.
-     * @param  int    $category  The category whose indices should be returned.
-     *                           Should be either -1, 0, or 1 per the
-     *                           categorize_column() function.
-     * @return array  Returns an array of integers which represent the indices
-     *                of the columns of type $category arranged in ascending
-     *                order. For LEVEL columns, that means ascending order of
-     *                LEVEL. For timepoint columns, that means ascending order
-     *                of date. For metadata columns, that means alphabetical order.
-     * @example  For $category = 1, referring to LEVEL columns,
-     *           the returned array [4,7,..] would mean that LEVEL1 is column 4,
-     *           LEVEL2 is column 7, etc.
-     */
-    public static function ordered_columns_of_type($header, $category) {
-
-        // Categorize the columns
-        $categories = self::column_categories($header);
-
-        // Filter out non-LEVEL columns. This gets us indices of all LEVEL cols.
-        $levels = array_filter($categories,
-                        function ($i) use ($category) {
-                            return $i === $category;
-                        });
-        $levels = array_keys($levels);
-
-        // This is what we're after: the indices of the columns of type
-        // $category in ascending order.
-        $ordered_levels = array_filter($header,
-            function($i) use ($levels) {
-                return in_array($i, $levels);
-            }, ARRAY_FILTER_USE_KEY);
-        natcasesort($ordered_levels);
-
-        return $ordered_levels;
-    }
-
 
     /**
      * Get the JSON of metadata to be written to the _meta JSON file.
@@ -424,11 +240,12 @@ class VisualBudget_Dataset {
         $keep = Array(
                 'id',
                 'created',
-                'filename',
-                'meta_filename',
-                'original_filename',
+                'filename_json',
+                'filename_csv',
+                'filename_meta',
+                'filename_original',
                 'uploaded_name',
-                'original_extension',
+                'uploaded_extension',
                 'url'
                 );
 
@@ -444,14 +261,27 @@ class VisualBudget_Dataset {
     }
 
     // Get the data.
-    public function get_data() {
-        return $this->data;
+    public function get_data($format='array') {
+        switch($format) {
+            case 'array':
+                return $this->data;
+                break;
+
+            case 'json':
+                $name = strval($this->properties['id']);
+                $restructured_data = VisualBudget_Dataset_Restructure::restructure($this->data, $name);
+                return json_encode($restructured_data);
+                break;
+
+            case 'csv':
+                return $this->array2d_to_csv($this->data);
+                break;
+
+            default:
+                return $this->data;
+        }
     }
 
-    // Get the JSON representation of this dataset.
-    public function get_json() {
-        return json_encode($this->data);
-    }
 
     // Get the original blob of this dataset, if it exists.
     public function get_original_blob() {
@@ -459,33 +289,32 @@ class VisualBudget_Dataset {
     }
 
     // Get the filename of this dataset.
-    public function get_filename() {
-        return $this->properties['filename'];
-    }
+    public function get_filename($string='json') {
+        switch($string) {
+            case 'json':
+                return $this->properties['filename_json'];
+                break;
 
-    // Get the filename of this metadata to this dataset.
-    public function get_meta_filename() {
-        return $this->properties['meta_filename'];
-    }
+            case 'csv':
+                return $this->properties['filename_csv'];
+                break;
 
-    // Get the filename of the original version of this dataset.
-    public function get_original_filename() {
-        return $this->properties['original_filename'];
+            case 'meta':
+                return $this->properties['filename_meta'];
+                break;
+
+            case 'original':
+                return $this->properties['filename_original'];
+                break;
+
+            default:
+                return null;
+        }
     }
 
     // Get the file path of this dataset.
-    public function get_filepath() {
-        return VISUALBUDGET_UPLOAD_PATH . $this->properties['filename'];
-    }
-
-    // Get the file path of this metadata to this dataset.
-    public function get_meta_filepath() {
-        return VISUALBUDGET_UPLOAD_PATH . $this->properties['meta_filename'];
-    }
-
-    // Get the file path of the original version of this dataset.
-    public function get_original_filepath() {
-        return VISUALBUDGET_UPLOAD_PATH . $this->properties['original_filename'];
+    public function get_filepath($string) {
+        return VISUALBUDGET_UPLOAD_PATH . $this->get_filename($string);
     }
 
     // Vertical dimension of the dataset
@@ -514,8 +343,31 @@ class VisualBudget_Dataset {
         return $this->properties;
     }
 
-    public function get_notifications() {
-        return $this->notifications;
+    /**
+     * Turn an array into a CSV string.
+     *
+     * This function based on code from
+     * https://gist.github.com/johanmeiring/2894568
+     */
+    public function array2d_to_csv($matrix, $delimiter = ',', $enclosure = '"') {
+        $csv = '';
+
+        foreach ($matrix as $row) {
+            // Open a memory "file" for read/write...
+            $fp = fopen('php://temp', 'r+');
+            // ... write the $row array to the "file" using fputcsv()...
+            fputcsv($fp, $row, $delimiter, $enclosure);
+            // ... rewind the "file" so we can read what we just wrote...
+            rewind($fp);
+            // ... read the entire line into a variable...
+            $data = rtrim(stream_get_contents($fp), "\n");
+            // ... close the "file"...
+            fclose($fp);
+            // ... and return the $data to the caller, with the trailing newline from fgets() removed.
+            $csv .= $data . "\n";
+        }
+
+        return rtrim($csv, "\n");
     }
 
 }

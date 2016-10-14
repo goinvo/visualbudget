@@ -268,7 +268,8 @@ class VisualBudget_Dataset {
                 break;
 
             case 'json':
-                $restructured_data = VisualBudget_Dataset_Restructure::restructure($this->data);
+                $name = strval($this->properties['id']);
+                $restructured_data = VisualBudget_Dataset_Restructure::restructure($this->data, $name);
                 return json_encode($restructured_data);
                 break;
 

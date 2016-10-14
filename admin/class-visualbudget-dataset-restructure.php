@@ -170,7 +170,62 @@ class VisualBudget_Dataset_Restructure {
      * @param   array   $tree   N-dimensional array, result of generate_tree()
      */
     public static function sum_tree($tree) {
-        return $tree; // FIXME: to do.
+
+        if ( empty($tree['children']) ) {
+            // Do nothing. This is a leaf, so nothing to sum. Base case.
+
+        } else {
+            // We will create an array of sums.
+            $dollars_sum = array();
+
+            // Sum up the dollars amounts in each child tree.
+            foreach ($tree['children'] as &$child) {
+                $child = self::sum_tree($child); // Recurse.
+                $dollars_sum = self::add_dollar_amounts($dollars_sum, $child['dollarAmounts']);
+            }
+            unset($child);
+
+            $tree['dollarAmounts'] = $dollars_sum;
+        }
+
+        return $tree;
+    }
+
+    /**
+     * Compute the sum of two dollarAmounts fields in data.
+     * A dollarAmounts array is structured as
+     *
+     *   $tree['dollarAmounts'] = array(
+     *                                array(
+     *                                    'date' => 2002,
+     *                                    'dollarAmount' => 89232.31
+     *                                ),
+     *                                array(
+     *                                    'date' => 2003,
+     *                                    'dollarAmount' => 42442.79
+     *                                ),
+     *                                ...
+     *                            )
+     */
+    public static function add_dollar_amounts($array1, $array2) {
+        // Loop through, adding the dollar amounts of $array1 to those
+        // of $array2. The data structure is a bit weird here, which is
+        // why this function is necessary at all.
+        foreach($array2 as $elem) {
+            $date = $elem['date'];
+            $index = array_keys(array_filter($array1,
+                        function($a) use ($date) { return $a['date'] == $date; } ));
+
+            // If index is nonempty, it means $array1 & $array2 both contain that date.
+            if (!empty($index)) {
+                $index = $index[0]; // $index is actually an array.
+                $array1[$index]['dollarAmount'] += $elem['dollarAmount'];
+            } else {
+                array_push($array1, $elem);
+            }
+        }
+
+        return $array1;
     }
 
 }

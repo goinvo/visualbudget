@@ -27,10 +27,9 @@ if (empty($datasets)) {
     echo '</select>';
 }
 
-?>
-</p>
-<iframe src='/wp-content/plugins/visualbudget/vis/vis.php?data=<?php
-echo $props['id'];
-?>&iframe' style='width:100%; height:500px'></iframe>
+echo '</p>';
 
+echo do_shortcode('[visualbudget data=1476477175 vis=linechart]');
+
+?>
 </div>

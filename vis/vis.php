@@ -18,9 +18,10 @@ $dataset_url = dirname(dirname($_SERVER["REQUEST_URI"]))
 $chart_div = "<div "
         . "id='vb-chart-$hash' "
         . "class='vb-chart' "
+        . "data-vb-hash='" . $hash . "' "
         . "data-vb-dataset-url='". $dataset_url . "' "
-        . "data-vb-vis-type='$vis_type' "
         . "data-vb-dataset-id='$dataset_id'"
+        . "data-vb-vis-type='$vis_type' "
         . "></div>";
 
 

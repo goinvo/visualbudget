@@ -26,9 +26,12 @@ class VisualBudget_Public {
 	 */
 	public function enqueue_scripts() {
 
-		wp_enqueue_script( 'vb_vis_js', plugin_dir_url( __FILE__ ) . '../vis/vb.js', array( 'jquery' ), $this->version, false );
+        // Add D3
+        wp_enqueue_script( 'd3_js', 'https://cdnjs.cloudflare.com/ajax/libs/d3/4.2.6/d3.min.js', array(), VISUALBUDGET_VERSION, false );
 
 		wp_enqueue_script( 'vb_public_js', plugin_dir_url( __FILE__ ) . 'js/visualbudget-public.js', array( 'jquery' ), $this->version, false );
+
+		wp_enqueue_script( 'vb_vis_js', plugin_dir_url( __FILE__ ) . '../vis/vb.js', array( 'jquery' ), $this->version, false );
 
 	}
 

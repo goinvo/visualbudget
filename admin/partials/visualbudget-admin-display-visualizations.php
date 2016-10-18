@@ -3,7 +3,7 @@
  * This file displays the content of the "Configuration" tab in the dashboard.
  */
 ?>
-<div><p>
+<div class='bootstrap-wrapper'><p></p>&nbsp;<p>
 
 <?php
 
@@ -29,7 +29,7 @@ if (empty($datasets)) {
 
 echo '</p>';
 
-echo do_shortcode('[visualbudget data=1476477175 vis=linechart]');
+echo do_shortcode('[visualbudget data=1476739268 vis=linechart]');
 
 ?>
 </div>

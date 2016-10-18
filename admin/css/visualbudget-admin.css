@@ -5,6 +5,10 @@
 
 
 
+
+/* *****************************************************
+                    DATASET TABLES
+   ***************************************************** */
 /* Dataset listings div */
 .dataset-listings a.tablelink {
     color: #6a778d;
@@ -93,4 +97,14 @@
     position: fixed;
     margin-left: -28px;
     color: white;
+}
+
+
+
+/* *****************************************************
+                    VISUALIZATIONS
+   ***************************************************** */
+
+.hidden {
+    display: none;
 }

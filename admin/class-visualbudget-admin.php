@@ -322,6 +322,9 @@ class VisualBudget_Admin {
 
         // Add the VB admin CSS file
         wp_enqueue_style( 'jquerymodal_css', plugin_dir_url( __FILE__ ) . 'css/jquery.modal.css', array(), VISUALBUDGET_VERSION, 'all' );
+
+        // Add the VB admin CSS file
+        wp_enqueue_style( 'vis_css', plugin_dir_url( __FILE__ ) . '../vis/vb.css', array(), VISUALBUDGET_VERSION, 'all' );
     }
 
     /**

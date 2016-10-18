@@ -19,6 +19,8 @@ class VisualBudget_Public {
 
 		wp_enqueue_style( 'vb_public_css', plugin_dir_url( __FILE__ ) . 'css/visualbudget-public.css', array(), $this->version, 'all' );
 
+        // Add the VB admin CSS file
+        wp_enqueue_style( 'vis_css', plugin_dir_url( __FILE__ ) . '../vis/vb.css', array(), VISUALBUDGET_VERSION, 'all' );
 	}
 
 	/**

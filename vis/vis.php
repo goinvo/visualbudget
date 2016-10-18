@@ -14,14 +14,17 @@ $vis_type = $_GET['vis'];
 $dataset_url = dirname(dirname($_SERVER["REQUEST_URI"]))
                 . "/datasets/" . $dataset_id . ".json";
 
+// Build a string of the data attributes.
+$data_atts = "data-vb-hash='" . $hash . "' "
+        . "data-vb-dataset-url='". $dataset_url . "' "
+        . "data-vb-dataset-id='$dataset_id'"
+        . "data-vb-vis-type='$vis_type'";
+
 // Build the chart div.
 $chart_div = "<div "
         . "id='vb-chart-$hash' "
         . "class='vb-chart' "
-        . "data-vb-hash='" . $hash . "' "
-        . "data-vb-dataset-url='". $dataset_url . "' "
-        . "data-vb-dataset-id='$dataset_id'"
-        . "data-vb-vis-type='$vis_type' "
+        . $data_atts
         . "></div>";
 
 
@@ -32,9 +35,14 @@ if (isset($_GET['iframe'])) {
     // Note: iframe.php uses the variable $chart_div.
     include 'iframe.php';
 
+} elseif (isset($_GET['data_atts'])) {
+
+    // Just echo the data- attributes.
+    echo trim($data_atts);
+
 } else {
 
-    // If no "iframe" argument, then just spit out the div.
+    // If no "iframe" or "data_atts" argument, then just spit out the div.
     echo $chart_div;
 
 }

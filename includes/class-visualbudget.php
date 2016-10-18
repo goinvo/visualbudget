@@ -128,6 +128,9 @@ class VisualBudget {
 
         // Display all the notices.
         $this->loader->add_action( 'admin_notices', $plugin_admin, 'notifications_callback' );
+
+        // FIXME: this doesn't work.
+        $this->loader->add_action('wp_enqueue_scripts', $plugin_admin, array($this, 'use_new_jquery'));
     }
 
     /**
@@ -141,13 +144,16 @@ class VisualBudget {
         $this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_styles' );
         $this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
 
+        $this->loader->add_action('wp_enqueue_scripts', $plugin_public, array($this, 'use_new_jquery'));
+
+
     }
 
     /**
      * Define the VB shortcode.
      */
     private function define_shortcodes() {
-        // [visualbudget text="display me"]
+        // [visualbudget data=193826342:schools:utilities]
         add_shortcode( 'visualbudget', Array( $this, 'visualbudget_func' ) );
     }
 
@@ -157,12 +163,33 @@ class VisualBudget {
      */
     public function visualbudget_func( $atts ) {
         $a = shortcode_atts( array(
-            'text' => 'Default text.',
+            'data' => '',
+            'vis' => '',
+            'iframe' => null
         ), $atts );
 
-        return "<iframe src='" . VISUALBUDGET_URL . "vis.php?text=" . urlencode($a['text']) . "'"
-            . " width='100%' height='100px' style='border:1px solid #aaa;'>"
-            . "</iframe>";
+        $vis_url = VISUALBUDGET_URL . "vis/vis.php?" . http_build_query($a);
+
+        // If the "iframe" variable was passed, then return an iframe element.
+        if ($a['iframe']) {
+            return "<iframe src='" . $vis_url . "'"
+                . " width='100%' height='300px' style='border:1px solid #aaa;'>"
+                . "</iframe>";
+        } else {
+            // Otherwise, return a div. We'll get the div by requesting the same page
+            // with the iframe variable unset.
+            return file_get_contents($vis_url);
+        }
+
+    }
+
+    /**
+     * Prevent WP from loading old verions of jquery.
+     */
+    public function use_new_jquery(){
+        wp_deregister_script('jquery');
+        wp_register_script('jquery', "https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js", array(), false, true);
+        wp_enqueue_script('jquery');
     }
 
     /**

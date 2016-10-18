@@ -17,20 +17,10 @@ class VisualBudget_Public {
 	 */
 	public function enqueue_styles() {
 
-		/**
-		 * This function is provided for demonstration purposes only.
-		 *
-		 * An instance of this class should be passed to the run() function
-		 * defined in VisualBudget_Loader as all of the hooks are defined
-		 * in that particular class.
-		 *
-		 * The VisualBudget_Loader will then create the relationship
-		 * between the defined hooks and the functions defined in this
-		 * class.
-		 */
+		wp_enqueue_style( 'vb_public_css', plugin_dir_url( __FILE__ ) . 'css/visualbudget-public.css', array(), $this->version, 'all' );
 
-		wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/visualbudget-public.css', array(), $this->version, 'all' );
-
+        // Add the VB admin CSS file
+        wp_enqueue_style( 'vis_css', plugin_dir_url( __FILE__ ) . '../vis/vb.css', array(), VISUALBUDGET_VERSION, 'all' );
 	}
 
 	/**
@@ -38,19 +28,12 @@ class VisualBudget_Public {
 	 */
 	public function enqueue_scripts() {
 
-		/**
-		 * This function is provided for demonstration purposes only.
-		 *
-		 * An instance of this class should be passed to the run() function
-		 * defined in VisualBudget_Loader as all of the hooks are defined
-		 * in that particular class.
-		 *
-		 * The VisualBudget_Loader will then create the relationship
-		 * between the defined hooks and the functions defined in this
-		 * class.
-		 */
+        // Add D3
+        wp_enqueue_script( 'd3_js', 'https://cdnjs.cloudflare.com/ajax/libs/d3/4.2.6/d3.min.js', array(), VISUALBUDGET_VERSION, false );
 
-		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/visualbudget-public.js', array( 'jquery' ), $this->version, false );
+		wp_enqueue_script( 'vb_public_js', plugin_dir_url( __FILE__ ) . 'js/visualbudget-public.js', array( 'jquery' ), $this->version, false );
+
+		wp_enqueue_script( 'vb_vis_js', plugin_dir_url( __FILE__ ) . '../vis/vb.js', array( 'jquery' ), $this->version, false );
 
 	}
 

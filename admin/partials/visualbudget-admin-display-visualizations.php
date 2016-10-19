@@ -45,7 +45,7 @@ if (empty($datasets)) {
 
 <br/><br/>
 <br/><br/>
-The above vis is generating using the following shortcode:
+The above vis is generated using the following shortcode:
 <br/>
 <br/>
 <pre id='vb-shortcode'></pre>

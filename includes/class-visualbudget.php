@@ -41,7 +41,7 @@ class VisualBudget {
         define('VISUALBUDGET_SLUG', 'visualbudget' );
         define('VISUALBUDGET_VERSION', '0.1.0' );
         define('VISUALBUDGET_UPLOAD_DIR', 'datasets/' );
-        define('VISUALBUDGET_PATH', $trailingslashit(dirname(__FILE__, 2)));
+        define('VISUALBUDGET_PATH', $trailingslashit(dirname(dirname(__FILE__))));
         define('VISUALBUDGET_UPLOAD_PATH', VISUALBUDGET_PATH . VISUALBUDGET_UPLOAD_DIR );
 
         /* We cannot set the URL if being called statically. */

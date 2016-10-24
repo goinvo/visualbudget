@@ -5,7 +5,7 @@
  */
 
 if ( ! isset($_GET['rand']) ) {
-    $_GET['rand'] = random_int(PHP_INT_MIN, PHP_INT_MAX);
+    $_GET['rand'] = mt_rand(0, PHP_INT_MAX);
 }
 $query_string = http_build_query($_GET);
 $hash = hash('crc32', $query_string);

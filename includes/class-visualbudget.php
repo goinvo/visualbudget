@@ -29,7 +29,6 @@ class VisualBudget {
         $this->define_admin_hooks();    // Admin hooks.
         $this->define_public_hooks();   // Public hooks.
         $this->define_shortcodes();     // Define the VB shortcodes.
-
     }
 
     /**
@@ -131,6 +130,9 @@ class VisualBudget {
 
         // FIXME: this doesn't work.
         $this->loader->add_action('wp_enqueue_scripts', $plugin_admin, array($this, 'use_new_jquery'));
+
+        // Intercept admin page load request to render a shortcode.
+        $this->loader->add_action('init', $this, 'intercept_query_string_shortcode_render_request');
     }
 
     /**
@@ -181,6 +183,39 @@ class VisualBudget {
             return file_get_contents($vis_url);
         }
 
+    }
+
+    /**
+     * If the GET/POST variable "vb_shortcode" is passed, then render
+     * the query string as a shortcode and echo it. Don't display
+     * the admin page.
+     */
+    public function intercept_query_string_shortcode_render_request() {
+
+        // If the vb_shortcode variable is set
+        if ( isset($_REQUEST['vb_shortcode']) ) {
+
+            // Unset the query string.
+            unset($_REQUEST['vb_shortcode']);
+
+            $pieces = array();
+            foreach($_REQUEST as $key=>$val) {
+                $str = $key . '=' . urldecode($val);
+                array_push($pieces, $str);
+            }
+
+            // Add up the pieces
+            $shortcode = implode(' ', $pieces);
+
+            // Wrap the shortcode in tags.
+            $full_shortcode = sprintf('[visualbudget %s]', $shortcode);
+
+            // Perform the shortcode
+            echo do_shortcode( $full_shortcode );
+
+            // Stop the script before WordPress tries to display a template file.
+            exit;
+        }
     }
 
     /**

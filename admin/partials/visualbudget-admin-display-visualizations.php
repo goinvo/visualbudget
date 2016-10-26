@@ -50,4 +50,13 @@ The above vis is generated using the following shortcode:
 <br/>
 <pre id='vb-shortcode'></pre>
 
+<br/><br/><br/><br/>
+
+<div ng-app>
+<input type="text" ng-model="someText" placeholder="Enter some text">
+<hr>
+<h1>Testing angular.js: {{someText}}</h1>
+</div>
+
+
 </div>

@@ -3,44 +3,95 @@
  * This file displays the content of the "Configuration" tab in the dashboard.
  */
 ?>
-<div class='bootstrap-wrapper'><p></p>&nbsp;<p>
+<div class='bootstrap-wrapper'>
+
+<br/><br/>
+
+<div ng-app="components">
+
+    <tabs>
+        <pane title="Trends">
+        This is trends.<br/>
+        This is trends.<br/>
+        This is trends.<br/>
+        This is trends.<br/>
+        This is trends.<br/>
+        This is trends.<br/>
+        This is trends.<br/>
+        This is trends.<br/>
+        This is trends.<br/>
+        This is trends.<br/>
+        This is trends.<br/>
+        This is trends.<br/>
+        This is trends.<br/>
+        This is trends.<br/>
+        This is trends.<br/>
+        This is trends.<br/>
+        This is trends.<br/>
+        This is trends.<br/>
+        This is trends.<br/>
+        This is trends.<br/>
+        This is trends.<br/>
+        This is trends.<br/>
+        This is trends.<br/>
+        This is trends.<br/>
+        This is trends.<br/>
+        </pane>
+        <pane title="Breakdown">
+        This is a breakdown.
+        </pane>
+        <pane title="Comparison">
+        </pane>
+        <pane title="Ratio">
+        </pane>
+        <pane title="Difference">
+        </pane>
+        <pane title="Metrics">
+        </pane>
+        <pane title="Custom">
+        </pane>
+    </tabs>
+
+</div>
+
+</div>
+
+
+
 
 <?php
+// $datasets = $this->datasets;
 
-$datasets = $this->datasets;
+// if (empty($datasets)) {
 
-if (empty($datasets)) {
+//     // If not, say so.
+//     echo 'There are no datasets.';
 
-    // If not, say so.
-    echo 'There are no datasets.';
+// } else {
 
-} else {
+//     echo '<select id="vb-select-dataset">';
 
-    echo '<select id="vb-select-dataset">';
+//     // If there are datasets, print some information for each one
+//     foreach ($datasets as $n=>$dataset) {
+//         $props = $dataset->get_properties();
+//         $atts = array(
+//                 'data' => $props['id'],
+//                 'vis' => 'linechart',
+//                 'data_atts' => 1
+//             );
+//         $vis_atts_url = VISUALBUDGET_URL . 'vis/vis.php?'
+//                             . http_build_query($atts);
+//         echo '<option '
+//             . file_get_contents($vis_atts_url)
+//             . '>' . $props['uploaded_name'] . '</option>';
+//     }
 
-    // If there are datasets, print some information for each one
-    foreach ($datasets as $n=>$dataset) {
-        $props = $dataset->get_properties();
-        $atts = array(
-                'data' => $props['id'],
-                'vis' => 'linechart',
-                'data_atts' => 1
-            );
-        $vis_atts_url = VISUALBUDGET_URL . 'vis/vis.php?'
-                            . http_build_query($atts);
-        echo '<option '
-            . file_get_contents($vis_atts_url)
-            . '>' . $props['uploaded_name'] . '</option>';
-    }
-
-    echo '</select>';
-}
+//     echo '</select>';
+// }
 
 // echo do_shortcode('[visualbudget data=1476739268 vis=linechart]');
-
 ?>
-</p>
-
+<!--
 <div id='vb-chart' class='vb-chart'></div>
 
 <br/><br/>
@@ -49,14 +100,4 @@ The above vis is generated using the following shortcode:
 <br/>
 <br/>
 <pre id='vb-shortcode'></pre>
-
-<br/><br/><br/><br/>
-
-<div ng-app>
-<input type="text" ng-model="someText" placeholder="Enter some text">
-<hr>
-<h1>Testing angular.js: {{someText}}</h1>
-</div>
-
-
-</div>
+ -->

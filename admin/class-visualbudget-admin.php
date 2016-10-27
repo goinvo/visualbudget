@@ -341,8 +341,9 @@ class VisualBudget_Admin {
         // Add D3
         wp_enqueue_script( 'd3_js', 'https://cdnjs.cloudflare.com/ajax/libs/d3/4.2.6/d3.min.js', array(), VISUALBUDGET_VERSION, false );
 
-        // Add the visualization js file.
+        // Add the visualization js file and submodules.
         wp_enqueue_script( 'vb_js', plugin_dir_url( __FILE__ ) . '../vis/vb.js', array( 'jquery' ), VISUALBUDGET_VERSION, false );
+        wp_enqueue_script( 'vb_linechart_js', plugin_dir_url( __FILE__ ) . '../vis/vb-linechart.js', array( 'jquery' ), VISUALBUDGET_VERSION, false );
 
         // Add jQuery modal
         wp_enqueue_script( 'jquerymodal_js', plugin_dir_url( __FILE__ ) . 'js/jquery.modal.js', array( 'jquery' ), VISUALBUDGET_VERSION, false );

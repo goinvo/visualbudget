@@ -224,3 +224,7 @@
     border-color: #ddd #ddd #ddd transparent;
     *border-left-color: #ffffff;
 }
+
+.tab-content {
+    overflow: hidden;
+}

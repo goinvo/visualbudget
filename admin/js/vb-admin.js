@@ -18,12 +18,6 @@ var visualbudget = (function(vb) {
 })(visualbudget || {});
 
 
-
-/**
- * Kick it off.
- */
-
-
 /**
  * Kick it off.
  */

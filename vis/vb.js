@@ -1,11 +1,5 @@
 /**
- *  Visual Budget main routines.
- */
-
-
-
-/**
- * Define vb.
+ * Define the visualbudget module.
  */
 var visualbudget = (function (vb, $, d3) {
 
@@ -18,9 +12,6 @@ var visualbudget = (function (vb, $, d3) {
         var $chartDivs = $('.vb-chart');
         $.when.apply($, $chartDivs.map(vb.tryToInitializeChart))
             .then(vb.drawAllCharts);
-        // $chartDivs.each(vb.tryToInitializeChart)
-        //     .promise()
-        //     .done(vb.drawAllCharts);
     }
 
     /**
@@ -53,6 +44,9 @@ var visualbudget = (function (vb, $, d3) {
         }
     }
 
+    /**
+     * Redraw all charts on the page.
+     */
     vb.drawAllCharts = function() {
         vb.charts.forEach(function(chart, i, array) {
             chart.draw();
@@ -67,9 +61,17 @@ var visualbudget = (function (vb, $, d3) {
 /**
  * Augment for line chart.
  */
-var visualbudget = (function (vb) {
+var visualbudget = (function (vb, $, d3) {
 
-    vb.Chart = function($div, data) {
+    /**
+     * Define the Chart constructor.
+     *
+     * FIXME: Why does this not work?
+     *      var Chart = vb.Chart = vb.Chart || function(){};
+     *      Chart = function(x,y) { ... };
+     */
+    var Chart = vb.Chart = vb.Chart || function($div, data) {
+
         this.$div = $div;
         this.data = data;
 
@@ -82,7 +84,7 @@ var visualbudget = (function (vb) {
     };
 
 
-    vb.Chart.prototype.draw = function() {
+    Chart.prototype.draw = function() {
         console.log('Drawing chart ' + this.props.hash + '.');
 
         switch(this.props.visType) {
@@ -96,7 +98,7 @@ var visualbudget = (function (vb) {
     }
 
 
-    vb.Chart.prototype.doLineChart = function() {
+    Chart.prototype.doLineChart = function() {
 
         var data = this.data;
 

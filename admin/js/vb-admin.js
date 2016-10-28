@@ -12,34 +12,58 @@
     var vbAdmin = angular.module('vbAdmin', ['components']);
     vbAdmin.controller('vbVisualizationsController', function($scope, $http) {
 
+            $scope.vbChartData = {};
+
+            // The _vbAdminGlobal is set by wp_localize_script() in the vb admin php file.
             var url_ids = _vbAdminGlobal.vbPluginUrl + 'vis/api.php?filter=id';
 
+            // First load all dataset IDs.
             $http.get(url_ids).success( function(ids) {
 
+                // We'll collect metadata of datasets here.
                 var datasets = [];
 
                 // Function to fetch metadata given a dataset ID.
-                // The $http object is from Angular.
                 function fetchMetaFromId(id) {
                     var url_next_meta = _vbAdminGlobal.vbPluginUrl + 'vis/api.php?filename=' + id + '_meta.json';
                     $http.get(url_next_meta).success( function(next_meta) {
                         datasets.push(next_meta);
-                        $scope.vbDatasetSelect = datasets[0];
+                        $scope.vbChartData.dataset = datasets[0]; // FIXME: this should be unnecessary
                     });
                 }
 
                 // Fetch metadata for all datasets.
-                // .apply is native JS
-                // .when, .then, and .map are jQuery
-                // $scope is Angular
                 $.when.apply($, $.map(ids, fetchMetaFromId))
                     .then(function() {
                         // Set the selected dataset to be the first one.
-                        $scope.vbDatasetSelect = datasets[0];
+                        $scope.vbChartData.dataset = datasets[0];
+                        console.log('setting datasets to scope');
+                        $scope.datasets = datasets;
                     });
 
-                $scope.datasets = datasets;
+                // Give $scope access to datasets.
+
             });
+
+
+            // Assemble the shortcode from given values.
+            $scope.getShortcode = function() {
+                console.log('called');
+                $scope.shortcode = '[visualbudget'
+                                    + ' data=' + $scope.vbChartData.dataset.id
+                                    // + ' vis=' + $scope.shortcodeProperties.vis
+                                    + ']';
+
+                return $scope.shortcode;
+            }
+
+
+            // On change of certain fields, reload the chart.
+            $scope.redrawChart = function() {
+                console.log($scope.vbChartData.dataset);
+                $scope.shortcode = $scope.vbChartData.dataset.id;
+                console.log('changed to ' + $scope.vbChartData.dataset.id);
+            }
 
         });
 
@@ -86,7 +110,6 @@
         // generateShortcode();
 
         vb.initialize();
-        // vb.admin.initialize();
 
     });
 

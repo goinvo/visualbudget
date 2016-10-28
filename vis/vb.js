@@ -22,13 +22,16 @@ var visualbudget = (function (vb, $, d3) {
     vb.tryToInitializeChart = function() {
         var $div = $(this);
         var url = $div.data('vbDatasetUrl');
-        var jqXHR = $.getJSON(url)
-            .done(vb.setupChartObject($div))
-            .fail(function( jqxhr, textStatus, error ) {
-                var err = textStatus + ", " + error;
-                console.log( "Request Failed: " + err );
-            });
-        return jqXHR;
+
+        if(url) {
+            var jqXHR = $.getJSON(url)
+                .done(vb.setupChartObject($div))
+                .fail(function( jqxhr, textStatus, error ) {
+                    var err = textStatus + ", " + error;
+                    console.log( "Request Failed: " + err );
+                });
+            return jqXHR;
+        }
     }
 
     /**

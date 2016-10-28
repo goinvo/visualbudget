@@ -18,18 +18,27 @@
 
                 var datasets = [];
 
-                // Retrieve metadata for each ID.
-                for (i = 0; i < ids.length; i++) {
-                    var id = ids[i];
+                // Function to fetch metadata given a dataset ID.
+                // The $http object is from Angular.
+                function fetchMetaFromId(id) {
                     var url_next_meta = _vbAdminGlobal.vbPluginUrl + 'vis/api.php?filename=' + id + '_meta.json';
                     $http.get(url_next_meta).success( function(next_meta) {
                         datasets.push(next_meta);
-                    })
+                        $scope.vbDatasetSelect = datasets[0];
+                    });
                 }
 
-                $scope.datasets = datasets;
+                // Fetch metadata for all datasets.
+                // .apply is native JS
+                // .when, .then, and .map are jQuery
+                // $scope is Angular
+                $.when.apply($, $.map(ids, fetchMetaFromId))
+                    .then(function() {
+                        // Set the selected dataset to be the first one.
+                        $scope.vbDatasetSelect = datasets[0];
+                    });
 
-                $scope.vbDatasetSelect = $scope.datasets[0];
+                $scope.datasets = datasets;
             });
 
         });

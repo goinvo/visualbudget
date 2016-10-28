@@ -46,8 +46,19 @@ $datasets = $this->datasets;
             <br/><br/>
             <pre id='vb-shortcode' ng-model='vbShortcode'>[visualbudget data={{vbDatasetSelect.id}} vis=linechart]</pre>
         </pane>
+
         <pane title="Breakdown">
+            <select ng-model="vbDatasetSelect"
+                    ng-options="d.uploaded_name for d in datasets"
+                    ng-change="">
+                    </select>
+            <div id='vb-chart' class='vb-chart'></div>
+            <br/><br/>
+            The above vis is generated using the following shortcode:
+            <br/><br/>
+            <pre id='vb-shortcode' ng-model='vbShortcode'>[visualbudget data={{vbDatasetSelect.id}} vis=stackedarea]</pre>
         </pane>
+
         <pane title="Comparison">
         </pane>
         <pane title="Ratio">

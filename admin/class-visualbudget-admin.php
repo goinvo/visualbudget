@@ -349,7 +349,8 @@ class VisualBudget_Admin {
         wp_enqueue_script( 'jquerymodal_js', plugin_dir_url( __FILE__ ) . 'js/jquery.modal.js', array( 'jquery' ), VISUALBUDGET_VERSION, false );
 
         // Add the VB admin javascript file (this came with boilerplate)
-        wp_enqueue_script( 'visualbudget_js', plugin_dir_url( __FILE__ ) . 'js/vb-admin.js', array( 'jquery' ), VISUALBUDGET_VERSION, false );
+        wp_enqueue_script( 'vb_admin_js', plugin_dir_url( __FILE__ ) . 'js/vb-admin.js', array( 'jquery' ), VISUALBUDGET_VERSION, false );
+        wp_localize_script('vb_admin_js', '_vbAdminGlobal', array('vbPluginUrl' => plugin_dir_url(dirname(__FILE__))));
 
     }
 

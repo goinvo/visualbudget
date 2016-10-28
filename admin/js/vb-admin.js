@@ -10,15 +10,28 @@
 (function(vb, $) {
 
     var vbAdmin = angular.module('vbAdmin', ['components']);
-    vbAdmin.controller('vbVisualizationsController', function($scope) {
-            $scope.datasets = [
-                {'uploaded_name': 'expenses.csv',
-                 'id': '18349273'},
-                {'uploaded_name': 'revenues.csv',
-                 'id': '22398172'}
-                ];
+    vbAdmin.controller('vbVisualizationsController', function($scope, $http) {
 
-            $scope.vbDatasetSelect = $scope.datasets[0];
+            var url_ids = _vbAdminGlobal.vbPluginUrl + 'vis/api.php?filter=id';
+
+            $http.get(url_ids).success( function(ids) {
+
+                var datasets = [];
+
+                // Retrieve metadata for each ID.
+                for (i = 0; i < ids.length; i++) {
+                    var id = ids[i];
+                    var url_next_meta = _vbAdminGlobal.vbPluginUrl + 'vis/api.php?filename=' + id + '_meta.json';
+                    $http.get(url_next_meta).success( function(next_meta) {
+                        datasets.push(next_meta);
+                    })
+                }
+
+                $scope.datasets = datasets;
+
+                $scope.vbDatasetSelect = $scope.datasets[0];
+            });
+
         });
 
     $(document).ready(function () {
@@ -64,7 +77,7 @@
         // generateShortcode();
 
         vb.initialize();
-        vb.admin.initialize();
+        // vb.admin.initialize();
 
     });
 

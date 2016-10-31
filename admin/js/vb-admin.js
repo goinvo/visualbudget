@@ -50,9 +50,9 @@
 
 
         // Assemble the shortcode from given values.
-        // If the 'query_string' argument is set, the shortcode is
-        // returned in the form of a query string.
-        this.getShortcode = function(query_string) {
+        // If the 'option' argument is set, the shortcode is
+        // returned in a different form accordingly.
+        this.getShortcode = function(option) {
 
             var dateRange = ['min', 'max'];
             var slider = that.selectInActivePane('.vb-time-slider')[0];
@@ -64,18 +64,26 @@
                 'data': $scope.vbChartData.dataset.id,
                 'vis': 'linechart',
                 'time0': dateRange[0],
-                'time1': dateRange[1],
-                'iframe': 0
+                'time1': dateRange[1]
             }
 
             var shortcode = null;
 
-            if (typeof query_string === "undefined") {
-                shortcode = '[visualbudget '
-                                + this.serialize(shortcode_atts, ' ')
-                                + ']';
-            } else {
-                shortcode = "?vb_shortcode&" + this.serialize(shortcode_atts, '&');
+            switch(option) {
+                case 'iframe_link':
+                    shortcode_atts['iframe'] = 1;
+                    shortcode = _vbAdminGlobal.vbPluginUrl + 'vis/vis.php?' + this.serialize(shortcode_atts, '&');
+                    break;
+
+                case 'admin_shortcode_link':
+                    shortcode_atts['iframe'] = 0;
+                    shortcode = _vbAdminGlobal.vbAdminUrl + "?vb_shortcode&" + this.serialize(shortcode_atts, '&');
+                    break;
+
+                default:
+                    shortcode = '[visualbudget '
+                                    + this.serialize(shortcode_atts, ' ')
+                                    + ']';
             }
 
             return shortcode;
@@ -85,7 +93,7 @@
         // On change of certain fields, reload the chart.
         this.redrawChart = function() {
             console.log('Redrawing chart #' + $scope.vbChartData.dataset.id);
-            var shortcode_url = _vbAdminGlobal.vbAdminUrl + this.getShortcode(true);
+            var shortcode_url = this.getShortcode('admin_shortcode_link');
             $http.get(shortcode_url).success( function(response) {
                 that.selectInActivePane('.chart-wrapper').html(response);
                 vb.initialize(that.setSlider);

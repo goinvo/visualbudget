@@ -69,7 +69,7 @@ var visualbudget = (function (vb, $, d3) {
         var match = null;
 
         for (i = 0; i < vb.charts.length; i ++) {
-            if (vb.charts[i].props.hash == hash) {
+            if (vb.charts[i].props.vbHash == hash) {
                 match = vb.charts[i];
                 break;
             }

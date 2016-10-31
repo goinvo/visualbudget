@@ -12,49 +12,58 @@ var visualbudget = (function (vb, $, d3) {
      */
     var Chart = vb.Chart = vb.Chart || function($div, data) {
 
+        // Keep the jQuery object onhand.
         this.$div = $div;
 
-
+        // Parse the data.
         data.dollarAmounts.forEach(function(d) {
             d.date = Date.parse(d.date);
             d.dollarAmount = +d.dollarAmount;
         });
-
         this.data = data;
 
-        var props = $div.data();
-        this.props = {};
-        this.props.datasetUrl = props.vbDatasetUrl;
-        this.props.datasetId = props.vbData;
-        this.props.visType = props.vbVis;
-        this.props.hash = props.vbHash;
+        // Properties of the chart are specified as HTML data attributes.
+        this.props = $div.data();
 
+        // Deal with other settings, such as the date range to display.
         this.settings = {};
         this.settings.dateRange = this.getTotalDateRange();
+        if (this.props.vbTime0) {
+            if (this.props.vbTime0 != 'min') {
+                this.settings.dateRange[0] = Date.parse(this.props.vbTime0);
+            }
+        }
+        if (this.props.vbTime1) {
+            if (this.props.vbTime1 == 'present') {
+                this.settings.dateRange[1] = Date.now();
+            } else if (this.props.vbTime1 != 'max') {
+                this.settings.dateRange[1] = Date.parse(this.props.vbTime1);
+            }
+        }
     };
 
+    // The min and max of all dates.
     Chart.prototype.getTotalDateRange = function() {
 
+        // Get a list of all dates.
         var dates = [];
         this.data.dollarAmounts.forEach(function(obj) {
             dates.push(+obj.date);
         });
 
-        var minDate = dates.reduce(function(a, b) {
-                return Math.min(a, b);
-            });
-
-        var maxDate = dates.reduce(function(a, b) {
-                return Math.max(a, b);
-            });
+        // Find the min and max.
+        var minDate = dates.reduce(function(a, b) { return Math.min(a, b); });
+        var maxDate = dates.reduce(function(a, b) { return Math.max(a, b); });
 
         return [minDate, maxDate];
     }
 
+    // Get the current displayed dateRange.
     Chart.prototype.getDateRange = function() {
         return this.settings.dateRange;
     }
 
+    // Set a new displayed dateRange.
     Chart.prototype.setDateRange = function(range) {
         range[0] = Date.parse(range[0]);
         range[1] = Date.parse(range[1]);
@@ -86,11 +95,11 @@ var visualbudget = (function (vb, $, d3) {
         return obj;
     }
 
-
+    // Redraw the chart.
     Chart.prototype.redraw = function() {
-        console.log('Drawing chart ' + this.props.hash + '.');
+        console.log('Drawing chart ' + this.props.vbHash + '.');
 
-        switch(this.props.visType) {
+        switch(this.props.vbVis) {
             case 'linechart':
                 this.$div.html('');
                 this.doLineChart();
@@ -101,7 +110,7 @@ var visualbudget = (function (vb, $, d3) {
         }
     }
 
-
+    // Do the line chart thing.
     Chart.prototype.doLineChart = function() {
 
         var data = this.data;

@@ -1,53 +1,47 @@
 <?php
 /**
- * This file displays the content of the "Configuration" tab in the dashboard.
+ * This file displays the content of the "Visualizations" tab in the dashboard.
  */
 ?>
-<div class='bootstrap-wrapper'><p></p>&nbsp;<p>
+<div class='bootstrap-wrapper'>
 
-<?php
+    <br/><br/><br/>
 
-$datasets = $this->datasets;
+    <div ng-app="vbAdmin" ng-controller="vbVisualizationsController as vbCtrl">
 
-if (empty($datasets)) {
+        <tabs>
+            <pane title="Trends">
+                <div class='chart-wrapper'></div>
+                <br/><br/>
+                <select class='vb-dataset-select'
+                        ng-model="vbChartData.dataset"
+                        ng-options="d.uploaded_name for d in datasets"
+                        ng-change="vbCtrl.redrawChart()">
+                        </select>
+                <br/><br/>
+                <br/><br/>
+                <div class='vb-time-slider'></div>
+                <br/><br/>
+                The above vis is generated using the following shortcode:
+                <br/><br/>
+                <pre class='vb-shortcode' ng-bind="vbCtrl.getShortcode()"></pre>
+                <a class='vb-iframe-link' ng-href="{{ vbCtrl.getShortcode('iframe_link') }}">{{ vbCtrl.getShortcode('iframe_link') }}</a>
+            </pane>
 
-    // If not, say so.
-    echo 'There are no datasets.';
+            <pane title="Breakdown">
+            </pane>
+            <pane title="Comparison">
+            </pane>
+            <pane title="Ratio">
+            </pane>
+            <pane title="Difference">
+            </pane>
+            <pane title="Metrics">
+            </pane>
+            <pane title="Custom">
+            </pane>
+        </tabs>
 
-} else {
-
-    echo '<select id="vb-select-dataset">';
-
-    // If there are datasets, print some information for each one
-    foreach ($datasets as $n=>$dataset) {
-        $props = $dataset->get_properties();
-        $atts = array(
-                'data' => $props['id'],
-                'vis' => 'linechart',
-                'data_atts' => 1
-            );
-        $vis_atts_url = VISUALBUDGET_URL . 'vis/vis.php?'
-                            . http_build_query($atts);
-        echo '<option '
-            . file_get_contents($vis_atts_url)
-            . '>' . $props['uploaded_name'] . '</option>';
-    }
-
-    echo '</select>';
-}
-
-// echo do_shortcode('[visualbudget data=1476739268 vis=linechart]');
-
-?>
-</p>
-
-<div id='vb-chart' class='vb-chart'></div>
-
-<br/><br/>
-<br/><br/>
-The above vis is generated using the following shortcode:
-<br/>
-<br/>
-<pre id='vb-shortcode'></pre>
+    </div>
 
 </div>

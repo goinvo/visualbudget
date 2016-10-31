@@ -13,17 +13,17 @@ header("Content-Type: text/plain");
 // This is the same constant as defined in includes/class-visualbudget.php
 define( 'VISUALBUDGET_UPLOAD_DIR', '../datasets/' );
 
-// If the "dataset" key of the query string has been defined,
+// If the "filename" key of the query string has been defined,
 // then look for that file. If it exists, return its contents.
 // If it doesn't exist, return an error (as JSON).
-if ( isset($_GET['dataset']) ) {
+if ( isset($_GET['filename']) ) {
 
-    $dataset = $_GET['dataset'];
+    $dataset = $_GET['filename'];
     $dataset_filename = VISUALBUDGET_UPLOAD_DIR . $dataset;
     if ( is_file($dataset_filename) ) {
         echo file_get_contents($dataset_filename);
     } else {
-        echo '{"Error":"Dataset not found."}';
+        echo '{"Error":"File not found."}';
     }
 
 // If the 'dataset' key is not defined in the query string,
@@ -37,14 +37,32 @@ if ( isset($_GET['dataset']) ) {
     // names in quotes.
     foreach ($files as $key => $file) {
         if ( is_file(VISUALBUDGET_UPLOAD_DIR . $file) ) {
+            // Filter appropriately.
+            switch($_GET['filter']) {
+
+                // Only return file IDs.
+                case "id":
+                    $file = explode('_', explode('.', $file)[0])[0];
+                    break;
+
+                // Default, including if there is no filter.
+                default:
+                    break;
+            }
+
+            // If no filter
             $files[$key] = '"' . $file . '"';
+
         } else {
             unset($files[$key]);
         }
     }
 
+    // Remove duplicates.
+    $files = array_unique($files);
+
     // Print out all the others, one per line
-    echo '{"datasets":[';
+    echo '[';
     echo implode(",", $files);
-    echo "]}";
+    echo "]";
 }

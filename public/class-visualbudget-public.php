@@ -33,7 +33,9 @@ class VisualBudget_Public {
 
 		wp_enqueue_script( 'vb_public_js', plugin_dir_url( __FILE__ ) . 'js/visualbudget-public.js', array( 'jquery' ), $this->version, false );
 
-		wp_enqueue_script( 'vb_vis_js', plugin_dir_url( __FILE__ ) . '../vis/vb.js', array( 'jquery' ), $this->version, false );
+        // Add the visualization js file and submodules.
+        wp_enqueue_script( 'vb_js', plugin_dir_url( __FILE__ ) . '../vis/vb.js', array( 'jquery' ), VISUALBUDGET_VERSION, false );
+        wp_enqueue_script( 'vb_linechart_js', plugin_dir_url( __FILE__ ) . '../vis/vb-linechart.js', array( 'jquery' ), VISUALBUDGET_VERSION, false );
 
 	}
 

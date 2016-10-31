@@ -93,7 +93,6 @@ var visualbudget = (function (vb, $, d3) {
         switch(this.props.visType) {
             case 'linechart':
                 this.$div.html('');
-                console.log(this.getDateRange())
                 this.doLineChart();
                 break;
 

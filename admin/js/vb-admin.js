@@ -53,10 +53,18 @@
         // If the 'query_string' argument is set, the shortcode is
         // returned in the form of a query string.
         this.getShortcode = function(query_string) {
+
+            var dateRange = ['min', 'max'];
+            var slider = that.selectInActivePane('.vb-time-slider')[0];
+            if(typeof slider.noUiSlider !== "undefined") {
+                dateRange = slider.noUiSlider.get();
+            }
+
             var shortcode_atts = {
                 'data': $scope.vbChartData.dataset.id,
                 'vis': 'linechart',
-                'time': 'all',
+                'time0': dateRange[0],
+                'time1': dateRange[1],
                 'iframe': 0
             }
 
@@ -95,8 +103,14 @@
             var rangeObject = chart.getDateRangeObject();
 
             // Create the slider.
-            var slider_element = that.selectInActivePane('.vb-time-slider')[0];
-            noUiSlider.create(slider_element, {
+            var slider = that.selectInActivePane('.vb-time-slider')[0];
+
+            // Destory an old slider if necessary.
+            if(typeof slider.noUiSlider !== "undefined") {
+                slider.noUiSlider.destroy();
+            }
+
+            noUiSlider.create(slider, {
                     start: [rangeObject['min'], rangeObject['max']],
                     connect: true,
                     tooltips: true,
@@ -108,8 +122,9 @@
                     }
                 })
                 .on('set', function() {
-                    chart.setDateRange(slider_element.noUiSlider.get());
+                    chart.setDateRange(slider.noUiSlider.get());
                     chart.redraw();
+                    $scope.$apply();
                 });
 
         }

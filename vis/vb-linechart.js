@@ -13,22 +13,87 @@ var visualbudget = (function (vb, $, d3) {
     var Chart = vb.Chart = vb.Chart || function($div, data) {
 
         this.$div = $div;
+
+
+        data.dollarAmounts.forEach(function(d) {
+            d.date = Date.parse(d.date);
+            d.dollarAmount = +d.dollarAmount;
+        });
+
         this.data = data;
 
         var props = $div.data();
         this.props = {};
         this.props.datasetUrl = props.vbDatasetUrl;
-        this.props.datasetId = props.vbDatasetId;
-        this.props.visType = props.vbVisType;
+        this.props.datasetId = props.vbData;
+        this.props.visType = props.vbVis;
         this.props.hash = props.vbHash;
+
+        this.settings = {};
+        this.settings.dateRange = this.getTotalDateRange();
     };
 
+    Chart.prototype.getTotalDateRange = function() {
 
-    Chart.prototype.draw = function() {
+        var dates = [];
+        this.data.dollarAmounts.forEach(function(obj) {
+            dates.push(+obj.date);
+        });
+
+        var minDate = dates.reduce(function(a, b) {
+                return Math.min(a, b);
+            });
+
+        var maxDate = dates.reduce(function(a, b) {
+                return Math.max(a, b);
+            });
+
+        return [minDate, maxDate];
+    }
+
+    Chart.prototype.getDateRange = function() {
+        return this.settings.dateRange;
+    }
+
+    Chart.prototype.setDateRange = function(range) {
+        range[0] = Date.parse(range[0]);
+        range[1] = Date.parse(range[1]);
+        this.settings.dateRange = range;
+    }
+
+
+    // This object is necessary to construct for the noUiSlider to
+    // display dates correctly.
+    Chart.prototype.getDateRangeObject = function() {
+
+        var dateRange = this.getDateRange();
+
+        var yearOne = new Date(dateRange[0]).getUTCFullYear();
+        var yearTwo = new Date(dateRange[1]).getUTCFullYear();
+
+        var obj = {
+            'min': yearOne,
+            'max': yearTwo
+        };
+
+        var intervals = yearTwo - yearOne - 1;
+
+        for(i = 1; i <= intervals; i++) {
+            var pct = Math.round(100/(intervals+1)*i);
+            obj[pct + '%'] = yearOne + i;
+        }
+
+        return obj;
+    }
+
+
+    Chart.prototype.redraw = function() {
         console.log('Drawing chart ' + this.props.hash + '.');
 
         switch(this.props.visType) {
             case 'linechart':
+                this.$div.html('');
+                console.log(this.getDateRange())
                 this.doLineChart();
                 break;
 
@@ -41,6 +106,12 @@ var visualbudget = (function (vb, $, d3) {
     Chart.prototype.doLineChart = function() {
 
         var data = this.data;
+
+        var inDateRange = function(range) {
+            return function(d) {
+                return d.date >= range[0] && d.date <= range[1];
+            }
+        }
 
         // Set the dimensions of the canvas / graph
         var margin = {top: 30, right: 20, bottom: 30, left: 50},
@@ -76,19 +147,16 @@ var visualbudget = (function (vb, $, d3) {
                 .attr("transform",
                       "translate(" + margin.left + "," + margin.top + ")");
 
-        data.dollarAmounts.forEach(function(d) {
-            d.date = Date.parse(d.date);
-            d.dollarAmount = +d.dollarAmount/1000;
-        });
-
         // Scale the range of the data
-        x.domain(d3.extent(data.dollarAmounts, function(d) { return d.date; }));
-        y.domain([0, d3.max(data.dollarAmounts, function(d) { return d.dollarAmount; })]);
+        x.domain(d3.extent(data.dollarAmounts.filter(inDateRange(this.getDateRange())),
+            function(d) { return d.date; }));
+        y.domain([0, d3.max(data.dollarAmounts.filter(inDateRange(this.getDateRange())),
+            function(d) { return d.dollarAmount; })]);
 
         // Add the valueline path.
         svg.append("path")
             .attr("class", "line")
-            .attr("d", valueline(data.dollarAmounts));
+            .attr("d", valueline(data.dollarAmounts.filter(inDateRange(this.getDateRange()))));
 
         // Add the X Axis
         svg.append("g")

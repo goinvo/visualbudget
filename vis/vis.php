@@ -10,15 +10,19 @@ if ( ! isset($_GET['rand']) ) {
 $query_string = http_build_query($_GET);
 $hash = hash('crc32', $query_string);
 $dataset_id = $_GET['data'];
-$vis_type = $_GET['vis'];
 $dataset_url = dirname(dirname($_SERVER["REQUEST_URI"]))
                 . "/datasets/" . $dataset_id . ".json";
+
+unset($_GET['rand']);
+$custom_atts = array();
+foreach ($_GET as $key => $val) {
+    array_push($custom_atts, 'data-vb-' . $key . '="' . $val . '"');
+}
 
 // Build a string of the data attributes.
 $data_atts = "data-vb-hash='" . $hash . "' "
         . "data-vb-dataset-url='". $dataset_url . "' "
-        . "data-vb-dataset-id='$dataset_id'"
-        . "data-vb-vis-type='$vis_type'";
+        . implode(' ', $custom_atts);
 
 // Build the chart div.
 $chart_div = "<div "

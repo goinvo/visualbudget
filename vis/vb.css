@@ -11,3 +11,7 @@ path {
     stroke-width: 1;
     shape-rendering: crispEdges;
 }
+
+.vb-time-slider {
+    margin: 0 5rem;
+}

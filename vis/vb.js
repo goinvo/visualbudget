@@ -6,12 +6,19 @@ var visualbudget = (function (vb, $, d3) {
     /**
      * Initialize each chart.
      */
-    vb.initialize = function() {
-        console.log('VB initializing...');
+    vb.initialize = function(callback) {
+
+        // Make callback an empty function if it's not set
+        if (typeof callback === "undefined") {
+            callback = function() {};
+        }
+
+        console.log('Initializing VB charts.');
         vb.charts = [];
         var $chartDivs = $('.vb-chart');
         $.when.apply($, $chartDivs.map(vb.tryToInitializeChart))
-            .then(vb.drawAllCharts);
+            .then(vb.drawAllCharts)
+            .then(callback);
     }
 
     /**
@@ -40,7 +47,6 @@ var visualbudget = (function (vb, $, d3) {
      */
     vb.setupChartObject = function($div) {
         return function(data) {
-
             var newChart = new vb.Chart($div, data);
             vb.charts.push(newChart);
             console.log('Added chart ' + $div.data('vbHash') + ' to queue.');
@@ -52,8 +58,24 @@ var visualbudget = (function (vb, $, d3) {
      */
     vb.drawAllCharts = function() {
         vb.charts.forEach(function(chart, i, array) {
-            chart.draw();
+            chart.redraw();
         });
+    }
+
+    /**
+     * Search for a chart by its hash. Returns null if no matching chart is found.
+     */
+    vb.getChart = function(hash) {
+        var match = null;
+
+        for (i = 0; i < vb.charts.length; i ++) {
+            if (vb.charts[i].props.hash == hash) {
+                match = vb.charts[i];
+                break;
+            }
+        }
+
+        return match;
     }
 
     return vb;

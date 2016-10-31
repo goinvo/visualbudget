@@ -317,14 +317,17 @@ class VisualBudget_Admin {
         // Add the bootstrap CSS file
         wp_enqueue_style( 'bootstrap', plugin_dir_url( __FILE__ ) . 'css/bootstrap-wrapper.css', array(), VISUALBUDGET_VERSION, 'all' );
 
-        // Add the VB admin CSS file
-        wp_enqueue_style( 'visualbudget_css', plugin_dir_url( __FILE__ ) . 'css/visualbudget-admin.css', array(), VISUALBUDGET_VERSION, 'all' );
+        // Add the jquery modal CSS file
+        wp_enqueue_style( 'jquerymodal', plugin_dir_url( __FILE__ ) . 'css/jquery.modal.css', array(), VISUALBUDGET_VERSION, 'all' );
+
+        // Add the visualizations CSS file
+        wp_enqueue_style( 'vis', plugin_dir_url( __FILE__ ) . '../vis/vb.css', array(), VISUALBUDGET_VERSION, 'all' );
+
+        // Add the slider CSS file
+        wp_enqueue_style( 'nouislider', plugin_dir_url( __FILE__ ) . '../vis/nouislider.min.css', array(), VISUALBUDGET_VERSION, 'all' );
 
         // Add the VB admin CSS file
-        wp_enqueue_style( 'jquerymodal_css', plugin_dir_url( __FILE__ ) . 'css/jquery.modal.css', array(), VISUALBUDGET_VERSION, 'all' );
-
-        // Add the VB admin CSS file
-        wp_enqueue_style( 'vis_css', plugin_dir_url( __FILE__ ) . '../vis/vb.css', array(), VISUALBUDGET_VERSION, 'all' );
+        wp_enqueue_style( 'visualbudget', plugin_dir_url( __FILE__ ) . 'css/visualbudget-admin.css', array(), VISUALBUDGET_VERSION, 'all' );
     }
 
     /**
@@ -333,24 +336,27 @@ class VisualBudget_Admin {
     public function enqueue_scripts() {
 
         // Add angular
-        wp_enqueue_script( 'angular_js', 'https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular.min.js', array(), VISUALBUDGET_VERSION, false );
+        wp_enqueue_script( 'angular', 'https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular.min.js', array(), VISUALBUDGET_VERSION, false );
 
         // Add angular components
-        wp_enqueue_script( 'ng_components_js', plugin_dir_url( __FILE__ ) . 'js/ng-components.js', array(), VISUALBUDGET_VERSION, false );
+        wp_enqueue_script( 'ng_components', plugin_dir_url( __FILE__ ) . 'js/ng-components.js', array(), VISUALBUDGET_VERSION, false );
 
         // Add D3
-        wp_enqueue_script( 'd3_js', 'https://cdnjs.cloudflare.com/ajax/libs/d3/4.2.6/d3.min.js', array(), VISUALBUDGET_VERSION, false );
-
-        // Add the visualization js file and submodules.
-        wp_enqueue_script( 'vb_js', plugin_dir_url( __FILE__ ) . '../vis/vb.js', array( 'jquery' ), VISUALBUDGET_VERSION, false );
-        wp_enqueue_script( 'vb_linechart_js', plugin_dir_url( __FILE__ ) . '../vis/vb-linechart.js', array( 'jquery' ), VISUALBUDGET_VERSION, false );
+        wp_enqueue_script( 'd3', 'https://cdnjs.cloudflare.com/ajax/libs/d3/4.2.6/d3.min.js', array(), VISUALBUDGET_VERSION, false );
 
         // Add jQuery modal
-        wp_enqueue_script( 'jquerymodal_js', plugin_dir_url( __FILE__ ) . 'js/jquery.modal.js', array( 'jquery' ), VISUALBUDGET_VERSION, false );
+        wp_enqueue_script( 'jquerymodal', plugin_dir_url( __FILE__ ) . 'js/jquery.modal.js', array( 'jquery' ), VISUALBUDGET_VERSION, false );
+
+        // Add the slider JS file
+        wp_enqueue_script( 'nouislider', plugin_dir_url( __FILE__ ) . '../vis/nouislider.min.js', array(), VISUALBUDGET_VERSION, false );
+
+        // Add the visualization js file and submodules.
+        wp_enqueue_script( 'vb', plugin_dir_url( __FILE__ ) . '../vis/vb.js', array( 'jquery' ), VISUALBUDGET_VERSION, false );
+        wp_enqueue_script( 'vb_linechart', plugin_dir_url( __FILE__ ) . '../vis/vb-linechart.js', array( 'jquery' ), VISUALBUDGET_VERSION, false );
 
         // Add the VB admin javascript file (this came with boilerplate)
-        wp_enqueue_script( 'vb_admin_js', plugin_dir_url( __FILE__ ) . 'js/vb-admin.js', array( 'jquery' ), VISUALBUDGET_VERSION, false );
-        wp_localize_script('vb_admin_js', '_vbAdminGlobal', array('vbPluginUrl' => plugin_dir_url(dirname(__FILE__)),
+        wp_enqueue_script( 'vb_admin', plugin_dir_url( __FILE__ ) . 'js/vb-admin.js', array( 'jquery' ), VISUALBUDGET_VERSION, false );
+        wp_localize_script('vb_admin', '_vbAdminGlobal', array('vbPluginUrl' => plugin_dir_url(dirname(__FILE__)),
                                                                   'vbAdminUrl' => admin_url('', 'admin')));
 
     }

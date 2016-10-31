@@ -19,6 +19,9 @@
                         ng-change="vbCtrl.redrawChart()">
                         </select>
                 <br/><br/>
+                <br/><br/>
+                <div class='vb-time-slider'></div>
+                <br/><br/>
                 The above vis is generated using the following shortcode:
                 <br/><br/>
                 <pre class='vb-shortcode' ng-bind="vbCtrl.getShortcode()"></pre>

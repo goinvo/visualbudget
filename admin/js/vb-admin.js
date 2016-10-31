@@ -14,7 +14,8 @@
 
         var that = this;
 
-        $scope.vbChartData = {};
+        $scope.vbChartTrends = {};
+        $scope.vbChartBreakdown = {};
 
         // The _vbAdminGlobal is set by wp_localize_script() in the vb admin php file.
         var ids_url = _vbAdminGlobal.vbPluginUrl + 'vis/api.php?filter=id';
@@ -34,7 +35,8 @@
                     // FIXME: These two commands should go in the .then() below, right?
                     //        But they don't execute properly there.
                     if (datasets.length == 1) {
-                        $scope.vbChartData.dataset = datasets[0];
+                        $scope.vbChartTrends.dataset = datasets[0];
+                        $scope.vbChartBreakdown.dataset = datasets[0];
                         that.redrawChart();
                     }
                 });
@@ -55,13 +57,14 @@
         this.getShortcode = function(option) {
 
             var dateRange = ['min', 'max'];
-            var slider = that.selectInActivePane('.vb-time-slider')[0];
+            var slider = that.selectInActivePane('.vb-time-slider-range')[0];
             if(typeof slider.noUiSlider !== "undefined") {
                 dateRange = slider.noUiSlider.get();
             }
 
             var shortcode_atts = {
-                'data': $scope.vbChartData.dataset.id,
+                // 'data': that.selectInActivePane('.vb-dataset-select'),
+                'data': $scope.vbChartTrends.dataset.id,
                 'vis': 'linechart',
                 'time0': dateRange[0],
                 'time1': dateRange[1]
@@ -89,13 +92,11 @@
             return shortcode;
         }
 
-
         // On change of certain fields, reload the chart.
         this.redrawChart = function() {
-            console.log('Redrawing chart #' + $scope.vbChartData.dataset.id);
             var shortcode_url = this.getShortcode('admin_shortcode_link');
             $http.get(shortcode_url).success( function(response) {
-                that.selectInActivePane('.chart-wrapper').html(response);
+                that.selectInActivePane('.vb-chart-wrapper').html(response);
                 vb.initialize(that.setSlider);
             });
         }
@@ -111,7 +112,7 @@
             var rangeObject = chart.getDateRangeObject();
 
             // Create the slider.
-            var slider = that.selectInActivePane('.vb-time-slider')[0];
+            var slider = that.selectInActivePane('.vb-time-slider-range')[0];
 
             // Destory an old slider if necessary.
             if(typeof slider.noUiSlider !== "undefined") {
@@ -135,6 +136,7 @@
                     $scope.$apply();
                 });
 
+            slider.noUiSlider.reset();
         }
 
         // Get elements of a certain class on the active tab pane.

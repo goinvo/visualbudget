@@ -45,6 +45,42 @@ angular.module('components', [])
       template:
         '<div class="tab-pane" ng-class="{active: selected}" ng-transclude>' +
         '</div>',
-      replace: true
+      replace: true,
+      // controller: function($scope, $elements) {
+      // }
     };
   })
+
+  // .directive('chart', function() {
+  //   return {
+  //     restrict: 'E',
+  //     transclude: true,
+  //     scope: {},
+  //     link: function(scope, element, attrs, tabsController) {},
+  //     template: '',
+  //     replace: true,
+  //     controller: function($scope, $elements) {}
+  //   }
+  // })
+  // .directive('shortcode', function() {
+  //   return {
+  //     restrict: 'E',
+  //     transclude: true,
+  //     scope: {},
+  //     link: function(scope, element, attrs, tabsController) {},
+  //     template: '',
+  //     replace: true,
+  //     controller: function($scope, $elements) {}
+  //   }
+  // })
+  // .directive('iframelink', function() {
+  //   return {
+  //     restrict: 'E',
+  //     transclude: true,
+  //     scope: {},
+  //     link: function(scope, element, attrs, tabsController) {},
+  //     template: '',
+  //     replace: true,
+  //     controller: function($scope, $elements) {}
+  //   }
+  // })

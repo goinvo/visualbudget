@@ -46,6 +46,7 @@
                 <pre class='vb-shortcode' ng-bind="vbCtrl.getShortcode()"></pre>
                 <a class='vb-iframe-link' ng-href="{{ vbCtrl.getShortcode('iframe_link') }}">{{ vbCtrl.getShortcode('iframe_link') }}</a>
             </pane>
+
             <pane title="Comparison">
             </pane>
             <pane title="Ratio">

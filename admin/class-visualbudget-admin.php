@@ -350,7 +350,8 @@ class VisualBudget_Admin {
 
         // Add the VB admin javascript file (this came with boilerplate)
         wp_enqueue_script( 'vb_admin_js', plugin_dir_url( __FILE__ ) . 'js/vb-admin.js', array( 'jquery' ), VISUALBUDGET_VERSION, false );
-        wp_localize_script('vb_admin_js', '_vbAdminGlobal', array('vbPluginUrl' => plugin_dir_url(dirname(__FILE__))));
+        wp_localize_script('vb_admin_js', '_vbAdminGlobal', array('vbPluginUrl' => plugin_dir_url(dirname(__FILE__)),
+                                                                  'vbAdminUrl' => admin_url('', 'admin')));
 
     }
 

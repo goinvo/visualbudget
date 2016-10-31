@@ -29,7 +29,7 @@ $chart_div = "<div "
 
 
 // Check to see if we're displaying an iframe or not.
-if (isset($_GET['iframe'])) {
+if ($_GET['iframe']) {
 
     // Include iframe.php, which is the iframe template.
     // Note: iframe.php uses the variable $chart_div.

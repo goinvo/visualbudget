@@ -12,21 +12,23 @@
     var vbAdmin = angular.module('vbAdmin', ['components']);
     vbAdmin.controller('vbVisualizationsController', function($scope, $http) {
 
+            var that = this;
+
             $scope.vbChartData = {};
 
             // The _vbAdminGlobal is set by wp_localize_script() in the vb admin php file.
-            var url_ids = _vbAdminGlobal.vbPluginUrl + 'vis/api.php?filter=id';
+            var ids_url = _vbAdminGlobal.vbPluginUrl + 'vis/api.php?filter=id';
 
             // First load all dataset IDs.
-            $http.get(url_ids).success( function(ids) {
+            $http.get(ids_url).success( function(ids) {
 
                 // We'll collect metadata of datasets here.
                 var datasets = [];
 
                 // Function to fetch metadata given a dataset ID.
                 function fetchMetaFromId(id) {
-                    var url_next_meta = _vbAdminGlobal.vbPluginUrl + 'vis/api.php?filename=' + id + '_meta.json';
-                    $http.get(url_next_meta).success( function(next_meta) {
+                    var next_meta_url = _vbAdminGlobal.vbPluginUrl + 'vis/api.php?filename=' + id + '_meta.json';
+                    $http.get(next_meta_url).success( function(next_meta) {
                         datasets.push(next_meta);
                         $scope.vbChartData.dataset = datasets[0]; // FIXME: this should be unnecessary
                     });
@@ -35,34 +37,63 @@
                 // Fetch metadata for all datasets.
                 $.when.apply($, $.map(ids, fetchMetaFromId))
                     .then(function() {
-                        // Set the selected dataset to be the first one.
-                        $scope.vbChartData.dataset = datasets[0];
-                        console.log('setting datasets to scope');
                         $scope.datasets = datasets;
+                        // that.redrawChart();
                     });
-
-                // Give $scope access to datasets.
 
             });
 
 
             // Assemble the shortcode from given values.
-            $scope.getShortcode = function() {
-                console.log('called');
-                $scope.shortcode = '[visualbudget'
-                                    + ' data=' + $scope.vbChartData.dataset.id
-                                    // + ' vis=' + $scope.shortcodeProperties.vis
-                                    + ']';
+            // If the 'query_string' argument is set, the shortcode is
+            // returned in the form of a query string.
+            this.getShortcode = function(query_string) {
+                var shortcode_atts = {
+                    'data': $scope.vbChartData.dataset.id,
+                    'vis': 'linechart',
+                    'time': 'all',
+                    'iframe': 0
+                }
 
-                return $scope.shortcode;
+                var shortcode = null;
+
+                if (typeof query_string === "undefined") {
+                    shortcode = '[visualbudget '
+                                    + this.serialize(shortcode_atts, ' ')
+                                    + ']';
+                } else {
+                    shortcode = "?vb_shortcode&" + this.serialize(shortcode_atts, '&');
+                }
+
+                return shortcode;
             }
 
 
             // On change of certain fields, reload the chart.
-            $scope.redrawChart = function() {
-                console.log($scope.vbChartData.dataset);
-                $scope.shortcode = $scope.vbChartData.dataset.id;
-                console.log('changed to ' + $scope.vbChartData.dataset.id);
+            this.redrawChart = function() {
+                console.log('Redrawing chart #' + $scope.vbChartData.dataset.id);
+                var shortcode_url = _vbAdminGlobal.vbAdminUrl + this.getShortcode(true);
+                $http.get(shortcode_url).success( function(response) {
+                    $('.tab-pane.active .chart-wrapper').html(response);
+                    vb.initialize();
+                });
+            }
+
+
+            // Turn a JS object into a query string.
+            // based on code from  http://stackoverflow.com/a/1714899
+            this.serialize = function(obj, sep) {
+                // The separator between key=val pairs.
+                if (typeof sep === "undefined") {
+                    sep = '&';
+                }
+
+                var str = [];
+                for(var p in obj)
+                    if (obj.hasOwnProperty(p)) {
+                        str.push(encodeURIComponent(p) + "=" + encodeURIComponent(obj[p]));
+                    }
+                return str.join(sep);
             }
 
         });

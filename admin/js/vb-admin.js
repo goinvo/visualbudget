@@ -30,7 +30,13 @@
                     var next_meta_url = _vbAdminGlobal.vbPluginUrl + 'vis/api.php?filename=' + id + '_meta.json';
                     $http.get(next_meta_url).success( function(next_meta) {
                         datasets.push(next_meta);
-                        $scope.vbChartData.dataset = datasets[0]; // FIXME: this should be unnecessary
+
+                        // FIXME: These two commands should go in the .then() below, right?
+                        //        But they don't execute properly there.
+                        if (datasets.length == 1) {
+                            $scope.vbChartData.dataset = datasets[0];
+                            that.redrawChart();
+                        }
                     });
                 }
 
@@ -38,7 +44,6 @@
                 $.when.apply($, $.map(ids, fetchMetaFromId))
                     .then(function() {
                         $scope.datasets = datasets;
-                        // that.redrawChart();
                     });
 
             });
@@ -97,51 +102,5 @@
             }
 
         });
-
-    $(document).ready(function () {
-        'use strict';
-
-        // String.prototype.format = function(placeholders) {
-        //     var s = this;
-        //     for(var propertyName in placeholders) {
-        //         var re = new RegExp('{' + propertyName + '}', 'gm');
-        //         s = s.replace(re, placeholders[propertyName]);
-        //     }
-        //     return s;
-        // };
-
-        // function setSelect() {
-        //     // Remove the existing chart by setting innerHTML to ''
-        //     var $chartDiv = $('#vb-chart');
-        //     $chartDiv.html('');
-
-        //     // Update the chart div data.
-        //     var $selectDiv = $("#vb-select-dataset option:selected");
-        //     $chartDiv.data($selectDiv.data());
-        // }
-
-        // function generateShortcode() {
-        //     var $chartDiv = $('#vb-chart');
-        //     var $pre = $('#vb-shortcode');
-        //     var str = '[visualbudget data={dataset_id} vis={vistype}]';
-        //     $pre.html(str.format({
-        //         dataset_id: $chartDiv.data('vbDatasetId'),
-        //         vistype: $chartDiv.data('vbVisType')
-        //     }));
-        // }
-
-        // $('#vb-select-dataset').change(function() {
-        //     console.log('Changing selected dataset.');
-        //     setSelect();
-        //     generateShortcode();
-        //     vb.initialize();
-        // });
-
-        // setSelect();
-        // generateShortcode();
-
-        vb.initialize();
-
-    });
 
 })(visualbudget, jQuery);

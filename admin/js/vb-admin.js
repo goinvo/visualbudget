@@ -12,19 +12,17 @@
     var vbAdmin = angular.module('vbAdmin', ['components']);
     vbAdmin.controller('vbVisualizationsController', function($scope, $http) {
 
+        /*
         var that = this;
-
-        $scope.vbChartTrends = {};
-        $scope.vbChartBreakdown = {};
 
         // The _vbAdminGlobal is set by wp_localize_script() in the vb admin php file.
         var ids_url = _vbAdminGlobal.vbPluginUrl + 'vis/api.php?filter=id';
 
+        // We'll collect metadata of datasets here.
+        var datasets = $scope.datasets = [];
+
         // First load all dataset IDs.
         $http.get(ids_url).success( function(ids) {
-
-            // We'll collect metadata of datasets here.
-            var datasets = [];
 
             // Function to fetch metadata given a dataset ID.
             function fetchMetaFromId(id) {
@@ -34,11 +32,10 @@
 
                     // FIXME: These two commands should go in the .then() below, right?
                     //        But they don't execute properly there.
-                    if (datasets.length == 1) {
-                        $scope.vbChartTrends.dataset = datasets[0];
-                        $scope.vbChartBreakdown.dataset = datasets[0];
-                        that.redrawChart();
-                    }
+                    // if (datasets.length == 1) {
+                    //     $scope.vbChart.dataset = datasets[0];
+                    //     that.redrawChart();
+                    // }
                 });
             }
 
@@ -159,6 +156,7 @@
                 }
             return str.join(sep);
         }
+        */
 
     });
 

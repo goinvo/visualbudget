@@ -1,12 +1,16 @@
 /**
- * LineChart submodule.
+ * Line chart submodule.
  */
 var visualbudget = (function (vb, $, d3) {
 
     /**
-     * Define the LineChart constructor.
+     * Define the Chart constructor.
+     *
+     * FIXME: Why does this not work?
+     *      var Chart = vb.Chart = vb.Chart || function(){};
+     *      Chart = function(x,y) { ... };
      */
-    var LineChart = vb.LineChart = vb.LineChart || function($div, data) {
+    var Chart = vb.Chart = vb.Chart || function($div, data) {
 
         // Keep the jQuery object onhand.
         this.$div = $div;
@@ -38,9 +42,8 @@ var visualbudget = (function (vb, $, d3) {
         }
     };
 
-
     // The min and max of all dates.
-    LineChart.prototype.getTotalDateRange = function() {
+    Chart.prototype.getTotalDateRange = function() {
 
         // Get a list of all dates.
         var dates = [];
@@ -53,30 +56,62 @@ var visualbudget = (function (vb, $, d3) {
         var maxDate = dates.reduce(function(a, b) { return Math.max(a, b); });
 
         return [minDate, maxDate];
-    };
+    }
 
     // Get the current displayed dateRange.
-    LineChart.prototype.getDateRange = function() {
+    Chart.prototype.getDateRange = function() {
         return this.settings.dateRange;
-    };
+    }
 
     // Set a new displayed dateRange.
-    LineChart.prototype.setDateRange = function(range) {
+    Chart.prototype.setDateRange = function(range) {
         range[0] = Date.parse(range[0]);
         range[1] = Date.parse(range[1]);
         this.settings.dateRange = range;
-    };
+    }
+
+
+    // This object is necessary to construct for the noUiSlider to
+    // display dates correctly.
+    Chart.prototype.getDateRangeObject = function() {
+
+        var dateRange = this.getDateRange();
+
+        var yearOne = new Date(dateRange[0]).getUTCFullYear();
+        var yearTwo = new Date(dateRange[1]).getUTCFullYear();
+
+        var obj = {
+            'min': yearOne,
+            'max': yearTwo
+        };
+
+        var intervals = yearTwo - yearOne - 1;
+
+        for(i = 1; i <= intervals; i++) {
+            var pct = Math.round(100/(intervals+1)*i);
+            obj[pct + '%'] = yearOne + i;
+        }
+
+        return obj;
+    }
 
     // Redraw the chart.
-    LineChart.prototype.redraw = function() {
+    Chart.prototype.redraw = function() {
         console.log('Drawing chart ' + this.props.vbHash + '.');
 
-        this.$div.html('');
-        this.doLineChart();
-    };
+        switch(this.props.vbVis) {
+            case 'linechart':
+                this.$div.html('');
+                this.doLineChart();
+                break;
+
+            default:
+                this.$div.html('VisualBudget error: unrecognized chart type.');
+        }
+    }
 
     // Do the line chart thing.
-    LineChart.prototype.doLineChart = function() {
+    Chart.prototype.doLineChart = function() {
 
         var data = this.data;
 
@@ -142,9 +177,7 @@ var visualbudget = (function (vb, $, d3) {
             .attr("class", "y axis")
             .call(yAxis);
 
-    };
-
-
+    }
 
 
     return vb;

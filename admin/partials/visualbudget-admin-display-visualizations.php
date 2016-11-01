@@ -15,7 +15,6 @@
                 <br/><br/>
                 <select class='vb-dataset-select'
                         ng-model="chart.dataset"
-                        ng-options="d.uploaded_name for d in datasets"
                         ng-change="vbCtrl.redrawChart()">
                         </select>
                 <br/><br/>
@@ -29,24 +28,7 @@
             </pane>
 
             <pane title="Breakdown">
-                <div class='vb-chart-wrapper'></div>
-                <br/><br/>
-                <select class='vb-dataset-select'
-                        ng-model="vbChartBreakdown.dataset"
-                        ng-options="d.uploaded_name for d in datasets"
-                        ng-change="vbCtrl.redrawChart()">
-                        </select>
-                <br/><br/>
-                <br/><br/>
-                <div class='vb-time-slider-range'></div>
-                <br/><br/>
-                <br/><br/>
-                The above vis is generated using the following shortcode:
-                <br/><br/>
-                <pre class='vb-shortcode' ng-bind="vbCtrl.getShortcode()"></pre>
-                <a class='vb-iframe-link' ng-href="{{ vbCtrl.getShortcode('iframe_link') }}">{{ vbCtrl.getShortcode('iframe_link') }}</a>
             </pane>
-
             <pane title="Comparison">
             </pane>
             <pane title="Ratio">

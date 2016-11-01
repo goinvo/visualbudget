@@ -8,7 +8,7 @@ var visualbudget = (function (vb, $, d3) {
      */
     vb.initialize = function(callback) {
 
-        // Make callback an empty function if it's not set
+        // Set callback to an empty function if it's not set
         if (typeof callback === "undefined") {
             callback = function() {};
         }

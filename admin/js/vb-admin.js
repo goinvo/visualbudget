@@ -95,7 +95,7 @@
             console.log('Redrawing chart #' + $scope.vbChartData.dataset.id);
             var shortcode_url = this.getShortcode('admin_shortcode_link');
             $http.get(shortcode_url).success( function(response) {
-                that.selectInActivePane('.chart-wrapper').html(response);
+                that.selectInActivePane('.vb-chart-wrapper').html(response);
                 vb.initialize(that.setSlider);
             });
         }
@@ -134,6 +134,9 @@
                     chart.redraw();
                     $scope.$apply();
                 });
+
+            // Make sure we display the correct values at the beginning.
+            slider.noUiSlider.reset();
 
         }
 

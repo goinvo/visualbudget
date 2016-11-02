@@ -12,6 +12,28 @@ path {
     shape-rendering: crispEdges;
 }
 
+.vb-chart {
+    background: white;
+}
+
 .vb-time-slider {
-    margin: 0 5rem;
+    margin: 0 auto;
+    width: 20em;
+}
+
+.vb-select-wrapper {
+    text-align: center;
+}
+    .vb-dataset-select {
+        width: 20em;
+    }
+
+.vb-chart {
+    width: 600px;
+    height: 270px;
+    margin: 0 auto;
+}
+
+.tab-content {
+    padding: 0 5em;
 }

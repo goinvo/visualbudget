@@ -11,13 +11,15 @@
 
         <tabs>
             <pane title="Trends">
-                <div class='chart-wrapper'></div>
+                <div class='vb-chart-wrapper'></div>
                 <br/><br/>
-                <select class='vb-dataset-select'
+                <div class='vb-select-wrapper'>
+                    <select class='vb-dataset-select'
                         ng-model="vbChartData.dataset"
                         ng-options="d.uploaded_name for d in datasets"
                         ng-change="vbCtrl.redrawChart()">
                         </select>
+                </div>
                 <br/><br/>
                 <br/><br/>
                 <div class='vb-time-slider'></div>
@@ -25,6 +27,7 @@
                 The above vis is generated using the following shortcode:
                 <br/><br/>
                 <pre class='vb-shortcode' ng-bind="vbCtrl.getShortcode()"></pre>
+                Link to a standalone page of this chart:<br/>
                 <a class='vb-iframe-link' ng-href="{{ vbCtrl.getShortcode('iframe_link') }}">{{ vbCtrl.getShortcode('iframe_link') }}</a>
             </pane>
 

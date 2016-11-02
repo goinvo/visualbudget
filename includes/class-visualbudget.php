@@ -164,16 +164,11 @@ class VisualBudget {
      * into a URL to vis.php with appropriate query string.
      */
     public function visualbudget_func( $atts ) {
-        $a = shortcode_atts( array(
-            'data' => '',
-            'vis' => '',
-            'iframe' => null
-        ), $atts );
 
-        $vis_url = VISUALBUDGET_URL . "vis/vis.php?" . http_build_query($a);
+        $vis_url = VISUALBUDGET_URL . "vis/vis.php?" . http_build_query($atts);
 
         // If the "iframe" variable was passed, then return an iframe element.
-        if ($a['iframe']) {
+        if ($atts['iframe']) {
             return "<iframe src='" . $vis_url . "'"
                 . " width='100%' height='300px' style='border:1px solid #aaa;'>"
                 . "</iframe>";

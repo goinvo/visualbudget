@@ -18,7 +18,7 @@ var visualbudget = (function (vb, $, d3) {
         // Parse the data.
         data.dollarAmounts.forEach(function(d) {
             d.date = Date.parse(d.date);
-            d.dollarAmount = +d.dollarAmount;
+            d.dollarAmount = +d.dollarAmount/1000000;
         });
         this.data = data;
 
@@ -40,6 +40,7 @@ var visualbudget = (function (vb, $, d3) {
                 this.settings.dateRange[1] = Date.parse(this.props.vbTime1);
             }
         }
+
     };
 
     // The min and max of all dates.
@@ -171,6 +172,16 @@ var visualbudget = (function (vb, $, d3) {
             .attr("class", "x axis")
             .attr("transform", "translate(0," + height + ")")
             .call(xAxis);
+
+        svg.append("text")
+            .attr("class", "y label")
+            .attr("text-anchor", "middle")
+            .style("font-size","12px")
+            .attr("y", -43)
+            .attr("x", -height/2)
+            .attr("dy", ".8em")
+            .attr("transform", "rotate(-90)")
+            .text("dollars (millions)");
 
         // Add the Y Axis
         svg.append("g")

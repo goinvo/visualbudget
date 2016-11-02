@@ -1,3 +1,8 @@
+function paneController() {
+  // dfjkshsdkfj
+};
+
+
 angular.module('components', [])
 
   .directive('tabs', function() {

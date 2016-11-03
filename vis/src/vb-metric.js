@@ -27,7 +27,11 @@ class VbMetric extends VbChart {
         var metric = null;
 
         switch (name) {
-            case 'yeartotal':
+            case 'date':
+                metric = state.date;
+                break;
+
+            case 'datetotal':
                 metric = this.getMetricYearTotal(state);
                 break;
 

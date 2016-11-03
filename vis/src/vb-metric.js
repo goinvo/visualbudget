@@ -11,6 +11,8 @@ class VbMetric extends VbChart {
 
         // Call super method.
         super($div, data);
+
+        $div.css({"display": "inline"});
     }
 
     redraw() {

@@ -13,6 +13,12 @@ $dataset_id = $_GET['data'];
 $dataset_url = dirname(dirname($_SERVER["REQUEST_URI"]))
                 . "/datasets/" . $dataset_id . ".json";
 
+// The element will be a div if it's a chart, and a span if it's a metric.
+$element_type = 'div';
+if ($_GET['vis'] == 'metric') {
+    $element_type = 'span';
+}
+
 unset($_GET['rand']);
 $custom_atts = array();
 foreach ($_GET as $key => $val) {
@@ -25,18 +31,18 @@ $data_atts = "data-vb-hash='" . $hash . "' "
         . implode(' ', $custom_atts);
 
 // Build the chart div.
-$chart_div = "<div "
+$chart_element = "<$element_type "
         . "id='vb-chart-$hash' "
         . "class='vb-chart' "
         . $data_atts
-        . "></div>";
+        . "></$element_type>";
 
 
 // Check to see if we're displaying an iframe or not.
 if ($_GET['iframe']) {
 
     // Include iframe.php, which is the iframe template.
-    // Note: iframe.php uses the variable $chart_div.
+    // Note: iframe.php uses the variable $chart_element.
     include 'iframe.php';
 
 } elseif (isset($_GET['data_atts'])) {
@@ -47,6 +53,6 @@ if ($_GET['iframe']) {
 } else {
 
     // If no "iframe" or "data_atts" argument, then just spit out the div.
-    echo $chart_div;
+    echo $chart_element;
 
 }

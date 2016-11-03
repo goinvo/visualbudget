@@ -141,12 +141,71 @@ var VbLineChart = function (_VbChart) {
         value: function redraw() {
             console.log('Drawing chart ' + this.props.hash + ' (linechart).');
             this.$div.html('This is a linechart');
+            this.drawChart();
+        }
+    }, {
+        key: 'drawChart',
+        value: function drawChart() {
+            var data = this.data;
+
+            var inDateRange = function inDateRange(range) {
+                return function (d) {
+                    return d.date >= range[0] && d.date <= range[1];
+                };
+            };
+
+            // Set the dimensions of the canvas / graph
+            var margin = { top: 30, right: 20, bottom: 30, left: 50 },
+                width = this.$div.width() - margin.left - margin.right,
+                height = this.$div.height() - margin.top - margin.bottom;
+
+            // Parse the date / time
+            var parseDate = d3.timeFormat("%d-%b-%y").parse;
+
+            // Set the ranges
+            var x = d3.scaleTime().range([0, width]);
+            var y = d3.scaleLinear().range([height, 0]);
+
+            // Define the axes
+            // only show the year in the x-axis, not the month
+            var xAxis = d3.axisBottom().scale(x).tickFormat(function (time, index) {
+                return time.getUTCFullYear();
+            });
+
+            var yAxis = d3.axisLeft().scale(y).ticks(5);
+
+            // Define the line
+            var valueline = d3.line().x(function (d) {
+                return x(d.date);
+            }).y(function (d) {
+                return y(d.dollarAmount);
+            });
+
+            // Adds the svg canvas
+            var svg = d3.select('#' + this.$div.attr('id')).append("svg").attr("width", width + margin.left + margin.right).attr("height", height + margin.top + margin.bottom).append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+            // Scale the range of the data
+            x.domain(d3.extent(data.dollarAmounts.filter(inDateRange(this.getDateRange())), function (d) {
+                return d.date;
+            }));
+            y.domain([0, d3.max(data.dollarAmounts.filter(inDateRange(this.getDateRange())), function (d) {
+                return d.dollarAmount;
+            })]);
+
+            // Add the valueline path.
+            svg.append("path").attr("class", "line").attr("d", valueline(data.dollarAmounts.filter(inDateRange(this.getDateRange()))));
+
+            // Add the X Axis
+            svg.append("g").attr("class", "x axis").attr("transform", "translate(0," + height + ")").call(xAxis);
+
+            // Add the Y Axis
+            svg.append("g").attr("class", "y axis").call(yAxis);
         }
     }]);
 
     return VbLineChart;
 }(VbChart);
-'use strict';
+"use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
@@ -169,11 +228,15 @@ var VbMetric = function (_VbChart) {
         });
 
         // Call super method.
-        return _possibleConstructorReturn(this, (VbMetric.__proto__ || Object.getPrototypeOf(VbMetric)).call(this, $div, data));
+
+        var _this = _possibleConstructorReturn(this, (VbMetric.__proto__ || Object.getPrototypeOf(VbMetric)).call(this, $div, data));
+
+        $div.css({ "display": "inline" });
+        return _this;
     }
 
     _createClass(VbMetric, [{
-        key: 'redraw',
+        key: "redraw",
         value: function redraw() {
             // Just a test.
             console.log('Drawing chart ' + this.props.hash + ' (metric).');
@@ -182,7 +245,7 @@ var VbMetric = function (_VbChart) {
             this.$div.html(metric);
         }
     }, {
-        key: 'getMetric',
+        key: "getMetric",
         value: function getMetric(name, state) {
             var metric = null;
 
@@ -207,7 +270,7 @@ var VbMetric = function (_VbChart) {
             return metric;
         }
     }, {
-        key: 'getMetricYearTotal',
+        key: "getMetricYearTotal",
         value: function getMetricYearTotal(state) {
             var metric = this.dollarAmountOfDate(state.date);
             if (metric === null) {
@@ -217,7 +280,7 @@ var VbMetric = function (_VbChart) {
             return metric;
         }
     }, {
-        key: 'getMetricAverage',
+        key: "getMetricAverage",
         value: function getMetricAverage(state) {
             var metric = this.data.dollarAmounts.reduce(function (a, b) {
                 return a + b.dollarAmount;

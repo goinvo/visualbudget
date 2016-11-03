@@ -75,6 +75,20 @@ class VbChart {
         console.log('Destroying chart ' + this.props.hash + '.');
     }
 
+    getDateRange(data=this.data) {
+        // Get a list of all dates.
+        var dates = [];
+        data.dollarAmounts.forEach(function(obj) {
+            dates.push(Date.parse(obj.date));
+        });
+
+        // Find the min and max.
+        var minDate = dates.reduce(function(a, b) { return Math.min(a, b); });
+        var maxDate = dates.reduce(function(a, b) { return Math.max(a, b); });
+
+        return [new Date(minDate), new Date(maxDate)];
+    }
+
     // Number formatter, based on code from
     // http://stackoverflow.com/a/9462382/1516307
     nFormat(num, digits=0) {

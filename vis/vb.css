@@ -1,4 +1,10 @@
-body { font: 12px Arial;}
+/*body { font: 12px Arial;}*/
+
+div.vb-chart {
+    height: 300px;
+    width: 100%;
+}
+
 path {
     stroke: steelblue;
     stroke-width: 2;

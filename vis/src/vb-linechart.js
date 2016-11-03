@@ -113,13 +113,14 @@ class VbLineChart extends VbChart {
         // Hoverline
         this.hoverline = svg.append("g").append("line")
             .attr("x1", 0).attr("x2", 0)
-            .attr("y1", 0).attr("y2", chart.height)
+            .attr("y1", 0).attr("y2", chart.yheight)
             .attr("class", "hoverline")
             .classed("hidden", true);
     }
 
     moveHoverline() {
-        // FIXME: to write.
+        this.hoverline.classed("hidden", !this.state.hovering)
+            .attr("x1", this.state.mouseX).attr("x2", this.state.mouseX);
     }
 
     // Add interaction actions.
@@ -147,36 +148,27 @@ class VbLineChart extends VbChart {
             }
         }
 
-        function mouseover_callback(e) {
+        function mouseon_callback(e) {
             e = d3.event;
             e.preventDefault();
             let mouseX = getMouseX(e);
-            let mouseY = getMouseY(e);
-            that.hoverline.classed("hidden", false)
-                .attr("x1", mouseX)
-                .attr("x2", mouseX);
+            visualbudget.broadcastStateChange({
+                date: that.chart.x.invert(mouseX).getUTCFullYear(),
+                hovering: true,
+                mouseX: mouseX
+            })
         }
-        function mousemove_callback(e) {
+        function mouseoff_callback(e) {
             e = d3.event;
             e.preventDefault();
-            let mouseX = getMouseX(e);
-            let mouseY = getMouseY(e);
-            that.hoverline
-                .attr("x1", mouseX)
-                .attr("x2", mouseX);
-            visualbudget.broadcastStateChange({date: that.chart.x.invert(mouseX).getUTCFullYear()})
-        }
-        function mouseout_callback(e) {
-            e = d3.event;
-            e.preventDefault();
-            let mouseX = getMouseX(e);
-            let mouseY = getMouseY(e);
-            that.hoverline.classed("hidden", true);
+            visualbudget.broadcastStateChange({
+                hovering: false
+            })
         }
 
-        this.svg.on('mouseover', mouseover_callback);
-        this.svg.on('mousemove', mousemove_callback);
-        this.svg.on('mouseout',  mouseout_callback);
+        this.svg.on('mouseover', mouseon_callback);
+        this.svg.on('mousemove', mouseon_callback);
+        this.svg.on('mouseout',  mouseoff_callback);
     }
 
 }

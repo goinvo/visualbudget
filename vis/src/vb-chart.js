@@ -16,7 +16,9 @@ class VbChart {
         // for the interaction between charts.
         this.state = {
             groups: [],
-            date: "2016"
+            date: "2016",
+            hovering: false,
+            mouseX: null
         }
     }
 

@@ -22,7 +22,9 @@ var VbChart = function () {
         // for the interaction between charts.
         this.state = {
             groups: [],
-            date: "2016"
+            date: "2016",
+            hovering: false,
+            mouseX: null
         };
     }
 
@@ -175,8 +177,10 @@ var VbLineChart = function (_VbChart) {
     }, {
         key: 'setState',
         value: function setState(newState) {
-            // Do not redraw here.
             this.state = Object.assign({}, this.state, newState);
+
+            // Do not redraw everything here.
+            this.moveHoverline();
         }
     }, {
         key: 'setupChartSvg',
@@ -252,7 +256,12 @@ var VbLineChart = function (_VbChart) {
             chart.y = y;
 
             // Hoverline
-            this.hoverline = svg.append("g").append("line").attr("x1", 0).attr("x2", 0).attr("y1", 0).attr("y2", chart.height).attr("class", "hoverline").classed("hidden", true);
+            this.hoverline = svg.append("g").append("line").attr("x1", 0).attr("x2", 0).attr("y1", 0).attr("y2", chart.yheight).attr("class", "hoverline").classed("hidden", true);
+        }
+    }, {
+        key: 'moveHoverline',
+        value: function moveHoverline() {
+            this.hoverline.classed("hidden", !this.state.hovering).attr("x1", this.state.mouseX).attr("x2", this.state.mouseX);
         }
 
         // Add interaction actions.
@@ -283,32 +292,27 @@ var VbLineChart = function (_VbChart) {
                 }
             }
 
-            function mouseover_callback(e) {
+            function mouseon_callback(e) {
                 e = d3.event;
                 e.preventDefault();
                 var mouseX = getMouseX(e);
-                var mouseY = getMouseY(e);
-                that.hoverline.classed("hidden", false).attr("x1", mouseX).attr("x2", mouseX);
+                visualbudget.broadcastStateChange({
+                    date: that.chart.x.invert(mouseX).getUTCFullYear(),
+                    hovering: true,
+                    mouseX: mouseX
+                });
             }
-            function mousemove_callback(e) {
+            function mouseoff_callback(e) {
                 e = d3.event;
                 e.preventDefault();
-                var mouseX = getMouseX(e);
-                var mouseY = getMouseY(e);
-                that.hoverline.attr("x1", mouseX).attr("x2", mouseX);
-                visualbudget.broadcastStateChange({ date: that.chart.x.invert(mouseX).getUTCFullYear() });
-            }
-            function mouseout_callback(e) {
-                e = d3.event;
-                e.preventDefault();
-                var mouseX = getMouseX(e);
-                var mouseY = getMouseY(e);
-                that.hoverline.classed("hidden", true);
+                visualbudget.broadcastStateChange({
+                    hovering: false
+                });
             }
 
-            this.svg.on('mouseover', mouseover_callback);
-            this.svg.on('mousemove', mousemove_callback);
-            this.svg.on('mouseout', mouseout_callback);
+            this.svg.on('mouseover', mouseon_callback);
+            this.svg.on('mousemove', mouseon_callback);
+            this.svg.on('mouseout', mouseoff_callback);
         }
     }]);
 

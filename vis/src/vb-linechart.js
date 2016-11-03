@@ -26,8 +26,10 @@ class VbLineChart extends VbChart {
     }
 
     setState(newState) {
-        // Do not redraw here.
         this.state = Object.assign({}, this.state, newState);
+
+        // Do not redraw everything here.
+        this.moveHoverline();
     }
 
     setupChartSvg() {
@@ -80,7 +82,8 @@ class VbLineChart extends VbChart {
         // Define the line
         var valueline = d3.line()
             .x( d => x(new Date(d.date)) )
-            .y( d => y(d.dollarAmount) );
+            .y( d => y(d.dollarAmount) )
+            .curve(d3.curveCardinal.tension(0.5));
 
         // Scale the range of the data
         // x.domain(d3.extent(data.dollarAmounts.filter(inDateRange(null)), function(d) { return d.date; }));
@@ -113,6 +116,10 @@ class VbLineChart extends VbChart {
             .attr("y1", 0).attr("y2", chart.height)
             .attr("class", "hoverline")
             .classed("hidden", true);
+    }
+
+    moveHoverline() {
+        // FIXME: to write.
     }
 
     // Add interaction actions.

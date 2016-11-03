@@ -229,7 +229,7 @@ var VbLineChart = function (_VbChart) {
                 return x(new Date(d.date));
             }).y(function (d) {
                 return y(d.dollarAmount);
-            });
+            }).curve(d3.curveCardinal.tension(0.5));
 
             // Scale the range of the data
             // x.domain(d3.extent(data.dollarAmounts.filter(inDateRange(null)), function(d) { return d.date; }));

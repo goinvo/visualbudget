@@ -22,7 +22,6 @@ path {
 
 .svg-chart {
     pointer-events: all;
-    fill: #aaa;
 }
 .hoverline {
     stroke: red;

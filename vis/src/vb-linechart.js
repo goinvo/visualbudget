@@ -110,8 +110,16 @@ class VbLineChart extends VbChart {
         chart.x = x;
         chart.y = y;
 
+
+        svg.append('rect')
+            .attr('class', 'click-capture')
+            .style('visibility', 'hidden')
+            .attr('width', chart.width)
+            .attr('height', chart.height);
+
+
         // Hoverline
-        this.hoverline = svg.append("g").append("line")
+        this.hoverline = svg.append("line")
             .attr("x1", 0).attr("x2", 0)
             .attr("y1", 0).attr("y2", chart.yheight)
             .attr("class", "hoverline")

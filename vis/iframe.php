@@ -11,6 +11,6 @@ header("Content-type: text/html");
 <script type='text/javascript' src='vb-all.js'></script>
 </head>
 <body><?php
-echo $chart_div;
+echo $chart_element;
 ?></body>
 </html>

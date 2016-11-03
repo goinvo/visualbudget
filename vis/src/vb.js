@@ -64,7 +64,7 @@ var visualbudget = (function (vb, $, d3) {
             }
 
             vb.charts.push(newChart);
-            console.log('Added chart ' + $div.data('vbHash') + ' to queue.');
+            console.log('Added chart ' + newChart.atts.hash + ' to queue.');
         }
     }
 
@@ -77,14 +77,21 @@ var visualbudget = (function (vb, $, d3) {
         });
     }
 
+    vb.broadcastStateChange = function(state) {
+        for (let i = 0; i < vb.charts.length; i++) {
+            let chart = vb.charts[i];
+            chart.setState(state);
+        }
+    }
+
     /**
      * Search for a chart by its hash. Returns null if no matching chart is found.
      */
     vb.getChart = function(hash) {
         var match = null;
 
-        for (i = 0; i < vb.charts.length; i ++) {
-            if (vb.charts[i].props.vbHash == hash) {
+        for (let i = 0; i < vb.charts.length; i++) {
+            if (vb.charts[i].atts.hash == hash) {
                 match = vb.charts[i];
                 break;
             }

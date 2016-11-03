@@ -16,7 +16,7 @@ var VbChart = function () {
         this.data = data;
 
         // Properties of the chart are specified as HTML data attributes.
-        this.props = this.removeVbPrefixesOnAttributes($div.data());
+        this.atts = this.removeVbPrefixesOnAttributes($div.data());
 
         // The shared state among charts. These properties are used
         // for the interaction between charts.
@@ -32,7 +32,7 @@ var VbChart = function () {
 
     _createClass(VbChart, [{
         key: 'removeVbPrefixesOnAttributes',
-        value: function removeVbPrefixesOnAttributes(props) {
+        value: function removeVbPrefixesOnAttributes(atts) {
 
             function firstCharToLower(string) {
                 return string.charAt(0).toLowerCase() + string.slice(1).toLowerCase();
@@ -41,21 +41,21 @@ var VbChart = function () {
                 return str.replace(/^vb/, '');
             }
 
-            // We will clone the props here with new keys.
-            var newProps = {};
+            // We will clone the atts here with new keys.
+            var newAtts = {};
 
             // Loop through each property and remove the vb- prefix from them.
-            for (var key in props) {
-                if (props.hasOwnProperty(key)) {
+            for (var key in atts) {
+                if (atts.hasOwnProperty(key)) {
                     // Create a new key by removing the prefix of the old key
                     var newKey = removeVbPrefix(key);
                     newKey = firstCharToLower(newKey);
 
-                    newProps[newKey] = props[key];
+                    newAtts[newKey] = atts[key];
                 }
             }
 
-            return newProps;
+            return newAtts;
         }
     }, {
         key: 'dollarAmountOfDate',
@@ -78,14 +78,14 @@ var VbChart = function () {
         key: 'redraw',
         value: function redraw() {
             // Redraw the chart.
-            console.log('Drawing chart ' + this.props.hash + '.');
+            console.log('Drawing chart ' + this.atts.hash + '.');
             this.$div.html('This is a chart');
         }
     }, {
         key: 'destroy',
         value: function destroy() {
             // Remove everything in the chart.
-            console.log('Destroying chart ' + this.props.hash + '.');
+            console.log('Destroying chart ' + this.atts.hash + '.');
         }
     }, {
         key: 'getDateRange',
@@ -159,14 +159,24 @@ var VbLineChart = function (_VbChart) {
         var _this = _possibleConstructorReturn(this, (VbLineChart.__proto__ || Object.getPrototypeOf(VbLineChart)).call(this, $div, data));
 
         _this.setupChartSvg();
+
+        // Bind events.
+        _this.addActions();
         return _this;
     }
 
     _createClass(VbLineChart, [{
         key: 'redraw',
         value: function redraw() {
-            console.log('Drawing chart ' + this.props.hash + ' (linechart).');
+            console.log('Drawing chart ' + this.atts.hash + ' (linechart).');
+            d3.selectAll('#' + this.$div.attr('id') + ' svg g *').remove();
             this.drawChart();
+        }
+    }, {
+        key: 'setState',
+        value: function setState(newState) {
+            // Do not redraw here.
+            this.state = Object.assign({}, this.state, newState);
         }
     }, {
         key: 'setupChartSvg',
@@ -181,14 +191,8 @@ var VbLineChart = function (_VbChart) {
             this.chart.yheight = height - margin.top - margin.bottom;
 
             // Adds the svg canvas
-            this.svg = d3.select($div.get(0)).append("svg").attr("width", width).attr("height", height).append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+            this.svg = d3.select($div.get(0)).append("svg").attr("class", "svg-chart").attr("width", width).attr("height", height).append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
         }
-
-        // Add interaction actions.
-
-    }, {
-        key: 'addActions',
-        value: function addActions() {}
 
         // FIXME: This function should be broken up into drawAxes(), drawLine(data), etc.
 
@@ -242,6 +246,69 @@ var VbLineChart = function (_VbChart) {
 
             // Add the Y Axis
             svg.append("g").attr("class", "y axis").call(yAxis);
+
+            // For global use
+            chart.x = x;
+            chart.y = y;
+
+            // Hoverline
+            this.hoverline = svg.append("g").append("line").attr("x1", 0).attr("x2", 0).attr("y1", 0).attr("y2", chart.height).attr("class", "hoverline").classed("hidden", true);
+        }
+
+        // Add interaction actions.
+
+    }, {
+        key: 'addActions',
+        value: function addActions() {
+            var that = this;
+
+            function getMouseX(e) {
+                var x = void 0;
+                // Makes event valid for both touch and mouse devices
+                if (e.type === 'touchstart') {
+                    x = e.touches[0].pageX;
+                } else {
+                    // Solves some IE compatibility issues
+                    x = e.offsetX || d3.mouse(this)[0];
+                }
+                return x - that.chart.margin.left;
+            }
+            function getMouseY(e) {
+                // Makes event valid for both touch and mouse devices
+                if (e.type === 'touchstart') {
+                    return e.touches[0].pageY;
+                } else {
+                    // Solves some IE compatibility issues
+                    return e.offsetY || d3.mouse(this)[1];
+                }
+            }
+
+            function mouseover_callback(e) {
+                e = d3.event;
+                e.preventDefault();
+                var mouseX = getMouseX(e);
+                var mouseY = getMouseY(e);
+                that.hoverline.classed("hidden", false).attr("x1", mouseX).attr("x2", mouseX);
+            }
+            function mousemove_callback(e) {
+                e = d3.event;
+                e.preventDefault();
+                var mouseX = getMouseX(e);
+                var mouseY = getMouseY(e);
+                that.hoverline.attr("x1", mouseX).attr("x2", mouseX);
+                visualbudget.broadcastStateChange({ date: that.chart.x.invert(mouseX).getUTCFullYear() });
+            }
+            function mouseout_callback(e) {
+                e = d3.event;
+                e.preventDefault();
+                var mouseX = getMouseX(e);
+                var mouseY = getMouseY(e);
+                that.hoverline.classed("hidden", true);
+            }
+
+            this.svg.on('mouseover', mouseover_callback);
+            this.svg.on('mousemove', mousemove_callback);
+            this.svg.on('mouseout', mouseout_callback);
         }
     }]);
 
@@ -281,9 +348,9 @@ var VbMetric = function (_VbChart) {
         key: "redraw",
         value: function redraw() {
             // Just a test.
-            console.log('Drawing chart ' + this.props.hash + ' (metric).');
+            console.log('Drawing chart ' + this.atts.hash + ' (metric).');
 
-            var metric = this.getMetric(this.props.metric, this.state);
+            var metric = this.getMetric(this.atts.metric, this.state);
             this.$div.html(metric);
         }
     }, {
@@ -402,7 +469,7 @@ var visualbudget = function (vb, $, d3) {
             }
 
             vb.charts.push(newChart);
-            console.log('Added chart ' + $div.data('vbHash') + ' to queue.');
+            console.log('Added chart ' + newChart.atts.hash + ' to queue.');
         };
     };
 
@@ -415,14 +482,21 @@ var visualbudget = function (vb, $, d3) {
         });
     };
 
+    vb.broadcastStateChange = function (state) {
+        for (var i = 0; i < vb.charts.length; i++) {
+            var chart = vb.charts[i];
+            chart.setState(state);
+        }
+    };
+
     /**
      * Search for a chart by its hash. Returns null if no matching chart is found.
      */
     vb.getChart = function (hash) {
         var match = null;
 
-        for (i = 0; i < vb.charts.length; i++) {
-            if (vb.charts[i].props.vbHash == hash) {
+        for (var i = 0; i < vb.charts.length; i++) {
+            if (vb.charts[i].atts.hash == hash) {
                 match = vb.charts[i];
                 break;
             }

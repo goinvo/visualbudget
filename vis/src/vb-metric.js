@@ -17,9 +17,9 @@ class VbMetric extends VbChart {
 
     redraw() {
         // Just a test.
-        console.log('Drawing chart ' + this.props.hash + ' (metric).');
+        console.log('Drawing chart ' + this.atts.hash + ' (metric).');
 
-        var metric = this.getMetric(this.props.metric, this.state);
+        var metric = this.getMetric(this.atts.metric, this.state);
         this.$div.html(metric);
     }
 

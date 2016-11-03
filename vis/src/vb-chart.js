@@ -10,7 +10,7 @@ class VbChart {
         this.data = data;
 
         // Properties of the chart are specified as HTML data attributes.
-        this.props = this.removeVbPrefixesOnAttributes($div.data());
+        this.atts = this.removeVbPrefixesOnAttributes($div.data());
 
         // The shared state among charts. These properties are used
         // for the interaction between charts.
@@ -23,7 +23,7 @@ class VbChart {
 
     // The data-* properties are specified in the HTML with the additional
     // prefix of vb, so they are data-vb-*. Let's remove that unnecessary vb.
-    removeVbPrefixesOnAttributes(props) {
+    removeVbPrefixesOnAttributes(atts) {
 
         function firstCharToLower(string) {
             return string.charAt(0).toLowerCase() + string.slice(1).toLowerCase();
@@ -32,21 +32,21 @@ class VbChart {
             return str.replace(/^vb/, '');
         }
 
-        // We will clone the props here with new keys.
-        let newProps = {};
+        // We will clone the atts here with new keys.
+        let newAtts = {};
 
         // Loop through each property and remove the vb- prefix from them.
-        for (let key in props) {
-            if (props.hasOwnProperty(key)) {
+        for (let key in atts) {
+            if (atts.hasOwnProperty(key)) {
                 // Create a new key by removing the prefix of the old key
                 let newKey = removeVbPrefix(key);
                 newKey = firstCharToLower(newKey);
 
-                newProps[newKey] = props[key];
+                newAtts[newKey] = atts[key];
             }
         }
 
-        return newProps;
+        return newAtts;
     }
 
     dollarAmountOfDate(date) {
@@ -66,13 +66,13 @@ class VbChart {
 
     redraw() {
         // Redraw the chart.
-        console.log('Drawing chart ' + this.props.hash + '.');
+        console.log('Drawing chart ' + this.atts.hash + '.');
         this.$div.html('This is a chart');
     }
 
     destroy() {
         // Remove everything in the chart.
-        console.log('Destroying chart ' + this.props.hash + '.');
+        console.log('Destroying chart ' + this.atts.hash + '.');
     }
 
     getDateRange(data=this.data) {

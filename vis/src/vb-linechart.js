@@ -14,11 +14,20 @@ class VbLineChart extends VbChart {
 
         // Set up the SVG.
         this.setupChartSvg();
+
+        // Bind events.
+        this.addActions();
     }
 
     redraw() {
-        console.log('Drawing chart ' + this.props.hash + ' (linechart).');
+        console.log('Drawing chart ' + this.atts.hash + ' (linechart).');
+        d3.selectAll('#' + this.$div.attr('id') + ' svg g *').remove();
         this.drawChart();
+    }
+
+    setState(newState) {
+        // Do not redraw here.
+        this.state = Object.assign({}, this.state, newState);
     }
 
     setupChartSvg() {
@@ -34,16 +43,12 @@ class VbLineChart extends VbChart {
         // Adds the svg canvas
         this.svg = d3.select($div.get(0))
             .append("svg")
+                .attr("class", "svg-chart")
                 .attr("width",  width)
                 .attr("height", height)
             .append("g")
                 .attr("transform",
                       "translate(" + margin.left + "," + margin.top + ")");
-    }
-
-    // Add interaction actions.
-    addActions() {
-
     }
 
     // FIXME: This function should be broken up into drawAxes(), drawLine(data), etc.
@@ -77,7 +82,6 @@ class VbLineChart extends VbChart {
             .x( d => x(new Date(d.date)) )
             .y( d => y(d.dollarAmount) );
 
-
         // Scale the range of the data
         // x.domain(d3.extent(data.dollarAmounts.filter(inDateRange(null)), function(d) { return d.date; }));
         x.domain(this.getDateRange())
@@ -99,6 +103,73 @@ class VbLineChart extends VbChart {
             .attr("class", "y axis")
             .call(yAxis);
 
+        // For global use
+        chart.x = x;
+        chart.y = y;
+
+        // Hoverline
+        this.hoverline = svg.append("g").append("line")
+            .attr("x1", 0).attr("x2", 0)
+            .attr("y1", 0).attr("y2", chart.height)
+            .attr("class", "hoverline")
+            .classed("hidden", true);
+    }
+
+    // Add interaction actions.
+    addActions() {
+        let that = this;
+
+        function getMouseX(e) {
+            let x;
+            // Makes event valid for both touch and mouse devices
+            if (e.type === 'touchstart') {
+                x = e.touches[0].pageX;
+            } else {
+                // Solves some IE compatibility issues
+                x = e.offsetX || d3.mouse(this)[0];
+            }
+            return x - that.chart.margin.left;
+        }
+        function getMouseY(e) {
+            // Makes event valid for both touch and mouse devices
+            if (e.type === 'touchstart') {
+                return e.touches[0].pageY;
+            } else {
+                // Solves some IE compatibility issues
+                return e.offsetY || d3.mouse(this)[1];
+            }
+        }
+
+        function mouseover_callback(e) {
+            e = d3.event;
+            e.preventDefault();
+            let mouseX = getMouseX(e);
+            let mouseY = getMouseY(e);
+            that.hoverline.classed("hidden", false)
+                .attr("x1", mouseX)
+                .attr("x2", mouseX);
+        }
+        function mousemove_callback(e) {
+            e = d3.event;
+            e.preventDefault();
+            let mouseX = getMouseX(e);
+            let mouseY = getMouseY(e);
+            that.hoverline
+                .attr("x1", mouseX)
+                .attr("x2", mouseX);
+            visualbudget.broadcastStateChange({date: that.chart.x.invert(mouseX).getUTCFullYear()})
+        }
+        function mouseout_callback(e) {
+            e = d3.event;
+            e.preventDefault();
+            let mouseX = getMouseX(e);
+            let mouseY = getMouseY(e);
+            that.hoverline.classed("hidden", true);
+        }
+
+        this.svg.on('mouseover', mouseover_callback);
+        this.svg.on('mousemove', mousemove_callback);
+        this.svg.on('mouseout',  mouseout_callback);
     }
 
 }

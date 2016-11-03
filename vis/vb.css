@@ -19,6 +19,20 @@ path {
 }
 
 
+
+.svg-chart {
+    pointer-events: all;
+    fill: #aaa;
+}
+.hoverline {
+    stroke: red;
+    stroke-width: 1;
+    shape-rendering: optimizeSpeed;
+}
+.hidden {
+    opacity: 1;
+}
+
 /* Admin things. */
 .vb-chart-wrapper {
     background: white;

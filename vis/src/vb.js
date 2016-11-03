@@ -47,7 +47,22 @@ var visualbudget = (function (vb, $, d3) {
      */
     vb.setupChartObject = function($div) {
         return function(data) {
-            var newChart = new vb.Chart($div, data);
+
+            var newChart;
+
+            switch($div.data('vbVis')) {
+                case 'linechart':
+                    newChart = new VbLineChart($div, data);
+                    break;
+
+                case 'metric':
+                    newChart = new VbMetric($div, data);
+                    break;
+
+                default:
+                    console.log('VB error: Unrecognized chart type.');
+            }
+
             vb.charts.push(newChart);
             console.log('Added chart ' + $div.data('vbHash') + ' to queue.');
         }

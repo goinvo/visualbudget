@@ -16,7 +16,7 @@ var VbChart = function () {
         this.data = data;
 
         // Properties of the chart are specified as HTML data attributes.
-        this.props = $div.data();
+        this.props = this.removeVbPrefixesOnAttributes($div.data());
 
         // The shared state among charts. These properties are used
         // for the interaction between charts.
@@ -26,29 +26,91 @@ var VbChart = function () {
         };
     }
 
+    // The data-* properties are specified in the HTML with the additional
+    // prefix of vb, so they are data-vb-*. Let's remove that unnecessary vb.
+
+
     _createClass(VbChart, [{
+        key: 'removeVbPrefixesOnAttributes',
+        value: function removeVbPrefixesOnAttributes(props) {
+
+            function firstCharToLower(string) {
+                return string.charAt(0).toLowerCase() + string.slice(1).toLowerCase();
+            }
+            function removeVbPrefix(str) {
+                return str.replace(/^vb/, '');
+            }
+
+            // We will clone the props here with new keys.
+            var newProps = {};
+
+            // Loop through each property and remove the vb- prefix from them.
+            for (var key in props) {
+                if (props.hasOwnProperty(key)) {
+                    // Create a new key by removing the prefix of the old key
+                    var newKey = removeVbPrefix(key);
+                    newKey = firstCharToLower(newKey);
+
+                    newProps[newKey] = props[key];
+                }
+            }
+
+            return newProps;
+        }
+    }, {
+        key: 'dollarAmountOfDate',
+        value: function dollarAmountOfDate(date) {
+            for (var i = 0; i < this.data.dollarAmounts.length; i++) {
+                var obj = this.data.dollarAmounts[i];
+                if (obj.date == date) {
+                    return obj.dollarAmount;
+                }
+            }
+            return null;
+        }
+    }, {
         key: 'setState',
         value: function setState(newState) {
             this.state = Object.assign({}, this.state, newState);
-            // Do stuff with new state.
+            this.redraw();
         }
     }, {
         key: 'redraw',
         value: function redraw() {
             // Redraw the chart.
-            console.log('Drawing chart ' + this.props.vbHash + '.');
+            console.log('Drawing chart ' + this.props.hash + '.');
+            this.$div.html('This is a chart');
         }
     }, {
         key: 'destroy',
         value: function destroy() {
             // Remove everything in the chart.
-            console.log('Destroying chart ' + this.props.vbHash + '.');
+            console.log('Destroying chart ' + this.props.hash + '.');
+        }
+
+        // Number formatter, based on code from
+        // http://stackoverflow.com/a/9462382/1516307
+
+    }, {
+        key: 'nFormat',
+        value: function nFormat(num) {
+            var digits = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+
+            var si = [{ value: 1E12, symbol: "T" }, { value: 1E9, symbol: "B" }, { value: 1E6, symbol: "M" }, { value: 1E3, symbol: "k" }],
+                rx = /\.0+$|(\.[0-9]*[1-9])0+$/,
+                i;
+            for (i = 0; i < si.length; i++) {
+                if (num >= si[i].value) {
+                    return (num / si[i].value).toFixed(digits).replace(rx, "$1") + si[i].symbol;
+                }
+            }
+            return num.toFixed(digits).replace(rx, "$1");
         }
     }]);
 
     return VbChart;
 }();
-"use strict";
+'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
@@ -66,7 +128,7 @@ var VbLineChart = function (_VbChart) {
 
         // Normalize the data.
         data.dollarAmounts.forEach(function (d) {
-            d.date = Date.parse(d.date);
+            // d.date = Date.parse(d.date);
             d.dollarAmount = +d.dollarAmount;
         });
 
@@ -75,15 +137,16 @@ var VbLineChart = function (_VbChart) {
     }
 
     _createClass(VbLineChart, [{
-        key: "logState",
-        value: function logState() {
-            console.log("Logging state.");
+        key: 'redraw',
+        value: function redraw() {
+            console.log('Drawing chart ' + this.props.hash + ' (linechart).');
+            this.$div.html('This is a linechart');
         }
     }]);
 
     return VbLineChart;
 }(VbChart);
-"use strict";
+'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
@@ -101,7 +164,7 @@ var VbMetric = function (_VbChart) {
 
         // Normalize the data.
         data.dollarAmounts.forEach(function (d) {
-            d.date = Date.parse(d.date);
+            // d.date = Date.parse(d.date);
             d.dollarAmount = +d.dollarAmount;
         });
 
@@ -110,10 +173,57 @@ var VbMetric = function (_VbChart) {
     }
 
     _createClass(VbMetric, [{
-        key: "redraw",
+        key: 'redraw',
         value: function redraw() {
             // Just a test.
-            this.$div.html(Date.now());
+            console.log('Drawing chart ' + this.props.hash + ' (metric).');
+
+            var metric = this.getMetric(this.props.metric, this.state);
+            this.$div.html(metric);
+        }
+    }, {
+        key: 'getMetric',
+        value: function getMetric(name, state) {
+            var metric = null;
+
+            switch (name) {
+                case 'yeartotal':
+                    metric = this.getMetricYearTotal(state);
+                    break;
+
+                case 'average':
+                    metric = this.getMetricAverage(state);
+                    break;
+
+                case '5yearaverage':
+                    // Do what is necessary for 5 year average.
+                    metric = '5-year-average coming soon.';
+                    break;
+
+                default:
+                    metric = 'Unrecognized metric.';
+            }
+
+            return metric;
+        }
+    }, {
+        key: 'getMetricYearTotal',
+        value: function getMetricYearTotal(state) {
+            var metric = this.dollarAmountOfDate(state.date);
+            if (metric === null) {
+                return 'N/A';
+            }
+            metric = '$' + this.nFormat(metric, 1);
+            return metric;
+        }
+    }, {
+        key: 'getMetricAverage',
+        value: function getMetricAverage(state) {
+            var metric = this.data.dollarAmounts.reduce(function (a, b) {
+                return a + b.dollarAmount;
+            }, 0) / this.data.dollarAmounts.length;
+            metric = '$' + this.nFormat(metric, 1);
+            return metric;
         }
     }]);
 

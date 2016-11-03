@@ -5,7 +5,7 @@ class VbMetric extends VbChart {
 
         // Normalize the data.
         data.dollarAmounts.forEach(function(d) {
-            d.date = Date.parse(d.date);
+            // d.date = Date.parse(d.date);
             d.dollarAmount = +d.dollarAmount;
         });
 
@@ -15,7 +15,50 @@ class VbMetric extends VbChart {
 
     redraw() {
         // Just a test.
-        this.$div.html(Date.now());
+        console.log('Drawing chart ' + this.props.hash + ' (metric).');
+
+        var metric = this.getMetric(this.props.metric, this.state);
+        this.$div.html(metric);
+    }
+
+    getMetric(name, state) {
+        var metric = null;
+
+        switch (name) {
+            case 'yeartotal':
+                metric = this.getMetricYearTotal(state);
+                break;
+
+            case 'average':
+                metric = this.getMetricAverage(state);
+                break;
+
+            case '5yearaverage':
+                // Do what is necessary for 5 year average.
+                metric = '5-year-average coming soon.';
+                break;
+
+            default:
+                metric = 'Unrecognized metric.';
+        }
+
+        return metric;
+    }
+
+    getMetricYearTotal(state) {
+        let metric = this.dollarAmountOfDate(state.date);
+        if (metric === null) {
+            return 'N/A';
+        }
+        metric = '$' + this.nFormat(metric, 1);
+        return metric;
+    }
+
+    getMetricAverage(state) {
+        let metric = this.data.dollarAmounts.reduce((a,b) => a + b.dollarAmount, 0)
+                    / this.data.dollarAmounts.length;
+        metric = '$' + this.nFormat(metric, 1);
+        return metric;
     }
 
 }

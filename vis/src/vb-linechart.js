@@ -5,7 +5,7 @@ class VbLineChart extends VbChart {
 
         // Normalize the data.
         data.dollarAmounts.forEach(function(d) {
-            d.date = Date.parse(d.date);
+            // d.date = Date.parse(d.date);
             d.dollarAmount = +d.dollarAmount;
         });
 
@@ -13,8 +13,9 @@ class VbLineChart extends VbChart {
         super($div, data);
     }
 
-    logState() {
-        console.log("Logging state.");
+    redraw() {
+        console.log('Drawing chart ' + this.props.hash + ' (linechart).');
+        this.$div.html('This is a linechart');
     }
 
 }

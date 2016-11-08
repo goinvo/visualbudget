@@ -3,7 +3,7 @@ class VbLineChart extends VbChart {
 
     constructor($div, data) {
 
-        // Normalize the data.
+        // Cast the data.
         data.dollarAmounts.forEach(function(d) {
             // d.date = Date.parse(d.date);
             d.dollarAmount = +d.dollarAmount;

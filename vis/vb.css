@@ -5,6 +5,36 @@ div.vb-chart {
     width: 100%;
 }
 
+
+
+/* treemap */
+.vb-chart {
+  font: 10px sans-serif;
+  position: relative;
+}
+.node {
+  box-sizing: border-box;
+  line-height: 1em;
+  overflow: hidden;
+  position: absolute;
+  white-space: pre;
+  background: #ddd;
+  opacity: 0.8;
+}
+.node-label,
+.node-value {
+  margin: 4px;
+}
+.node-value {
+  margin-top: -2px;
+}
+.node-value {
+  font-weight: bold;
+}
+
+
+
+/* linechart */
 path {
     stroke: steelblue;
     stroke-width: 2;
@@ -17,9 +47,6 @@ path {
     stroke-width: 1;
     shape-rendering: crispEdges;
 }
-
-
-
 .svg-chart {
     pointer-events: all;
 }
@@ -31,6 +58,8 @@ path {
 .hidden {
     opacity: 0;
 }
+
+
 
 /* Admin things. */
 .vb-chart-wrapper {

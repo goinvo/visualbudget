@@ -30,6 +30,7 @@ class VbTreeMap extends VbChart {
     }
 
     setupChartSvg() {
+        this.transitioning = false;
         let $div = this.$div;
 
         let chart = this.chart = {};
@@ -72,12 +73,16 @@ class VbTreeMap extends VbChart {
     }
 
     // FIXME: This function should be broken up into drawAxes(), drawLine(data), etc.
-    drawChart() {
+    drawChart(d) {
         let that  = this;
-        let data  = this.data;
+        let data  = d || this.data;
         let chart = this.chart;
         let svg   = this.svg;
 
+        console.log(d)
+
+        // remove old elements
+        d3.select(this.$div.get(0)).selectAll('.node').remove();
 
         // for the sake of choice
         let yearIndex = this.yearIndex = 10;
@@ -95,8 +100,6 @@ class VbTreeMap extends VbChart {
             // .sum(d => d.dollarAmounts[yearIndex].dollarAmount)
             // .sort((a, b) => b.dollarAmount - a.dollarAmount);
 
-        console.log(root)
-
         treemap(root);
 
         let node = d3.select(this.$div.get(0))
@@ -104,6 +107,7 @@ class VbTreeMap extends VbChart {
             .data(root.children)
             .enter().append("div")
                 .attr("class", "node")
+                .on("click", d => d.data.children.length ? this.drawChart(d.data) : false)
                 .style("left", d => d.x0 + "px")
                 .style("top", d => d.y0 + "px")
                 .style("width", d => d.x1 - d.x0 + "px")
@@ -111,15 +115,11 @@ class VbTreeMap extends VbChart {
 
         node.append("div")
             .attr("class", "node-label")
-            // .text(d => d.parent.parent.data.name + " to " + d.parent.data.name + "\n" + d.data.name);
             .text(d => d.data.name);
 
         node.append("div")
             .attr("class", "node-value")
             .text(d => '$' + this.nFormat(d.value));
-
-
-
-
     }
+
 }

@@ -18,7 +18,7 @@ div.vb-chart {
   overflow: hidden;
   position: absolute;
   white-space: pre;
-  background: #ddd;
+  background: #eee;
   opacity: 0.8;
 }
 .node-label,

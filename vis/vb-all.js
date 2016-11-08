@@ -460,6 +460,7 @@ var VbTreeMap = function (_VbChart) {
     }, {
         key: 'setupChartSvg',
         value: function setupChartSvg() {
+            this.transitioning = false;
             var $div = this.$div;
 
             var chart = this.chart = {};
@@ -487,13 +488,18 @@ var VbTreeMap = function (_VbChart) {
 
     }, {
         key: 'drawChart',
-        value: function drawChart() {
+        value: function drawChart(d) {
             var _this2 = this;
 
             var that = this;
-            var data = this.data;
+            var data = d || this.data;
             var chart = this.chart;
             var svg = this.svg;
+
+            console.log(d);
+
+            // remove old elements
+            d3.select(this.$div.get(0)).selectAll('.node').remove();
 
             // for the sake of choice
             var yearIndex = this.yearIndex = 10;
@@ -509,11 +515,11 @@ var VbTreeMap = function (_VbChart) {
             // .sum(d => d.dollarAmounts[yearIndex].dollarAmount)
             // .sort((a, b) => b.dollarAmount - a.dollarAmount);
 
-            console.log(root);
-
             treemap(root);
 
-            var node = d3.select(this.$div.get(0)).selectAll(".node").data(root.children).enter().append("div").attr("class", "node").style("left", function (d) {
+            var node = d3.select(this.$div.get(0)).selectAll(".node").data(root.children).enter().append("div").attr("class", "node").on("click", function (d) {
+                return d.data.children.length ? _this2.drawChart(d.data) : false;
+            }).style("left", function (d) {
                 return d.x0 + "px";
             }).style("top", function (d) {
                 return d.y0 + "px";
@@ -523,9 +529,7 @@ var VbTreeMap = function (_VbChart) {
                 return d.y1 - d.y0 + "px";
             });
 
-            node.append("div").attr("class", "node-label")
-            // .text(d => d.parent.parent.data.name + " to " + d.parent.data.name + "\n" + d.data.name);
-            .text(function (d) {
+            node.append("div").attr("class", "node-label").text(function (d) {
                 return d.data.name;
             });
 

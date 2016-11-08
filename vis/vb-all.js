@@ -464,39 +464,32 @@ var VbTreeMap = function (_VbChart) {
             var $div = this.$div;
 
             var chart = this.chart = {};
-            var margin = this.chart.margin = { top: 0, right: 0, bottom: 0, left: 0 };
+            var margin = this.chart.margin = { top: 20, right: 0, bottom: 0, left: 0 };
             var width = this.chart.width = $div.width();
             var height = this.chart.height = $div.height();
-            this.chart.xwidth = width - margin.right - margin.left;
-            this.chart.yheight = height - margin.top - margin.bottom;
+            var xwidth = this.chart.xwidth = width - margin.right - margin.left;
+            var yheight = this.chart.yheight = height - margin.top - margin.bottom;
 
             // Adds the svg canvas
-            var svg = this.svg = d3.select($div.get(0)).append("svg").attr("class", "svg-chart").attr("width", width).attr("height", height).append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+            var container = d3.select($div.get(0)).classed("vb-treemap", true);
 
-            // sanity check / background color
-            this.svg.append("rect").attr("width", width).attr("height", height).attr("fill", "#abcdef");
+            container.append("div").attr("class", "treemap-grandparent").style("width", xwidth).style("height", margin.top + "px").text('zoom out');
 
-            // grandparent
-            var grandparent = chart.grandparent = svg.append("g").attr("class", "grandparent");
-
-            grandparent.append("rect").attr("fill", "#789abc").attr("y", -chart.margin.top).attr("width", width).attr("height", chart.margin.top);
-
-            grandparent.append("text").attr("x", 6).attr("y", 6 - chart.margin.top).attr("dy", ".75em");
+            container.append("div").attr("class", "treemap-main").style("width", xwidth).style("height", yheight);
+            // .style("top", margin.top + "px")
         }
 
         // FIXME: This function should be broken up into drawAxes(), drawLine(data), etc.
 
     }, {
         key: 'drawChart',
-        value: function drawChart(d) {
+        value: function drawChart(input_node) {
             var _this2 = this;
 
             var that = this;
-            var data = d || this.data;
+            var data = input_node || this.data;
             var chart = this.chart;
             var svg = this.svg;
-
-            console.log(d);
 
             // remove old elements
             d3.select(this.$div.get(0)).selectAll('.node').remove();
@@ -517,7 +510,13 @@ var VbTreeMap = function (_VbChart) {
 
             treemap(root);
 
-            var node = d3.select(this.$div.get(0)).selectAll(".node").data(root.children).enter().append("div").attr("class", "node").on("click", function (d) {
+            // zoom out button
+            d3.select(this.$div.get(0)).select(".treemap-grandparent").on('click', function (d) {
+                console.log(d);
+            });
+            // .on('click', d => d.parent ? this.drawChart(d.parent.data) : false)
+
+            var node = d3.select(this.$div.get(0)).select(".treemap-main").selectAll(".node").data(root.children).enter().append("div").attr("class", "node").on("click", function (d) {
                 return d.data.children.length ? _this2.drawChart(d.data) : false;
             }).style("left", function (d) {
                 return d.x0 + "px";

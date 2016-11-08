@@ -34,52 +34,36 @@ class VbTreeMap extends VbChart {
         let $div = this.$div;
 
         let chart = this.chart = {};
-        let margin = this.chart.margin = {top: 0, right: 0, bottom: 0, left: 0};
+        let margin = this.chart.margin = {top: 20, right: 0, bottom: 0, left: 0};
         let width  = this.chart.width  = $div.width();
         let height = this.chart.height = $div.height();
-        this.chart.xwidth = width - margin.right - margin.left;
-        this.chart.yheight = height - margin.top - margin.bottom;
+        let xwidth = this.chart.xwidth = width - margin.right - margin.left;
+        let yheight = this.chart.yheight = height - margin.top - margin.bottom;
 
         // Adds the svg canvas
-        let svg = this.svg = d3.select($div.get(0))
-            .append("svg")
-                .attr("class", "svg-chart")
-                .attr("width",  width)
-                .attr("height", height)
-            .append("g")
-                .attr("transform",
-                      "translate(" + margin.left + "," + margin.top + ")");
+        let container = d3.select($div.get(0))
+                .classed("vb-treemap", true);
 
-        // sanity check / background color
-        this.svg.append("rect")
-            .attr("width",  width)
-            .attr("height", height)
-            .attr("fill", "#abcdef");
+        container.append("div")
+                .attr("class", "treemap-grandparent")
+                .style("width", xwidth)
+                .style("height", margin.top + "px")
+                .text('zoom out')
 
-        // grandparent
-        let grandparent = chart.grandparent = svg.append("g")
-            .attr("class", "grandparent");
+        container.append("div")
+                .attr("class", "treemap-main")
+                .style("width",  xwidth)
+                .style("height", yheight)
+                // .style("top", margin.top + "px")
 
-        grandparent.append("rect")
-            .attr("fill", "#789abc")
-            .attr("y", -chart.margin.top)
-            .attr("width", width)
-            .attr("height", chart.margin.top);
-
-        grandparent.append("text")
-            .attr("x", 6)
-            .attr("y", 6 - chart.margin.top)
-            .attr("dy", ".75em");
     }
 
     // FIXME: This function should be broken up into drawAxes(), drawLine(data), etc.
-    drawChart(d) {
+    drawChart(input_node) {
         let that  = this;
-        let data  = d || this.data;
+        let data  = input_node || this.data;
         let chart = this.chart;
         let svg   = this.svg;
-
-        console.log(d)
 
         // remove old elements
         d3.select(this.$div.get(0)).selectAll('.node').remove();
@@ -102,7 +86,13 @@ class VbTreeMap extends VbChart {
 
         treemap(root);
 
-        let node = d3.select(this.$div.get(0))
+        // zoom out button
+        d3.select(this.$div.get(0)).select(".treemap-grandparent")
+            .datum(data)
+            .on('click', function(d) { console.log(d)})
+            // .on('click', d => d.parent ? this.drawChart(d.parent.data) : false)
+
+        let node = d3.select(this.$div.get(0)).select(".treemap-main")
             .selectAll(".node")
             .data(root.children)
             .enter().append("div")

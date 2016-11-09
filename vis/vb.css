@@ -7,46 +7,6 @@ div.vb-chart {
 
 
 
-/* treemap */
-.vb-treemap {
-  font: 10px sans-serif;
-  position: relative;
-}
-.treemap-grandparent {
-    vertical-align: middle;
-    text-align: center;
-    background-color: #eeccdd;
-    opacity: 0.8;
-}
-    .treemap-grandparent:hover {
-        opacity: 1;
-    }
-.treemap-main {
-    position: relative;
-}
-    .node {
-      box-sizing: border-box;
-      line-height: 1em;
-      overflow: hidden;
-      position: absolute;
-      white-space: pre;
-      background: #eee;
-      opacity: 0.8;
-    }
-        .node:hover {
-            opacity: 1;
-        }
-        .node-label,
-        .node-value {
-          margin: 4px;
-        }
-        .node-value {
-          margin-top: -2px;
-          font-weight: bold;
-        }
-
-
-
 /* linechart */
 path {
     stroke: steelblue;
@@ -104,6 +64,7 @@ path {
   position: relative;
   height: 88%;
   width: 100%;
+  font: 10px sans-serif;
 }
 /* line 14, ../../scss/partials/_treemap.scss */
 .vb-treemap svg {

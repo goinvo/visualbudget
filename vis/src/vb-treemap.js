@@ -26,7 +26,16 @@ class VbTreeMap extends VbChart {
     }
 
     setState(newState) {
+        let oldDate = this.state.date;
+        let newDate = newState.date;
+
         this.state = Object.assign({}, this.state, newState);
+
+        if(newDate && newDate != oldDate) {
+            this.dateIndex = this.getDateIndex(this.state.date);
+            this.calculateLayout();
+            this.open()
+        }
     }
 
     initialize($div, data) {
@@ -69,43 +78,37 @@ class VbTreeMap extends VbChart {
         // initialize chart
         // avb.chart.initialize($('#chart'));
 
-        this.currentData = data;
-
-        // start populating treemap
-        this.update(data);
-
-    }
-
-    update(data) {
-        let nav = this.nav;
+        let dateIndex = this.dateIndex = this.getDateIndex(this.state.date);
 
         // remove all old treemap elements
         nav.selectAll("g").remove();
-
-        // for the sake of choice
-        let yearIndex = this.yearIndex = 0;
-
-        // make the treemap
-        let treemap = this.treemap = d3.treemap()
-            .size([this.$div.width(), this.$div.height()])
-            .padding(1)
-            .round(true);
-
-        let root = this.root = d3.hierarchy(data, d => d.children)
-            .sum(d => d.children.length ? 0 : d.dollarAmounts[yearIndex].dollarAmount)
-            // .sum(d => d.dollarAmounts[yearIndex].dollarAmount)
-            .sort((a, b) => b.dollarAmount - a.dollarAmount)
-            .each(function(d) { d.color = '#d00'; });
-
-        treemap(root);
+        
+        this.calculateLayout();
 
         nav.grandparent = nav.append("rect")
                 .attr("y", "-10px")
                 .attr("class", "grandparent");
 
         // display treemap
-        this.currentData = root;
+        // this.currentData = this.root;
         this.currentLevel = this.display(this.currentData);
+    }
+
+    calculateLayout() {
+        this.root = d3.hierarchy(this.data, d => d.children)
+            .sum(d => d.children.length ? 0 : d.dollarAmounts[this.dateIndex].dollarAmount)
+            // .sum(d => d.dollarAmounts[dateIndex].dollarAmount)
+            .sort((a, b) => b.dollarAmount - a.dollarAmount)
+            .each(function(d) { d.color = '#d00'; });
+
+        // make the treemap
+        this.treemap = d3.treemap()
+            .size([this.$div.width(), this.$div.height()])
+            .padding(1)
+            .round(true);
+
+        this.treemap(this.root);
+        this.currentData = this.currentData ? this.findHash(this.currentData.data.hash, this.root) : this.root;
     }
 
     /*
@@ -151,7 +154,8 @@ class VbTreeMap extends VbChart {
             // .attr("nodeid", (d.parent === undefined) ? d.hash : d.parent.hash)
             .on("click", function (event) {
                 that.zoneClick.call(this, d3.select(this).datum(), true, null, that);
-            });
+            })
+            .append('text', 'meep')
 
         // refresh title
         // updateTitle(d);
@@ -196,9 +200,12 @@ class VbTreeMap extends VbChart {
             .each(function () {
                 var group = d3.select(this);
                 if (d.children !== undefined) {
-                    $.each(d.children, function () {
-                        addChilds(this, group);
-                    })
+                    for(let i = 0; i < d.children.length; i++) {
+                        addChilds(d.children[i], group);
+                    }
+                    // $.each(d.children, function () {
+                    //     addChilds(this, group);
+                    // })
                 }
             })
                 .append("rect")
@@ -216,8 +223,8 @@ class VbTreeMap extends VbChart {
         // }
 
 
-        // for the sake of choice
-        let yearIndex = this.yearIndex = 0;
+        // the dateIndex.
+        let dateIndex = this.dateIndex;
 
         // assign label through foreign object
         // foreignobjects allows the use of divs and textwrapping
@@ -229,7 +236,7 @@ class VbTreeMap extends VbChart {
                 .html(function (d) {
                     var title = '<div class="titleLabel">' + d.data.name + '</div>',
                         values = '<div class="valueLabel">'
-                            + '$' + that.nFormat(d.data.dollarAmounts[yearIndex].dollarAmount)
+                            + '$' + that.nFormat(d.value)
                             + '</div>';
                     return title + values;
                 })
@@ -246,7 +253,7 @@ class VbTreeMap extends VbChart {
 
     open(nodeId, transition) {
         // find node with given hash or open root node
-        // this.zoneClick.call(null, findHash(nodeId, avb.root) || avb.root, false, transition || 1, this);
+        this.zoneClick.call(null, this.currentData, false, transition || 1, this);
     }
 
     /*
@@ -286,11 +293,11 @@ class VbTreeMap extends VbChart {
         }
 
         // reset year
-        // yearIndex = avb.thisYear - avb.firstYear;
-        let yearIndex = 0;
+        // dateIndex = avb.thisYear - avb.firstYear;
+        let dateIndex = that.dateIndex;
 
         //
-        if(d.data.dollarAmounts[yearIndex].dollarAmount === 0) {
+        if(d.value === 0) {
             that.zoneClick.call(null, d.parent || that.root.data.hash, 0, that);
             return;
         }
@@ -300,7 +307,7 @@ class VbTreeMap extends VbChart {
 
         // remember currently selected section and year
         that.currentData = d;
-        // that.currentNode.year = yearIndex; // that.currentNode doesn't exist though?
+        // that.currentNode.year = dateIndex; // that.currentNode doesn't exist though?
 
         // // update chart and cards
         // avb.chart.open(d, d.color);

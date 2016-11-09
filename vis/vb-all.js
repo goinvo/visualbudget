@@ -129,6 +129,28 @@ var VbChart = function () {
             }
             return num.toFixed(digits).replace(rx, "$1");
         }
+    }, {
+        key: 'getDateIndex',
+        value: function getDateIndex(date) {
+            var index = 0;
+            for (var i = 0; i < this.data.dollarAmounts.length; i++) {
+                if (this.data.dollarAmounts[i].date == date) {
+                    index = i;
+                }
+            }
+            return index;
+        }
+    }, {
+        key: 'findHash',
+        value: function findHash(hash, root) {
+            var node = null;
+            root.each(function (d) {
+                if (d.data.hash == hash) {
+                    node = d;
+                }
+            });
+            return node;
+        }
     }]);
 
     return VbChart;
@@ -354,7 +376,7 @@ var VbMetric = function (_VbChart) {
         key: "redraw",
         value: function redraw() {
             // Just a test.
-            console.log('Drawing chart ' + this.atts.hash + ' (metric).');
+            // console.log('Drawing chart ' + this.atts.hash + ' (metric).');
 
             var metric = this.getMetric(this.atts.metric, this.state);
             this.$div.html(metric);
@@ -455,7 +477,16 @@ var VbTreeMap = function (_VbChart) {
     }, {
         key: 'setState',
         value: function setState(newState) {
+            var oldDate = this.state.date;
+            var newDate = newState.date;
+
             this.state = Object.assign({}, this.state, newState);
+
+            if (newDate && newDate != oldDate) {
+                this.dateIndex = this.getDateIndex(this.state.date);
+                this.calculateLayout();
+                this.open();
+            }
         }
     }, {
         key: 'initialize',
@@ -489,44 +520,41 @@ var VbTreeMap = function (_VbChart) {
             // initialize chart
             // avb.chart.initialize($('#chart'));
 
-            this.currentData = data;
-
-            // start populating treemap
-            this.update(data);
-        }
-    }, {
-        key: 'update',
-        value: function update(data) {
-            var nav = this.nav;
+            var dateIndex = this.dateIndex = this.getDateIndex(this.state.date);
 
             // remove all old treemap elements
             nav.selectAll("g").remove();
 
-            // for the sake of choice
-            var yearIndex = this.yearIndex = 0;
+            this.calculateLayout();
 
-            // make the treemap
-            var treemap = this.treemap = d3.treemap().size([this.$div.width(), this.$div.height()]).padding(1).round(true);
+            nav.grandparent = nav.append("rect").attr("y", "-10px").attr("class", "grandparent");
 
-            var root = this.root = d3.hierarchy(data, function (d) {
+            // display treemap
+            // this.currentData = this.root;
+            this.currentLevel = this.display(this.currentData);
+        }
+    }, {
+        key: 'calculateLayout',
+        value: function calculateLayout() {
+            var _this2 = this;
+
+            this.root = d3.hierarchy(this.data, function (d) {
                 return d.children;
             }).sum(function (d) {
-                return d.children.length ? 0 : d.dollarAmounts[yearIndex].dollarAmount;
+                return d.children.length ? 0 : d.dollarAmounts[_this2.dateIndex].dollarAmount;
             })
-            // .sum(d => d.dollarAmounts[yearIndex].dollarAmount)
+            // .sum(d => d.dollarAmounts[dateIndex].dollarAmount)
             .sort(function (a, b) {
                 return b.dollarAmount - a.dollarAmount;
             }).each(function (d) {
                 d.color = '#d00';
             });
 
-            treemap(root);
+            // make the treemap
+            this.treemap = d3.treemap().size([this.$div.width(), this.$div.height()]).padding(1).round(true);
 
-            nav.grandparent = nav.append("rect").attr("y", "-10px").attr("class", "grandparent");
-
-            // display treemap
-            this.currentData = root;
-            this.currentLevel = this.display(this.currentData);
+            this.treemap(this.root);
+            this.currentData = this.currentData ? this.findHash(this.currentData.data.hash, this.root) : this.root;
         }
 
         /*
@@ -567,7 +595,7 @@ var VbTreeMap = function (_VbChart) {
             // .attr("nodeid", (d.parent === undefined) ? d.hash : d.parent.hash)
             .on("click", function (event) {
                 that.zoneClick.call(this, d3.select(this).datum(), true, null, that);
-            });
+            }).append('text', 'meep');
 
             // refresh title
             // updateTitle(d);
@@ -603,9 +631,12 @@ var VbTreeMap = function (_VbChart) {
                 .each(function () {
                     var group = d3.select(this);
                     if (d.children !== undefined) {
-                        $.each(d.children, function () {
-                            addChilds(this, group);
-                        });
+                        for (var i = 0; i < d.children.length; i++) {
+                            addChilds(d.children[i], group);
+                        }
+                        // $.each(d.children, function () {
+                        //     addChilds(this, group);
+                        // })
                     }
                 }).append("rect").call(that.rect(that.nav));
             }
@@ -621,15 +652,15 @@ var VbTreeMap = function (_VbChart) {
             // }
 
 
-            // for the sake of choice
-            var yearIndex = this.yearIndex = 0;
+            // the dateIndex.
+            var dateIndex = this.dateIndex;
 
             // assign label through foreign object
             // foreignobjects allows the use of divs and textwrapping
             g.each(function () {
                 var label = d3.select(this).append("foreignObject").call(that.rect(that.nav)).attr("class", "foreignobj").append("xhtml:div").html(function (d) {
                     var title = '<div class="titleLabel">' + d.data.name + '</div>',
-                        values = '<div class="valueLabel">' + '$' + that.nFormat(d.data.dollarAmounts[yearIndex].dollarAmount) + '</div>';
+                        values = '<div class="valueLabel">' + '$' + that.nFormat(d.value) + '</div>';
                     return title + values;
                 }).attr("class", "textdiv");
 
@@ -640,10 +671,10 @@ var VbTreeMap = function (_VbChart) {
         }
     }, {
         key: 'open',
-        value: function open(nodeId, transition) {}
-        // find node with given hash or open root node
-        // this.zoneClick.call(null, findHash(nodeId, avb.root) || avb.root, false, transition || 1, this);
-
+        value: function open(nodeId, transition) {
+            // find node with given hash or open root node
+            this.zoneClick.call(null, this.currentData, false, transition || 1, this);
+        }
 
         /*
         *   Event triggered on click event in treemap areas
@@ -685,11 +716,11 @@ var VbTreeMap = function (_VbChart) {
 
 
             // reset year
-            // yearIndex = avb.thisYear - avb.firstYear;
-            var yearIndex = 0;
+            // dateIndex = avb.thisYear - avb.firstYear;
+            var dateIndex = that.dateIndex;
 
             //
-            if (d.data.dollarAmounts[yearIndex].dollarAmount === 0) {
+            if (d.value === 0) {
                 that.zoneClick.call(null, d.parent || that.root.data.hash, 0, that);
                 return;
             }
@@ -699,7 +730,7 @@ var VbTreeMap = function (_VbChart) {
 
             // remember currently selected section and year
             that.currentData = d;
-            // that.currentNode.year = yearIndex; // that.currentNode doesn't exist though?
+            // that.currentNode.year = dateIndex; // that.currentNode doesn't exist though?
 
             // // update chart and cards
             // avb.chart.open(d, d.color);

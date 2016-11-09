@@ -108,4 +108,24 @@ class VbChart {
         return num.toFixed(digits).replace(rx, "$1");
     }
 
+    getDateIndex(date) {
+        let index = 0;
+        for(let i = 0; i < this.data.dollarAmounts.length; i++) {
+            if(this.data.dollarAmounts[i].date == date) {
+                index = i;
+            }
+        }
+        return index;
+    }
+
+    findHash(hash, root) {
+        let node = null;
+        root.each(function(d) {
+            if(d.data.hash == hash) {
+                node = d;
+            }
+        });
+        return node;
+    }
+
 }

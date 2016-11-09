@@ -438,7 +438,7 @@ var VbTreeMap = function (_VbChart) {
         // Set up the SVG.
         var _this = _possibleConstructorReturn(this, (VbTreeMap.__proto__ || Object.getPrototypeOf(VbTreeMap)).call(this, $div, data));
 
-        _this.setupChartSvg();
+        _this.initialize($div, data);
 
         // Bind events.
         // this.addActions();
@@ -450,7 +450,7 @@ var VbTreeMap = function (_VbChart) {
         value: function redraw() {
             console.log('Drawing chart ' + this.atts.hash + ' (treemap).');
             // d3.selectAll('#' + this.$div.attr('id') + ' svg g *').remove();
-            this.drawChart();
+            // this.initialize();
         }
     }, {
         key: 'setState',
@@ -458,83 +458,327 @@ var VbTreeMap = function (_VbChart) {
             this.state = Object.assign({}, this.state, newState);
         }
     }, {
-        key: 'setupChartSvg',
-        value: function setupChartSvg() {
-            this.transitioning = false;
-            var $div = this.$div;
+        key: 'initialize',
+        value: function initialize($div, data) {
+            d3.select($div.get(0)).classed('.vb-treemap', true);
 
-            var chart = this.chart = {};
-            var margin = this.chart.margin = { top: 20, right: 0, bottom: 0, left: 0 };
-            var width = this.chart.width = $div.width();
-            var height = this.chart.height = $div.height();
-            var xwidth = this.chart.xwidth = width - margin.right - margin.left;
-            var yheight = this.chart.yheight = height - margin.top - margin.bottom;
+            var width = $div.width(),
+                height = $div.height();
 
-            // Adds the svg canvas
-            var container = d3.select($div.get(0)).classed("vb-treemap", true);
+            var height = height,
+                formatNumber = d3.format(",d"),
+                transitioning;
 
-            container.append("div").attr("class", "treemap-grandparent").style("width", xwidth).style("height", margin.top + "px").text('zoom out');
+            // create svg
+            var nav = this.nav = d3.select($div.get(0)).append("svg").attr("width", width).attr("height", height).append("g").style("shape-rendering", "crispEdges");
 
-            container.append("div").attr("class", "treemap-main").style("width", xwidth).style("height", yheight);
-            // .style("top", margin.top + "px")
+            // initialize x and y scales
+            nav.x = d3.scaleLinear().domain([0, width]).range([0, width]);
+
+            nav.y = d3.scaleLinear().domain([0, height]).range([0, height]);
+
+            nav.h = height;
+            nav.w = width;
+
+            // color scale
+            nav.color = d3.schemeCategory20;
+
+            // center zoom button vertically
+            // $('#zoombutton').center();
+
+            // initialize chart
+            // avb.chart.initialize($('#chart'));
+
+            this.currentData = data;
+
+            // start populating treemap
+            this.update(data);
         }
-
-        // FIXME: This function should be broken up into drawAxes(), drawLine(data), etc.
-
     }, {
-        key: 'drawChart',
-        value: function drawChart(input_node) {
-            var _this2 = this;
+        key: 'update',
+        value: function update(data) {
+            var nav = this.nav;
 
-            var that = this;
-            var data = input_node || this.data;
-            var chart = this.chart;
-            var svg = this.svg;
-
-            // remove old elements
-            d3.select(this.$div.get(0)).selectAll('.node').remove();
+            // remove all old treemap elements
+            nav.selectAll("g").remove();
 
             // for the sake of choice
-            var yearIndex = this.yearIndex = 10;
+            var yearIndex = this.yearIndex = 0;
 
             // make the treemap
-            var treemap = d3.treemap().size([chart.xwidth, chart.yheight]).padding(1).round(true);
+            var treemap = d3.treemap().size([this.$div.width(), this.$div.height()]).padding(1).round(true);
 
-            var root = d3.hierarchy(data, function (d) {
+            var root = this.root = d3.hierarchy(data, function (d) {
                 return d.children;
             }).sum(function (d) {
                 return d.children.length ? 0 : d.dollarAmounts[yearIndex].dollarAmount;
-            });
+            })
             // .sum(d => d.dollarAmounts[yearIndex].dollarAmount)
-            // .sort((a, b) => b.dollarAmount - a.dollarAmount);
+            .sort(function (a, b) {
+                return b.dollarAmount - a.dollarAmount;
+            }).each(function (d) {
+                d.color = '#d00';
+            });
 
             treemap(root);
 
-            // zoom out button
-            d3.select(this.$div.get(0)).select(".treemap-grandparent").on('click', function (d) {
-                console.log(d);
-            });
-            // .on('click', d => d.parent ? this.drawChart(d.parent.data) : false)
+            nav.grandparent = nav.append("g").attr("class", "grandparent");
 
-            var node = d3.select(this.$div.get(0)).select(".treemap-main").selectAll(".node").data(root.children).enter().append("div").attr("class", "node").on("click", function (d) {
-                return d.data.children.length ? _this2.drawChart(d.data) : false;
-            }).style("left", function (d) {
-                return d.x0 + "px";
-            }).style("top", function (d) {
-                return d.y0 + "px";
-            }).style("width", function (d) {
-                return d.x1 - d.x0 + "px";
-            }).style("height", function (d) {
-                return d.y1 - d.y0 + "px";
+            // display treemap
+            this.currentData = root;
+            this.currentLevel = this.display(this.currentData);
+        }
+
+        /*
+        *   Draws and displays a treemap layout from node data
+        *
+        *   @param {node} d - node where treemap begins (root)
+        */
+
+    }, {
+        key: 'display',
+        value: function display(d) {
+            var that = this;
+            var nav = this.nav;
+
+            // remove all popovers
+            // $('.no-value').popover('destroy');
+
+            var formatNumber = d3.format(",d"),
+
+            // flag will be used to avoid overlapping transitions
+            transitioning;
+
+            // return block name [unused]
+            function name(d) {
+                return d.parent ? name(d.parent) + "." + d.name : d.name;
+            }
+
+            // insert top-level blocks
+            var g1 = nav.insert("g", ".grandparent").datum(d).attr("class", "depth").on("click", function (event) {
+                that.zoneClick.call(this, d3.select(this).datum(), true);
             });
 
-            node.append("div").attr("class", "node-label").text(function (d) {
-                return d.data.name;
+            // add in data
+            var g = g1.selectAll("g").data(d.children.length === 0 ? [d] : d.children).enter().append("g");
+
+            // create grandparent bar at top
+            nav.grandparent.datum(d.parent === undefined ? d : d.parent)
+            // .attr("nodeid", (d.parent === undefined) ? d.hash : d.parent.hash)
+            .on("click", function (event) {
+                that.zoneClick.call(this, d3.select(this).datum(), true);
             });
 
-            node.append("div").attr("class", "node-value").text(function (d) {
-                return '$' + _this2.nFormat(d.value);
+            // refresh title
+            // updateTitle(d);
+
+            /* transition on child click */
+            g.filter(function (d) {
+                return d.children;
+            }).classed("children", true)
+            // expand when clicked
+            .on("click", function (event) {
+                that.zoneClick.call(this, d3.select(this).datum(), true);
+            }).each(function () {
+                var node = d3.select(this);
+                // assign node hash attribute
+                node.attr('nodeid', function () {
+                    // return node.datum().hash;
+                    return '1';
+                });
             });
+
+            // draw parent rectangle
+            g.append("rect").attr("class", "parent").call(that.rect).attr("fill", "#ddd");
+            // .style("fill", d => d.color);
+
+            // recursively draw children rectangles
+            function addChilds(d, g) {
+                // add child rectangles
+                g.selectAll(".child").data(function (d) {
+                    return d.children || [d];
+                }).enter().append("g").attr("class", "child").attr("fill", "#abc")
+
+                // propagate recursively to next depth
+                .each(function () {
+                    var group = d3.select(this);
+                    if (d.children !== undefined) {
+                        $.each(d.children, function () {
+                            addChilds(this, group);
+                        });
+                    }
+                }).append("rect").call(that.rect(that));
+            }
+
+            addChilds(d, g);
+
+            // IE popover action
+            // if (ie()) {
+            //     nav.on('mouseout', function () {
+            //         d3.select('#ie-popover').style('display', 'none')
+            //     });
+            //     return g;
+            // }
+
+
+            // for the sake of choice
+            var yearIndex = this.yearIndex = 0;
+
+            // assign label through foreign object
+            // foreignobjects allows the use of divs and textwrapping
+            g.each(function () {
+                var label = d3.select(this).append("foreignObject").call(that.rect(that)).attr("class", "foreignobj").append("xhtml:div").html(function (d) {
+                    var title = '<div class="titleLabel">' + d.data.name + '</div>',
+                        values = '<div class="valueLabel">' + '$' + that.nFormat(d.data.dollarAmounts[yearIndex].dollarAmount) + '</div>';
+                    return title + values;
+                }).attr("class", "textdiv");
+
+                // textLabels.call(this); // FIXME
+            });
+
+            return g;
+        }
+    }, {
+        key: 'open',
+        value: function open(nodeId, transition) {}
+        // find node with given hash or open root node
+        // this.zoneClick.call(null, findHash(nodeId, avb.root) || avb.root, false, transition || 1);
+
+
+        /*
+        *   Event triggered on click event in treemap areas
+        *
+        *   @param {node} d - clicked node data
+        *   @param {boolean} click - whether click was triggered
+        *   @param {integer} transition - transition duration
+        */
+
+    }, {
+        key: 'zoneClick',
+        value: function zoneClick(d, click, transition) {}
+        //destroy popovers on transition (so they don't accidentally stay)
+        // $(this).find('div').first().popover('destroy');
+
+        /*
+                // stop event propagation
+                var event = window.event || event
+                stopPropagation( event );
+        
+                transition = transition || 750;
+        
+                // do not expand if another transition is happening
+                // or data not defined
+                if (nav.transitioning || !d) return;
+        
+                // go back if click happened on the same zone
+                if (click && d.hash === this.currentData.hash) {
+                    $('#zoombutton').trigger('click');
+                    return;
+                }
+        
+                // push url to browser history
+                if (click) {
+                    pushUrl(avb.section, avb.thisYear, avb.mode, d.hash);
+                }
+        
+                // reset year
+                yearIndex = avb.thisYear - avb.firstYear;
+        
+                //
+                if(d.values[yearIndex].val === 0) {
+                    this.zoneClick.call(null, d.parent || avb.root.hash);
+                    return;
+                }
+        
+                // remove old labels
+                nav.selectAll('text').remove();
+        
+                // remember currently selected section and year
+                this.currentData = d;
+                avb.currentNode.year = yearIndex;
+        
+                // update chart and cards
+                avb.chart.open(d, d.color);
+                avb.cards.open(d);
+        
+                // prevent further events from happening while transitioning
+                nav.transitioning = true;
+        
+                // initialize transitions
+                var g2 = display(d);
+                t1 = this.currentLevel.transition().duration(transition),
+                t2 = g2.transition().duration(transition);
+        
+                // Update the domain only after entering new elements.
+                nav.x.domain([d.x, d.x + d.dx]);
+                nav.y.domain([d.y, d.y + d.dy]);
+        
+                // Enable anti-aliasing during the transition.
+                nav.style("shape-rendering", null);
+        
+                // Draw child nodes on top of parent nodes.
+                nav.selectAll(".depth").sort(function (a, b) {
+                    return a.depth - b.depth;
+                });
+        
+                // Fade-in entering text.
+                g2.selectAll(".foreignobj").style("fill-opacity", 0);
+        
+                // Transition to the new view
+                t1.style('opacity', 0);
+                t1.selectAll(".foreignobj").call(this.rect);
+                t2.selectAll(".foreignobj").call(this.rect);
+                t1.selectAll("rect").call(this.rect);
+                t2.selectAll("rect").call(this.rect);
+        
+                // add labels to new elements
+                t2.each(function () {
+                    if (ie()) return;
+                    textLabels.call(this);
+                })
+                t2.each("end", function () {
+                    if (ie()) {
+                        ieLabels.call(this);
+                    } else {
+                        textLabels.call(this);
+                    }
+                })
+        
+                // Remove the old node when the transition is finished.
+                t1.remove().each("end", function () {
+                    nav.style("shape-rendering", "crispEdges");
+                    nav.transitioning = false;
+        
+                });
+                // update current level
+                this.currentLevel = g2;
+        */
+
+
+        /*
+        *   Sets SVG rectangle properties based on treemap node values
+        *
+        *   @param {d3 selection} rect - SVG rectangle
+        */
+
+    }, {
+        key: 'rect',
+        value: function rect(that) {
+            return function (rect) {
+                var nav = that.nav;
+
+                rect.attr("x", function (d) {
+                    return nav.x(d.x0);
+                }).attr("y", function (d) {
+                    return nav.y(d.y0);
+                }).attr("width", function (d) {
+                    // return nav.x(d.x + d.dx) - nav.x(d.x);
+                    return nav.x(d.x1) - nav.x(d.x0);
+                }).attr("height", function (d) {
+                    // return nav.y(d.y + d.dy) - nav.y(d.y);
+                    return nav.y(d.y1) - nav.y(d.y0);
+                });
+            };
         }
     }]);
 

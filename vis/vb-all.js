@@ -506,7 +506,7 @@ var VbTreeMap = function (_VbChart) {
             var yearIndex = this.yearIndex = 0;
 
             // make the treemap
-            var treemap = d3.treemap().size([this.$div.width(), this.$div.height()]).padding(1).round(true);
+            var treemap = this.treemap = d3.treemap().size([this.$div.width(), this.$div.height()]).padding(1).round(true);
 
             var root = this.root = d3.hierarchy(data, function (d) {
                 return d.children;
@@ -607,7 +607,7 @@ var VbTreeMap = function (_VbChart) {
                             addChilds(this, group);
                         });
                     }
-                }).append("rect").call(that.rect(that));
+                }).append("rect").call(that.rect(that.nav));
             }
 
             addChilds(d, g);
@@ -627,7 +627,7 @@ var VbTreeMap = function (_VbChart) {
             // assign label through foreign object
             // foreignobjects allows the use of divs and textwrapping
             g.each(function () {
-                var label = d3.select(this).append("foreignObject").call(that.rect(that)).attr("class", "foreignobj").append("xhtml:div").html(function (d) {
+                var label = d3.select(this).append("foreignObject").call(that.rect(that.nav)).attr("class", "foreignobj").append("xhtml:div").html(function (d) {
                     var title = '<div class="titleLabel">' + d.data.name + '</div>',
                         values = '<div class="valueLabel">' + '$' + that.nFormat(d.data.dollarAmounts[yearIndex].dollarAmount) + '</div>';
                     return title + values;
@@ -731,10 +731,10 @@ var VbTreeMap = function (_VbChart) {
 
             // Transition to the new view
             t1.style('opacity', 0);
-            t1.selectAll(".foreignobj").call(that.rect);
-            t2.selectAll(".foreignobj").call(that.rect);
-            t1.selectAll("rect").call(that.rect);
-            t2.selectAll("rect").call(that.rect);
+            t1.selectAll(".foreignobj").call(that.rect(nav));
+            t2.selectAll(".foreignobj").call(that.rect(nav));
+            t1.selectAll("rect").call(that.rect(nav));
+            t2.selectAll("rect").call(that.rect(nav));
 
             // add labels to new elements
             /*
@@ -769,10 +769,8 @@ var VbTreeMap = function (_VbChart) {
 
     }, {
         key: 'rect',
-        value: function rect(that) {
+        value: function rect(nav) {
             return function (rect) {
-                var nav = that.nav;
-
                 rect.attr("x", function (d) {
                     return nav.x(d.x0);
                 }).attr("y", function (d) {

@@ -85,7 +85,7 @@ class VbTreeMap extends VbChart {
         let yearIndex = this.yearIndex = 0;
 
         // make the treemap
-        let treemap = d3.treemap()
+        let treemap = this.treemap = d3.treemap()
             .size([this.$div.width(), this.$div.height()])
             .padding(1)
             .round(true);
@@ -197,7 +197,7 @@ class VbTreeMap extends VbChart {
                 }
             })
                 .append("rect")
-                .call(that.rect(that));
+                .call(that.rect(that.nav));
         }
 
         addChilds(d, g);
@@ -218,7 +218,7 @@ class VbTreeMap extends VbChart {
         // foreignobjects allows the use of divs and textwrapping
         g.each(function () {
             var label = d3.select(this).append("foreignObject")
-                .call(that.rect(that))
+                .call(that.rect(that.nav))
                 .attr("class", "foreignobj")
                 .append("xhtml:div")
                 .html(function (d) {
@@ -327,10 +327,10 @@ class VbTreeMap extends VbChart {
 
         // Transition to the new view
         t1.style('opacity', 0);
-        t1.selectAll(".foreignobj").call(that.rect);
-        t2.selectAll(".foreignobj").call(that.rect);
-        t1.selectAll("rect").call(that.rect);
-        t2.selectAll("rect").call(that.rect);
+        t1.selectAll(".foreignobj").call(that.rect(nav));
+        t2.selectAll(".foreignobj").call(that.rect(nav));
+        t1.selectAll("rect").call(that.rect(nav));
+        t2.selectAll("rect").call(that.rect(nav));
 
         // add labels to new elements
         /*
@@ -363,10 +363,8 @@ class VbTreeMap extends VbChart {
     *
     *   @param {d3 selection} rect - SVG rectangle
     */
-    rect(that) {
+    rect(nav) {
         return function(rect) {
-            let nav = that.nav;
-
             rect.attr("x", function (d) {
                 return nav.x(d.x0);
             })

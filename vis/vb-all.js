@@ -511,7 +511,7 @@ var VbTreeMap = function (_VbChart) {
     }, {
         key: 'initialize',
         value: function initialize($div, data) {
-            d3.select($div.get(0)).classed('.vb-treemap', true);
+            d3.select($div.get(0)).classed('vb-treemap', true);
 
             var width = $div.width(),
                 height = $div.height();
@@ -521,7 +521,9 @@ var VbTreeMap = function (_VbChart) {
                 transitioning;
 
             // create svg
-            var nav = this.nav = d3.select($div.get(0)).append("svg").style('padding-top', '20px').attr("width", width).attr("height", height).append("g").style("shape-rendering", "crispEdges");
+            var nav = this.nav = d3.select($div.get(0)).append("svg")
+            // .style('padding-top', '20px')
+            .attr("width", width).attr("height", height).append("g").style("shape-rendering", "crispEdges");
 
             // initialize x and y scales
             nav.x = d3.scaleLinear().domain([0, width]).range([0, width]);
@@ -547,7 +549,7 @@ var VbTreeMap = function (_VbChart) {
 
             this.calculateLayout();
 
-            nav.grandparent = nav.append("rect").attr("y", "-10px").attr("class", "grandparent");
+            nav.grandparent = nav.append("rect").attr("y", "-20px").attr("class", "grandparent");
 
             // display treemap
             // this.currentData = this.root;
@@ -571,7 +573,7 @@ var VbTreeMap = function (_VbChart) {
             });
 
             // make the treemap
-            this.treemap = d3.treemap().size([this.$div.width(), this.$div.height()]).padding(1).round(true);
+            this.treemap = d3.treemap().size([this.$div.width(), this.$div.height()]).padding(0).round(false);
 
             this.treemap(this.root);
             this.currentData = this.currentData ? this.findHash(this.currentData.data.hash, this.root) : this.root;
@@ -616,7 +618,7 @@ var VbTreeMap = function (_VbChart) {
             // .attr("nodeid", (d.parent === undefined) ? d.hash : d.parent.hash)
             .on("click", function (event) {
                 that.zoneClick.call(this, d3.select(this).datum(), true, null, that);
-            }).append('text', 'meep');
+            });
 
             // refresh title
             // updateTitle(d);
@@ -638,15 +640,18 @@ var VbTreeMap = function (_VbChart) {
             });
 
             // draw parent rectangle
-            g.append("rect").attr("class", "parent").call(that.rect).attr("fill", "none");
-            // .style("fill", d => d.color);
+            g.append("rect").attr("class", "parent").call(that.rect(that.nav))
+            // .attr("fill", "none");
+            .style("fill", function (d) {
+                return d.color;
+            });
 
             // recursively draw children rectangles
             function addChilds(d, g) {
                 // add child rectangles
                 g.selectAll(".child").data(function (d) {
                     return d.children || [d];
-                }).enter().append("g").attr("class", "child").attr("fill", "#abc")
+                }).enter().append("g").attr("class", "child")
 
                 // propagate recursively to next depth
                 .each(function () {
@@ -679,7 +684,9 @@ var VbTreeMap = function (_VbChart) {
             // assign label through foreign object
             // foreignobjects allows the use of divs and textwrapping
             g.each(function () {
-                var label = d3.select(this).append("foreignObject").call(that.rect(that.nav)).attr("class", "foreignobj").append("xhtml:div").html(function (d) {
+                var label = d3.select(this).append("foreignObject").call(that.rect(that.nav))
+                // .style("background", "#bca")
+                .attr("class", "foreignobj").append("xhtml:div").html(function (d) {
                     var title = '<div class="titleLabel">' + d.data.name + '</div>',
                         values = '<div class="valueLabel">' + '$' + that.nFormat(d.value) + '</div>';
                     return title + values;
@@ -728,6 +735,7 @@ var VbTreeMap = function (_VbChart) {
             // go back if click happened on the same zone
             if (click && d.data.hash === that.currentData.data.hash) {
                 // $('#zoombutton').trigger('click');
+                nav.grandparent.dispatch('click');
                 return;
             }
 

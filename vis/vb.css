@@ -68,12 +68,13 @@ path {
 }
 /* line 14, ../../scss/partials/_treemap.scss */
 .vb-treemap svg {
+  position: relative;
   overflow: hidden;
 }
 /* line 22, ../../scss/partials/_treemap.scss */
 .vb-treemap rect {
   fill: none;
-  stroke: #fff;
+  stroke: #ddd;
 }
 /* line 27, ../../scss/partials/_treemap.scss */
 .vb-treemap text {
@@ -91,11 +92,12 @@ path {
 /* line 41, ../../scss/partials/_treemap.scss */
 .vb-treemap .children:hover rect.parent,
 .vb-treemap .grandparent:hover rect {
-  opacity: 1.0;
+  opacity: 0.9;
 }
 /* line 45, ../../scss/partials/_treemap.scss */
 .vb-treemap .children {
   cursor: pointer;
+  position: relative;
 }
 /* line 49, ../../scss/partials/_treemap.scss */
 .vb-treemap .children.no-label .titleLabel {
@@ -116,13 +118,14 @@ path {
 /* line 72, ../../scss/partials/_treemap.scss */
 .vb-treemap .textdiv {
   padding: 8px;
-  font: 8px sans-serif;
+  font: 10px sans-serif;
   /*font-family: 'Strait', sans-serif;*/
 }
 /* line 77, ../../scss/partials/_treemap.scss */
 .vb-treemap .textdiv .titleLabel,
 .vb-treemap .textdiv .valueLabel {
   overflow: hidden;
+  position: relative;
   text-overflow: ellipsis;
 }
 

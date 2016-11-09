@@ -40,7 +40,7 @@ class VbTreeMap extends VbChart {
 
     initialize($div, data) {
         d3.select($div.get(0))
-            .classed('.vb-treemap', true);
+            .classed('vb-treemap', true);
 
         var width = $div.width(),
             height = $div.height();
@@ -51,7 +51,7 @@ class VbTreeMap extends VbChart {
 
         // create svg
         let nav = this.nav = d3.select($div.get(0)).append("svg")
-            .style('padding-top', '20px')
+            // .style('padding-top', '20px')
             .attr("width", width)
             .attr("height", height)
             .append("g")
@@ -86,7 +86,7 @@ class VbTreeMap extends VbChart {
         this.calculateLayout();
 
         nav.grandparent = nav.append("rect")
-                .attr("y", "-10px")
+                .attr("y", "-20px")
                 .attr("class", "grandparent");
 
         // display treemap
@@ -104,8 +104,8 @@ class VbTreeMap extends VbChart {
         // make the treemap
         this.treemap = d3.treemap()
             .size([this.$div.width(), this.$div.height()])
-            .padding(1)
-            .round(true);
+            .padding(0)
+            .round(false);
 
         this.treemap(this.root);
         this.currentData = this.currentData ? this.findHash(this.currentData.data.hash, this.root) : this.root;
@@ -156,7 +156,6 @@ class VbTreeMap extends VbChart {
             .on("click", function (event) {
                 that.zoneClick.call(this, d3.select(this).datum(), true, null, that);
             })
-            .append('text', 'meep')
 
         // refresh title
         // updateTitle(d);
@@ -182,9 +181,9 @@ class VbTreeMap extends VbChart {
         // draw parent rectangle
         g.append("rect")
             .attr("class", "parent")
-            .call(that.rect)
-            .attr("fill", "none");
-            // .style("fill", d => d.color);
+            .call(that.rect(that.nav))
+            // .attr("fill", "none");
+            .style("fill", d => d.color);
 
         // recursively draw children rectangles
         function addChilds(d, g) {
@@ -195,7 +194,6 @@ class VbTreeMap extends VbChart {
                 })
                 .enter().append("g")
                 .attr("class", "child")
-                .attr("fill", "#abc")
 
             // propagate recursively to next depth
             .each(function () {
@@ -232,6 +230,7 @@ class VbTreeMap extends VbChart {
         g.each(function () {
             var label = d3.select(this).append("foreignObject")
                 .call(that.rect(that.nav))
+                // .style("background", "#bca")
                 .attr("class", "foreignobj")
                 .append("xhtml:div")
                 .html(function (d) {
@@ -285,6 +284,7 @@ class VbTreeMap extends VbChart {
         // go back if click happened on the same zone
         if (click && d.data.hash === that.currentData.data.hash) {
             // $('#zoombutton').trigger('click');
+            nav.grandparent.dispatch('click')
             return;
         }
 

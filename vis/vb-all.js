@@ -657,9 +657,9 @@ var VbTreeMap = function (_VbChart) {
                 .each(function () {
                     var group = d3.select(this);
                     if (d.children !== undefined) {
-                        for (var i = 0; i < d.children.length; i++) {
-                            addChilds(d.children[i], group);
-                        }
+                        for (var i = 0; i < d.children.length; i++) {}
+                        // addChilds(d.children[i], group);
+
                         // $.each(d.children, function () {
                         //     addChilds(this, group);
                         // })

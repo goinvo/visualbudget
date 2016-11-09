@@ -200,7 +200,7 @@ class VbTreeMap extends VbChart {
                 var group = d3.select(this);
                 if (d.children !== undefined) {
                     for(let i = 0; i < d.children.length; i++) {
-                        addChilds(d.children[i], group);
+                        // addChilds(d.children[i], group);
                     }
                     // $.each(d.children, function () {
                     //     addChilds(this, group);

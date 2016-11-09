@@ -470,7 +470,7 @@ var VbTreeMap = function (_VbChart) {
                 transitioning;
 
             // create svg
-            var nav = this.nav = d3.select($div.get(0)).append("svg").attr("width", width).attr("height", height).append("g").style("shape-rendering", "crispEdges");
+            var nav = this.nav = d3.select($div.get(0)).append("svg").style('padding-top', '20px').attr("width", width).attr("height", height).append("g").style("shape-rendering", "crispEdges");
 
             // initialize x and y scales
             nav.x = d3.scaleLinear().domain([0, width]).range([0, width]);
@@ -522,7 +522,7 @@ var VbTreeMap = function (_VbChart) {
 
             treemap(root);
 
-            nav.grandparent = nav.append("g").attr("class", "grandparent");
+            nav.grandparent = nav.append("rect").attr("y", "-10px").attr("class", "grandparent");
 
             // display treemap
             this.currentData = root;
@@ -555,7 +555,7 @@ var VbTreeMap = function (_VbChart) {
             }
 
             // insert top-level blocks
-            var g1 = nav.insert("g", ".grandparent").datum(d).attr("class", "depth").on("click", function (event) {
+            var g1 = nav.insert("g", ".grandparent-g").datum(d).attr("class", "depth").on("click", function (event) {
                 that.zoneClick.call(this, d3.select(this).datum(), true, null, that);
             });
 
@@ -563,7 +563,7 @@ var VbTreeMap = function (_VbChart) {
             var g = g1.selectAll("g").data(d.children.length === 0 ? [d] : d.children).enter().append("g");
 
             // create grandparent bar at top
-            nav.grandparent.datum(d.parent === undefined ? d : d.parent)
+            nav.grandparent.attr('width', '100%').attr('height', '20px').style('fill', '#eaa').datum(d.parent === undefined ? d : d.parent)
             // .attr("nodeid", (d.parent === undefined) ? d.hash : d.parent.hash)
             .on("click", function (event) {
                 that.zoneClick.call(this, d3.select(this).datum(), true, null, that);
@@ -589,7 +589,7 @@ var VbTreeMap = function (_VbChart) {
             });
 
             // draw parent rectangle
-            g.append("rect").attr("class", "parent").call(that.rect).attr("fill", "#ddd");
+            g.append("rect").attr("class", "parent").call(that.rect).attr("fill", "none");
             // .style("fill", d => d.color);
 
             // recursively draw children rectangles
@@ -675,7 +675,7 @@ var VbTreeMap = function (_VbChart) {
 
             // go back if click happened on the same zone
             if (click && d.data.hash === that.currentData.data.hash) {
-                // $('#zoombutton').trigger('click');
+                $('#zoombutton').trigger('click');
                 return;
             }
 

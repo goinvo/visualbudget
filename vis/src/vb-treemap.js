@@ -42,6 +42,7 @@ class VbTreeMap extends VbChart {
 
         // create svg
         let nav = this.nav = d3.select($div.get(0)).append("svg")
+            .style('padding-top', '20px')
             .attr("width", width)
             .attr("height", height)
             .append("g")
@@ -98,8 +99,9 @@ class VbTreeMap extends VbChart {
 
         treemap(root);
 
-        nav.grandparent = nav.append("g")
-            .attr("class", "grandparent");
+        nav.grandparent = nav.append("rect")
+                .attr("y", "-10px")
+                .attr("class", "grandparent");
 
         // display treemap
         this.currentData = root;
@@ -128,7 +130,7 @@ class VbTreeMap extends VbChart {
         }
 
         // insert top-level blocks
-        var g1 = nav.insert("g", ".grandparent")
+        var g1 = nav.insert("g", ".grandparent-g")
             .datum(d)
             .attr("class", "depth")
             .on("click", function (event) {
@@ -142,6 +144,9 @@ class VbTreeMap extends VbChart {
 
         // create grandparent bar at top
         nav.grandparent
+            .attr('width', '100%')
+            .attr('height', '20px')
+            .style('fill', '#eaa')
             .datum((d.parent === undefined) ? d : d.parent)
             // .attr("nodeid", (d.parent === undefined) ? d.hash : d.parent.hash)
             .on("click", function (event) {
@@ -173,7 +178,7 @@ class VbTreeMap extends VbChart {
         g.append("rect")
             .attr("class", "parent")
             .call(that.rect)
-            .attr("fill", "#ddd");
+            .attr("fill", "none");
             // .style("fill", d => d.color);
 
         // recursively draw children rectangles
@@ -271,7 +276,7 @@ class VbTreeMap extends VbChart {
 
         // go back if click happened on the same zone
         if (click && d.data.hash === that.currentData.data.hash) {
-            // $('#zoombutton').trigger('click');
+            $('#zoombutton').trigger('click');
             return;
         }
 

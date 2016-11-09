@@ -23,7 +23,7 @@ var VbChart = function () {
         this.state = {
             groups: [],
             date: "2016",
-            hovering: false,
+            dragging: false,
             mouseX: null
         };
     }
@@ -285,7 +285,7 @@ var VbLineChart = function (_VbChart) {
     }, {
         key: 'moveHoverline',
         value: function moveHoverline() {
-            this.hoverline.classed("hidden", !this.state.hovering).attr("x1", this.state.mouseX).attr("x2", this.state.mouseX);
+            this.hoverline.classed("hidden", false).attr("x1", this.state.mouseX).attr("x2", this.state.mouseX);
         }
 
         // Add interaction actions.
@@ -316,27 +316,41 @@ var VbLineChart = function (_VbChart) {
                 }
             }
 
-            function mouseon_callback(e) {
+            function mousedown_callback(e) {
                 e = d3.event;
                 e.preventDefault();
                 var mouseX = getMouseX(e);
+                var date = that.chart.x.invert(mouseX);
                 visualbudget.broadcastStateChange({
-                    date: that.chart.x.invert(mouseX).getUTCFullYear(),
-                    hovering: true,
-                    mouseX: mouseX
+                    date: date.getUTCFullYear(),
+                    dragging: true,
+                    mouseX: that.chart.x(date)
                 });
             }
-            function mouseoff_callback(e) {
+            function mousemove_callback(e) {
+                if (that.state.dragging) {
+                    mousedown_callback(e);
+                }
+            }
+            function mouseup_callback(e) {
                 e = d3.event;
                 e.preventDefault();
                 visualbudget.broadcastStateChange({
-                    hovering: false
+                    dragging: false
+                });
+            }
+            function mouseout_callback(e) {
+                e = d3.event;
+                e.preventDefault();
+                visualbudget.broadcastStateChange({
+                    dragging: false
                 });
             }
 
-            this.svg.on('mouseover', mouseon_callback);
-            this.svg.on('mousemove', mouseon_callback);
-            this.svg.on('mouseout', mouseoff_callback);
+            this.svg.on('mousedown', mousedown_callback);
+            this.svg.on('mousemove', mousemove_callback);
+            this.svg.on('mouseup', mouseup_callback);
+            // this.svg.on('mouseout',  mouseout_callback); // doesn't work properly
         }
     }]);
 
@@ -555,6 +569,7 @@ var VbTreeMap = function (_VbChart) {
 
             this.treemap(this.root);
             this.currentData = this.currentData ? this.findHash(this.currentData.data.hash, this.root) : this.root;
+            this.state.hash = this.currentData.data.hash;
         }
 
         /*
@@ -706,7 +721,7 @@ var VbTreeMap = function (_VbChart) {
 
             // go back if click happened on the same zone
             if (click && d.data.hash === that.currentData.data.hash) {
-                $('#zoombutton').trigger('click');
+                // $('#zoombutton').trigger('click');
                 return;
             }
 
@@ -730,6 +745,8 @@ var VbTreeMap = function (_VbChart) {
 
             // remember currently selected section and year
             that.currentData = d;
+            that.state.hash = d.data.hash;
+            visualbudget.broadcastStateChange(that.state);
             // that.currentNode.year = dateIndex; // that.currentNode doesn't exist though?
 
             // // update chart and cards
@@ -902,8 +919,7 @@ var visualbudget = function (vb, $, d3) {
 
     vb.broadcastStateChange = function (state) {
         for (var i = 0; i < vb.charts.length; i++) {
-            var chart = vb.charts[i];
-            chart.setState(state);
+            vb.charts[i].setState(state);
         }
     };
 

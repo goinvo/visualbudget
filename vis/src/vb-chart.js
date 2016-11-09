@@ -17,7 +17,7 @@ class VbChart {
         this.state = {
             groups: [],
             date: "2016",
-            hovering: false,
+            dragging: false,
             mouseX: null
         }
     }

@@ -109,6 +109,7 @@ class VbTreeMap extends VbChart {
 
         this.treemap(this.root);
         this.currentData = this.currentData ? this.findHash(this.currentData.data.hash, this.root) : this.root;
+        this.state.hash = this.currentData.data.hash;
     }
 
     /*
@@ -283,7 +284,7 @@ class VbTreeMap extends VbChart {
 
         // go back if click happened on the same zone
         if (click && d.data.hash === that.currentData.data.hash) {
-            $('#zoombutton').trigger('click');
+            // $('#zoombutton').trigger('click');
             return;
         }
 
@@ -307,6 +308,8 @@ class VbTreeMap extends VbChart {
 
         // remember currently selected section and year
         that.currentData = d;
+        that.state.hash = d.data.hash;
+        visualbudget.broadcastStateChange(that.state);
         // that.currentNode.year = dateIndex; // that.currentNode doesn't exist though?
 
         // // update chart and cards

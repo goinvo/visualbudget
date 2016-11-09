@@ -83,8 +83,7 @@ var visualbudget = (function (vb, $, d3) {
 
     vb.broadcastStateChange = function(state) {
         for (let i = 0; i < vb.charts.length; i++) {
-            let chart = vb.charts[i];
-            chart.setState(state);
+            vb.charts[i].setState(state);
         }
     }
 

@@ -119,16 +119,20 @@ class VbLineChart extends VbChart {
 
 
         // Hoverline
+        let xpos = this.chart.x(new Date(this.state.date));
         this.hoverline = svg.append("line")
-            .attr("x1", 0).attr("x2", 0)
+            .attr("x1", xpos).attr("x2", xpos)
             .attr("y1", 0).attr("y2", chart.yheight)
             .attr("class", "hoverline")
-            .classed("hidden", true);
+            // .classed("hidden", true);
     }
 
     moveHoverline() {
-        this.hoverline.classed("hidden", false)
-            .attr("x1", this.state.mouseX).attr("x2", this.state.mouseX);
+        // note that the year must be a string here, otherwise interpreted as unix time
+        let xpos = this.chart.x(new Date(this.state.date));
+        this.hoverline
+            // .classed("hidden", false)
+            .attr("x1", xpos).attr("x2", xpos);
     }
 
     // Add interaction actions.
@@ -160,11 +164,12 @@ class VbLineChart extends VbChart {
             e = d3.event;
             e.preventDefault();
             let mouseX = getMouseX(e);
-            let date = that.chart.x.invert(mouseX);
+            let dateobj = that.chart.x.invert(mouseX); //.getUTCFullYear()
+            let date = (dateobj.getMonth() <= 6) ?
+                        dateobj.getUTCFullYear() : dateobj.getUTCFullYear() + 1;
             visualbudget.broadcastStateChange({
-                date: date.getUTCFullYear(),
+                date: "" + date, // cast to string
                 dragging: true,
-                mouseX: that.chart.x(date)
             })
         }
         function mousemove_callback(e) {

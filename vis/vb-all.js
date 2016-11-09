@@ -280,12 +280,18 @@ var VbLineChart = function (_VbChart) {
             svg.append('rect').attr('class', 'click-capture').style('visibility', 'hidden').attr('width', chart.width).attr('height', chart.height);
 
             // Hoverline
-            this.hoverline = svg.append("line").attr("x1", 0).attr("x2", 0).attr("y1", 0).attr("y2", chart.yheight).attr("class", "hoverline").classed("hidden", true);
+            var xpos = this.chart.x(new Date(this.state.date));
+            this.hoverline = svg.append("line").attr("x1", xpos).attr("x2", xpos).attr("y1", 0).attr("y2", chart.yheight).attr("class", "hoverline");
+            // .classed("hidden", true);
         }
     }, {
         key: 'moveHoverline',
         value: function moveHoverline() {
-            this.hoverline.classed("hidden", false).attr("x1", this.state.mouseX).attr("x2", this.state.mouseX);
+            // note that the year must be a string here, otherwise interpreted as unix time
+            var xpos = this.chart.x(new Date(this.state.date));
+            this.hoverline
+            // .classed("hidden", false)
+            .attr("x1", xpos).attr("x2", xpos);
         }
 
         // Add interaction actions.
@@ -320,11 +326,11 @@ var VbLineChart = function (_VbChart) {
                 e = d3.event;
                 e.preventDefault();
                 var mouseX = getMouseX(e);
-                var date = that.chart.x.invert(mouseX);
+                var dateobj = that.chart.x.invert(mouseX); //.getUTCFullYear()
+                var date = dateobj.getMonth() <= 6 ? dateobj.getUTCFullYear() : dateobj.getUTCFullYear() + 1;
                 visualbudget.broadcastStateChange({
-                    date: date.getUTCFullYear(),
-                    dragging: true,
-                    mouseX: that.chart.x(date)
+                    date: "" + date, // cast to string
+                    dragging: true
                 });
             }
             function mousemove_callback(e) {

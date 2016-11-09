@@ -556,7 +556,7 @@ var VbTreeMap = function (_VbChart) {
 
             // insert top-level blocks
             var g1 = nav.insert("g", ".grandparent").datum(d).attr("class", "depth").on("click", function (event) {
-                that.zoneClick.call(this, d3.select(this).datum(), true);
+                that.zoneClick.call(this, d3.select(this).datum(), true, null, that);
             });
 
             // add in data
@@ -566,7 +566,7 @@ var VbTreeMap = function (_VbChart) {
             nav.grandparent.datum(d.parent === undefined ? d : d.parent)
             // .attr("nodeid", (d.parent === undefined) ? d.hash : d.parent.hash)
             .on("click", function (event) {
-                that.zoneClick.call(this, d3.select(this).datum(), true);
+                that.zoneClick.call(this, d3.select(this).datum(), true, null, that);
             });
 
             // refresh title
@@ -578,7 +578,7 @@ var VbTreeMap = function (_VbChart) {
             }).classed("children", true)
             // expand when clicked
             .on("click", function (event) {
-                that.zoneClick.call(this, d3.select(this).datum(), true);
+                that.zoneClick.call(this, d3.select(this).datum(), true, null, that);
             }).each(function () {
                 var node = d3.select(this);
                 // assign node hash attribute
@@ -642,7 +642,7 @@ var VbTreeMap = function (_VbChart) {
         key: 'open',
         value: function open(nodeId, transition) {}
         // find node with given hash or open root node
-        // this.zoneClick.call(null, findHash(nodeId, avb.root) || avb.root, false, transition || 1);
+        // this.zoneClick.call(null, findHash(nodeId, avb.root) || avb.root, false, transition || 1, this);
 
 
         /*
@@ -651,109 +651,115 @@ var VbTreeMap = function (_VbChart) {
         *   @param {node} d - clicked node data
         *   @param {boolean} click - whether click was triggered
         *   @param {integer} transition - transition duration
+        *   @param {obj} that - "this" context for the VbTreeMap object
         */
 
     }, {
         key: 'zoneClick',
-        value: function zoneClick(d, click, transition) {}
-        //destroy popovers on transition (so they don't accidentally stay)
-        // $(this).find('div').first().popover('destroy');
+        value: function zoneClick(d, click, transition, that) {
+            //destroy popovers on transition (so they don't accidentally stay)
+            // $(this).find('div').first().popover('destroy');
 
-        /*
-                // stop event propagation
-                var event = window.event || event
-                stopPropagation( event );
-        
-                transition = transition || 750;
-        
-                // do not expand if another transition is happening
-                // or data not defined
-                if (nav.transitioning || !d) return;
-        
-                // go back if click happened on the same zone
-                if (click && d.hash === this.currentData.hash) {
-                    $('#zoombutton').trigger('click');
-                    return;
-                }
-        
-                // push url to browser history
-                if (click) {
-                    pushUrl(avb.section, avb.thisYear, avb.mode, d.hash);
-                }
-        
-                // reset year
-                yearIndex = avb.thisYear - avb.firstYear;
-        
-                //
-                if(d.values[yearIndex].val === 0) {
-                    this.zoneClick.call(null, d.parent || avb.root.hash);
-                    return;
-                }
-        
-                // remove old labels
-                nav.selectAll('text').remove();
-        
-                // remember currently selected section and year
-                this.currentData = d;
-                avb.currentNode.year = yearIndex;
-        
-                // update chart and cards
-                avb.chart.open(d, d.color);
-                avb.cards.open(d);
-        
-                // prevent further events from happening while transitioning
-                nav.transitioning = true;
-        
-                // initialize transitions
-                var g2 = display(d);
-                t1 = this.currentLevel.transition().duration(transition),
-                t2 = g2.transition().duration(transition);
-        
-                // Update the domain only after entering new elements.
-                nav.x.domain([d.x, d.x + d.dx]);
-                nav.y.domain([d.y, d.y + d.dy]);
-        
-                // Enable anti-aliasing during the transition.
-                nav.style("shape-rendering", null);
-        
-                // Draw child nodes on top of parent nodes.
-                nav.selectAll(".depth").sort(function (a, b) {
-                    return a.depth - b.depth;
-                });
-        
-                // Fade-in entering text.
-                g2.selectAll(".foreignobj").style("fill-opacity", 0);
-        
-                // Transition to the new view
-                t1.style('opacity', 0);
-                t1.selectAll(".foreignobj").call(this.rect);
-                t2.selectAll(".foreignobj").call(this.rect);
-                t1.selectAll("rect").call(this.rect);
-                t2.selectAll("rect").call(this.rect);
-        
-                // add labels to new elements
-                t2.each(function () {
-                    if (ie()) return;
-                    textLabels.call(this);
-                })
-                t2.each("end", function () {
-                    if (ie()) {
-                        ieLabels.call(this);
-                    } else {
-                        textLabels.call(this);
-                    }
-                })
-        
-                // Remove the old node when the transition is finished.
-                t1.remove().each("end", function () {
-                    nav.style("shape-rendering", "crispEdges");
-                    nav.transitioning = false;
-        
-                });
-                // update current level
-                this.currentLevel = g2;
-        */
+            var nav = that.nav;
 
+            // stop event propagation
+            var event = window.event || event;
+            // stopPropagation( event );
+            event.preventDefault();
+
+            transition = transition || 750;
+
+            // do not expand if another transition is happening
+            // or data not defined
+            if (nav.transitioning || !d) return;
+
+            // go back if click happened on the same zone
+            if (click && d.data.hash === that.currentData.data.hash) {
+                // $('#zoombutton').trigger('click');
+                return;
+            }
+
+            // push url to browser history
+            if (click) {}
+            // pushUrl(avb.section, avb.thisYear, avb.mode, d.hash);
+
+
+            // reset year
+            // yearIndex = avb.thisYear - avb.firstYear;
+            var yearIndex = 0;
+
+            //
+            if (d.data.dollarAmounts[yearIndex].dollarAmount === 0) {
+                that.zoneClick.call(null, d.parent || that.root.data.hash, 0, that);
+                return;
+            }
+
+            // remove old labels
+            nav.selectAll('text').remove();
+
+            // remember currently selected section and year
+            that.currentData = d;
+            // that.currentNode.year = yearIndex; // that.currentNode doesn't exist though?
+
+            // // update chart and cards
+            // avb.chart.open(d, d.color);
+            // avb.cards.open(d);
+
+            // prevent further events from happening while transitioning
+            nav.transitioning = true;
+
+            // initialize transitions
+            var g2 = that.display(d);
+            var t1 = that.currentLevel.transition().duration(transition);
+            var t2 = g2.transition().duration(transition);
+
+            // Update the domain only after entering new elements.
+            nav.x.domain([d.x0, d.x1]);
+            nav.y.domain([d.y0, d.y1]);
+            // nav.y.domain([d.y, d.y + d.dy]);
+
+            // Enable anti-aliasing during the transition.
+            nav.style("shape-rendering", null);
+
+            // Draw child nodes on top of parent nodes.
+            nav.selectAll(".depth").sort(function (a, b) {
+                return a.depth - b.depth;
+            });
+
+            // Fade-in entering text.
+            g2.selectAll(".foreignobj").style("fill-opacity", 0);
+
+            // Transition to the new view
+            t1.style('opacity', 0);
+            t1.selectAll(".foreignobj").call(that.rect);
+            t2.selectAll(".foreignobj").call(that.rect);
+            t1.selectAll("rect").call(that.rect);
+            t2.selectAll("rect").call(that.rect);
+
+            // add labels to new elements
+            /*
+            t2.each(function () {
+                if (ie()) return;
+                textLabels.call(that);
+            })
+            t2.each("end", function () {
+                if (ie()) {
+                    ieLabels.call(that);
+                } else {
+                    textLabels.call(that);
+                }
+            })
+            */
+
+            // Remove the old node when the transition is finished.
+            t1.remove().on("end", function () {
+                nav.style("shape-rendering", "crispEdges");
+                nav.transitioning = false;
+            });
+
+            // update current level
+            that.currentLevel = g2;
+        }
 
         /*
         *   Sets SVG rectangle properties based on treemap node values

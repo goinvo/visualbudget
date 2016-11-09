@@ -132,7 +132,7 @@ class VbTreeMap extends VbChart {
             .datum(d)
             .attr("class", "depth")
             .on("click", function (event) {
-                that.zoneClick.call(this, d3.select(this).datum(), true);
+                that.zoneClick.call(this, d3.select(this).datum(), true, null, that);
             })
 
         // add in data
@@ -145,7 +145,7 @@ class VbTreeMap extends VbChart {
             .datum((d.parent === undefined) ? d : d.parent)
             // .attr("nodeid", (d.parent === undefined) ? d.hash : d.parent.hash)
             .on("click", function (event) {
-                that.zoneClick.call(this, d3.select(this).datum(), true);
+                that.zoneClick.call(this, d3.select(this).datum(), true, null, that);
             });
 
         // refresh title
@@ -158,7 +158,7 @@ class VbTreeMap extends VbChart {
             .classed("children", true)
             // expand when clicked
             .on("click", function (event) {
-                that.zoneClick.call(this, d3.select(this).datum(), true);
+                that.zoneClick.call(this, d3.select(this).datum(), true, null, that);
             })
             .each(function () {
                 var node = d3.select(this);
@@ -241,7 +241,7 @@ class VbTreeMap extends VbChart {
 
     open(nodeId, transition) {
         // find node with given hash or open root node
-        // this.zoneClick.call(null, findHash(nodeId, avb.root) || avb.root, false, transition || 1);
+        // this.zoneClick.call(null, findHash(nodeId, avb.root) || avb.root, false, transition || 1, this);
     }
 
     /*
@@ -250,15 +250,18 @@ class VbTreeMap extends VbChart {
     *   @param {node} d - clicked node data
     *   @param {boolean} click - whether click was triggered
     *   @param {integer} transition - transition duration
+    *   @param {obj} that - "this" context for the VbTreeMap object
     */
-    zoneClick (d, click, transition) {
+    zoneClick(d, click, transition, that) {
         //destroy popovers on transition (so they don't accidentally stay)
         // $(this).find('div').first().popover('destroy');
 
-/*
+        let nav = that.nav;
+
         // stop event propagation
         var event = window.event || event
-        stopPropagation( event );
+        // stopPropagation( event );
+        event.preventDefault();
 
         transition = transition || 750;
 
@@ -267,22 +270,23 @@ class VbTreeMap extends VbChart {
         if (nav.transitioning || !d) return;
 
         // go back if click happened on the same zone
-        if (click && d.hash === this.currentData.hash) {
-            $('#zoombutton').trigger('click');
+        if (click && d.data.hash === that.currentData.data.hash) {
+            // $('#zoombutton').trigger('click');
             return;
         }
 
         // push url to browser history
         if (click) {
-            pushUrl(avb.section, avb.thisYear, avb.mode, d.hash);
+            // pushUrl(avb.section, avb.thisYear, avb.mode, d.hash);
         }
 
         // reset year
-        yearIndex = avb.thisYear - avb.firstYear;
+        // yearIndex = avb.thisYear - avb.firstYear;
+        let yearIndex = 0;
 
         //
-        if(d.values[yearIndex].val === 0) {
-            this.zoneClick.call(null, d.parent || avb.root.hash);
+        if(d.data.dollarAmounts[yearIndex].dollarAmount === 0) {
+            that.zoneClick.call(null, d.parent || that.root.data.hash, 0, that);
             return;
         }
 
@@ -290,24 +294,25 @@ class VbTreeMap extends VbChart {
         nav.selectAll('text').remove();
 
         // remember currently selected section and year
-        this.currentData = d;
-        avb.currentNode.year = yearIndex;
+        that.currentData = d;
+        // that.currentNode.year = yearIndex; // that.currentNode doesn't exist though?
 
-        // update chart and cards
-        avb.chart.open(d, d.color);
-        avb.cards.open(d);
+        // // update chart and cards
+        // avb.chart.open(d, d.color);
+        // avb.cards.open(d);
 
         // prevent further events from happening while transitioning
         nav.transitioning = true;
 
         // initialize transitions
-        var g2 = display(d);
-        t1 = this.currentLevel.transition().duration(transition),
-        t2 = g2.transition().duration(transition);
+        let g2 = that.display(d);
+        let t1 = that.currentLevel.transition().duration(transition);
+        let t2 = g2.transition().duration(transition);
 
         // Update the domain only after entering new elements.
-        nav.x.domain([d.x, d.x + d.dx]);
-        nav.y.domain([d.y, d.y + d.dy]);
+        nav.x.domain([d.x0, d.x1]);
+        nav.y.domain([d.y0, d.y1]);
+        // nav.y.domain([d.y, d.y + d.dy]);
 
         // Enable anti-aliasing during the transition.
         nav.style("shape-rendering", null);
@@ -322,33 +327,35 @@ class VbTreeMap extends VbChart {
 
         // Transition to the new view
         t1.style('opacity', 0);
-        t1.selectAll(".foreignobj").call(this.rect);
-        t2.selectAll(".foreignobj").call(this.rect);
-        t1.selectAll("rect").call(this.rect);
-        t2.selectAll("rect").call(this.rect);
+        t1.selectAll(".foreignobj").call(that.rect);
+        t2.selectAll(".foreignobj").call(that.rect);
+        t1.selectAll("rect").call(that.rect);
+        t2.selectAll("rect").call(that.rect);
 
         // add labels to new elements
+        /*
         t2.each(function () {
             if (ie()) return;
-            textLabels.call(this);
+            textLabels.call(that);
         })
         t2.each("end", function () {
             if (ie()) {
-                ieLabels.call(this);
+                ieLabels.call(that);
             } else {
-                textLabels.call(this);
+                textLabels.call(that);
             }
         })
+        */
 
         // Remove the old node when the transition is finished.
-        t1.remove().each("end", function () {
+        t1.remove().on("end", function () {
             nav.style("shape-rendering", "crispEdges");
             nav.transitioning = false;
-
         });
+
         // update current level
-        this.currentLevel = g2;
-*/
+        that.currentLevel = g2;
+
     }
 
     /*

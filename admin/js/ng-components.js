@@ -1,50 +1,32 @@
 angular.module('components', [])
 
-  .directive('tabs', function() {
+  .directive('chart', function() {
     return {
+      require: '^pane',
       restrict: 'E',
-      transclude: true,
       scope: {},
-      controller: function($scope, $element) {
-        var panes = $scope.panes = [];
+      link: function(scope, element, attrs, paneCtrl) {
+        paneCtrl.chart = scope;
+      },
+      template: '<div class="vb-chart-wrapper">{{ ctrl.getHtml() }}</div>',
+      replace: true,
+      controller: function($scope) {
+        $scope.ctrl = this;
+        this.loading = true;
 
-        $scope.select = function(pane) {
-          angular.forEach(panes, function(pane) {
-            pane.selected = false;
-          });
-          pane.selected = true;
+        this.redraw = function() {
+          console.log('chart.redraw()');
         }
 
-        this.addPane = function(pane) {
-          if (panes.length == 0) $scope.select(pane);
-          panes.push(pane);
+        this.getHtml = function() {
+          console.log('chart.getHtml()');
+          // console.log($parent.$parent.datasets);
+          if (this.loading) {
+            return "Loading...";
+          } else {
+            return "Chart HTML.";
+          }
         }
-      },
-      template:
-        '<div class="tabbable tabs-left">' +
-          '<ul class="nav nav-tabs">' +
-            '<li ng-repeat="pane in panes" ng-class="{active:pane.selected}">'+
-              '<a href="" ng-click="select(pane)">{{pane.title}}</a>' +
-            '</li>' +
-          '</ul>' +
-          '<div class="tab-content" ng-transclude></div>' +
-        '</div>',
-      replace: true
-    };
-  })
-
-  .directive('pane', function() {
-    return {
-      require: '^tabs',
-      restrict: 'E',
-      transclude: true,
-      scope: { title: '@' },
-      link: function(scope, element, attrs, tabsController) {
-        tabsController.addPane(scope);
-      },
-      template:
-        '<div class="tab-pane" ng-class="{active: selected}" ng-transclude>' +
-        '</div>',
-      replace: true
-    };
+      }
+    }
   })

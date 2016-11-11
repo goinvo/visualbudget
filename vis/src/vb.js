@@ -8,7 +8,7 @@ var visualbudget = (function (vb, $, d3) {
      */
     vb.initialize = function(callback) {
 
-        // Make callback an empty function if it's not set
+        // Set callback to an empty function if it's not set
         if (typeof callback === "undefined") {
             callback = function() {};
         }
@@ -47,9 +47,28 @@ var visualbudget = (function (vb, $, d3) {
      */
     vb.setupChartObject = function($div) {
         return function(data) {
-            var newChart = new vb.Chart($div, data);
+
+            var newChart;
+
+            switch($div.data('vbVis')) {
+                case 'linechart':
+                    newChart = new VbLineChart($div, data);
+                    break;
+
+                case 'treemap':
+                    newChart = new VbTreeMap($div, data);
+                    break;
+
+                case 'metric':
+                    newChart = new VbMetric($div, data);
+                    break;
+
+                default:
+                    console.log('VB error: Unrecognized chart type.');
+            }
+
             vb.charts.push(newChart);
-            console.log('Added chart ' + $div.data('vbHash') + ' to queue.');
+            console.log('Added chart ' + newChart.atts.hash + ' to queue.');
         }
     }
 
@@ -62,14 +81,20 @@ var visualbudget = (function (vb, $, d3) {
         });
     }
 
+    vb.broadcastStateChange = function(state) {
+        for (let i = 0; i < vb.charts.length; i++) {
+            vb.charts[i].setState(state);
+        }
+    }
+
     /**
      * Search for a chart by its hash. Returns null if no matching chart is found.
      */
     vb.getChart = function(hash) {
         var match = null;
 
-        for (i = 0; i < vb.charts.length; i ++) {
-            if (vb.charts[i].props.vbHash == hash) {
+        for (let i = 0; i < vb.charts.length; i++) {
+            if (vb.charts[i].atts.hash == hash) {
                 match = vb.charts[i];
                 break;
             }

@@ -7,9 +7,17 @@
 
     <br/><br/><br/>
 
-    <div ng-app="vbAdmin" ng-controller="vbVisualizationsController as vbCtrl">
+    <div ng-app="vbAdmin" ng-controller="vbController as vbCtrl">
 
         <tabs>
+
+            <pane title="Linechart" vb-chart-type="linechart"></pane>
+            <pane title="Stacked area graph" vb-chart-type="stackedarea"></pane>
+            <pane title="Treemap" vb-chart-type="treemap"></pane>
+            <pane title="Metrics" vb-chart-type="metrics"></pane>
+
+
+
             <pane title="Trends">
                 <div class='vb-chart-wrapper'></div>
                 <br/><br/>
@@ -21,8 +29,9 @@
                         </select>
                 </div>
                 <br/><br/>
-                <br/><br/>
-                <div class='vb-time-slider'></div>
+                <rz-slider
+                           rz-slider-model="chart.minDate"
+                           rz-slider-high="chart.maxDate"></rz-slider>
                 <br/><br/>
                 The above vis is generated using the following shortcode:
                 <br/><br/>
@@ -31,8 +40,6 @@
                 <a class='vb-iframe-link' ng-href="{{ vbCtrl.getShortcode('iframe_link') }}">{{ vbCtrl.getShortcode('iframe_link') }}</a>
             </pane>
 
-            <pane title="Breakdown">
-            </pane>
             <pane title="Comparison">
             </pane>
             <pane title="Ratio">

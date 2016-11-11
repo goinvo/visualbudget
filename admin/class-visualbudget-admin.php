@@ -351,8 +351,7 @@ class VisualBudget_Admin {
         wp_enqueue_script( 'nouislider', plugin_dir_url( __FILE__ ) . '../vis/nouislider.min.js', array(), VISUALBUDGET_VERSION, false );
 
         // Add the visualization js file and submodules.
-        wp_enqueue_script( 'vb', plugin_dir_url( __FILE__ ) . '../vis/vb.js', array( 'jquery' ), VISUALBUDGET_VERSION, false );
-        wp_enqueue_script( 'vb_linechart', plugin_dir_url( __FILE__ ) . '../vis/vb-linechart.js', array( 'jquery' ), VISUALBUDGET_VERSION, false );
+        wp_enqueue_script( 'vb', plugin_dir_url( __FILE__ ) . '../vis/vb-all.js', array( 'jquery' ), VISUALBUDGET_VERSION, false );
 
         // Add the VB admin javascript file (this came with boilerplate)
         wp_enqueue_script( 'vb_admin', plugin_dir_url( __FILE__ ) . 'js/vb-admin.js', array( 'jquery' ), VISUALBUDGET_VERSION, false );

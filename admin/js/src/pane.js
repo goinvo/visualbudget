@@ -2,17 +2,17 @@
  * The "pane" directive of the VB dashboard.
  */
 
-paneController = function($scope) {
+let paneController = function($scope) {
         $scope.ctrl = this;
     };
 
 
-paneLinkFunction = function(scope, element, attrs, tabsController) {
+let paneLinkFunction = function(scope, element, attrs, tabsController) {
         tabsController.addPane(scope);
     };
 
 
-angular.module('components', [])
+angular.module('vbAdmin.tabs')
     .directive('pane', function() {
         return {
             require: '^tabs',
@@ -20,8 +20,8 @@ angular.module('components', [])
             transclude: true,
             scope: { title: '@' },
             link: paneLinkFunction,
-            template: 'pane.html',
+            templateUrl: _vbPluginUrl + 'admin/js/src/pane.html',
             replace: true,
-            controller: paneController
+            // controller: paneController
         };
     })

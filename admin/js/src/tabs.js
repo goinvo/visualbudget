@@ -2,7 +2,7 @@
  * The "tabs" directive of the VB dashboard.
  */
 
-tabsController = function($scope, $http) {
+let tabsController = function($scope, $http) {
         var panes = $scope.panes = [];
 
         $scope.select = function(pane) {
@@ -19,14 +19,14 @@ tabsController = function($scope, $http) {
     };
 
 
-angular.module('components', [])
+angular.module('vbAdmin.tabs')
     .directive('tabs', function() {
         return {
             restrict: 'E',
             transclude: true,
             scope: {},
             controller: tabsController,
-            template: 'tabs.html',
+            templateUrl: _vbPluginUrl + 'admin/js/src/tabs.html',
             replace: true
         };
     })

@@ -24,7 +24,7 @@ angular.module('vbAdmin.tabs')
         return {
             restrict: 'E',
             transclude: true,
-            scope: {},
+            scope: false,
             controller: tabsController,
             templateUrl: _vbPluginUrl + 'admin/js/src/tabs.html',
             replace: true

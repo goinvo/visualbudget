@@ -26,12 +26,12 @@
             </pane>
             <pane title="Metrics">
                 <dataset-select></dataset-select>
-                <chart vis='metric' metric='date'></chart>
-                <shortcode metric='date'></shortcode>
-                <iframelink metric='date'></iframelink>
                 <chart vis='metric' metric='datetotal'></chart>
                 <shortcode metric='datetotal'></shortcode>
                 <iframelink metric='datetotal'></iframelink>
+                <!--<chart vis='metric' metric='date'></chart>
+                <shortcode metric='date'></shortcode>
+                <iframelink metric='date'></iframelink>-->
             </pane>
             <!--<pane title="Comparison">
             </pane>

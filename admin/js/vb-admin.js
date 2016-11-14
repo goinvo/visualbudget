@@ -52,15 +52,15 @@ angular.module('vbAdmin.shortcode', []);
         $scope.datasets = [{
             id: '1477929661',
             filename: '1477929661.json',
-            uploaded_filename: 'expenses.csv'
+            uploaded_name: '*expenses.csv'
         }, {
             id: '1477929681',
             filename: '1477929681.json',
-            uploaded_filename: 'revenues.csv'
+            uploaded_name: '*revenues.csv'
         }, {
             id: '1477930003',
             filename: '1477930003.json',
-            uploaded_filename: 'funds.csv'
+            uploaded_name: '*funds.csv'
         }];
     });
 })(visualbudget, jQuery);
@@ -72,27 +72,45 @@ angular.module('vbAdmin.shortcode', []);
 
 var chartController = function chartController($scope, $http) {
     $scope.ctrl = this;
+    var that = this;
 
     var chartUrl = _vbPluginUrl + 'vis/vis.php?';
 
-    this.chartHtml = function () {
-        return '[' + chartUrl + ']';
+    $scope.chartHtml = function () {
+        var atts = $scope.$parent.$parent.atts;
+        atts.vis = $scope.vis;
+        if ($scope.metric) {
+            atts.metric = $scope.metric;
+        }
+        return '[' + chartUrl + that.serialize(atts) + ']';
+        // return $http(chartUrl + that.serialize(atts));
+    };
+
+    // Turn a JS object into a query string of some form.
+    // based on code from  http://stackoverflow.com/a/1714899
+    this.serialize = function (obj) {
+        var sep = '&';
+        var str = [];
+        for (var p in obj) {
+            if (obj.hasOwnProperty(p)) {
+                str.push(encodeURIComponent(p) + "=" + encodeURIComponent(obj[p]));
+            }
+        }return str.join(sep);
     };
 };
 
-var chartLinkFunction = function chartLinkFunction(scope, element, attrs, paneController) {
-    paneController.addChart(scope);
-};
+// let chartLinkFunction = function(scope, element, attrs, paneController) {
+//         paneController.addChart(scope);
+//     };
+
 
 angular.module('vbAdmin.chart').directive('chart', function () {
     return {
-        require: '^pane',
+        // require: '^pane',
         restrict: 'E',
         transclude: false,
-        scope: {
-            vis: '=vis'
-        },
-        link: chartLinkFunction,
+        scope: { vis: '@', metric: '@' },
+        // link: chartLinkFunction,
         controller: chartController,
         templateUrl: _vbPluginUrl + 'admin/js/src/chart.html',
         replace: true
@@ -106,6 +124,19 @@ angular.module('vbAdmin.chart').directive('chart', function () {
 
 var datasetSelectController = function datasetSelectController($scope, $http) {
     $scope.ctrl = this;
+
+    $scope.$parent.chartData = {};
+    $scope.$parent.chartData.dataset = $scope.$parent.datasets[0];
+
+    $scope.setDataset = function () {
+        $scope.$parent.atts.data = $scope.$parent.chartData.dataset.id;
+    };
+
+    $scope.setDataset();
+};
+
+var datasetSelectLinkFunction = function datasetSelectLinkFunction(scope, element, attrs, paneController) {
+    paneController.addDatasetSelect(scope);
 };
 
 angular.module('vbAdmin.datasetSelect').directive('datasetSelect', function () {
@@ -113,7 +144,8 @@ angular.module('vbAdmin.datasetSelect').directive('datasetSelect', function () {
         require: '^pane',
         restrict: 'E',
         transclude: false,
-        scope: {},
+        scope: false,
+        link: datasetSelectLinkFunction,
         controller: datasetSelectController,
         templateUrl: _vbPluginUrl + 'admin/js/src/datasetSelect.html',
         replace: true
@@ -132,20 +164,27 @@ var paneController = function paneController($scope) {
     $scope.datasets = [{
         id: '1477929661',
         filename: '1477929661.json',
-        uploaded_filename: 'expenses.csv'
+        uploaded_name: 'expenses.csv'
     }, {
         id: '1477929681',
         filename: '1477929681.json',
-        uploaded_filename: 'revenues.csv'
+        uploaded_name: 'revenues.csv'
     }, {
         id: '1477930003',
         filename: '1477930003.json',
-        uploaded_filename: 'funds.csv'
+        uploaded_name: 'funds.csv'
     }];
+
+    var atts = $scope.atts = {};
 
     var charts = $scope.charts = [];
     this.addChart = function (chart) {
         charts.push(chart);
+    };
+
+    var datasetSelect = $scope.datasetSelect = null;
+    this.addDatasetSelect = function (select) {
+        datasetSelect = select;
     };
 };
 
@@ -175,7 +214,19 @@ var shortcodeController = function shortcodeController($scope, $http) {
     $scope.ctrl = this;
 
     this.shortcode = function () {
-        return '[shortcode]';
+        return '[visualbudget ' + this.serialize($scope.$parent.atts) + ']';
+    };
+
+    // Turn a JS object into a query string of some form.
+    // based on code from  http://stackoverflow.com/a/1714899
+    this.serialize = function (obj) {
+        var sep = ' ';
+        var str = [];
+        for (var p in obj) {
+            if (obj.hasOwnProperty(p)) {
+                str.push(encodeURIComponent(p) + "=" + encodeURIComponent(obj[p]));
+            }
+        }return str.join(sep);
     };
 };
 
@@ -183,7 +234,7 @@ angular.module('vbAdmin.shortcode').directive('shortcode', function () {
     return {
         restrict: 'E',
         transclude: false,
-        scope: {},
+        scope: false,
         controller: shortcodeController,
         templateUrl: _vbPluginUrl + 'admin/js/src/shortcode.html',
         replace: true
@@ -215,7 +266,7 @@ angular.module('vbAdmin.tabs').directive('tabs', function () {
     return {
         restrict: 'E',
         transclude: true,
-        scope: {},
+        scope: false,
         controller: tabsController,
         templateUrl: _vbPluginUrl + 'admin/js/src/tabs.html',
         replace: true

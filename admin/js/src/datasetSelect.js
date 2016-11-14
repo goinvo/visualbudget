@@ -5,6 +5,19 @@
 
 let datasetSelectController = function($scope, $http) {
         $scope.ctrl = this;
+
+        $scope.$parent.chartData = {};
+        $scope.$parent.chartData.dataset = $scope.$parent.datasets[0];
+
+        $scope.setDataset = function() {
+            $scope.$parent.atts.data = $scope.$parent.chartData.dataset.id;
+        }
+
+        $scope.setDataset();
+    };
+
+let datasetSelectLinkFunction = function(scope, element, attrs, paneController) {
+        paneController.addDatasetSelect(scope);
     };
 
 
@@ -14,7 +27,8 @@ angular.module('vbAdmin.datasetSelect')
             require: '^pane',
             restrict: 'E',
             transclude: false,
-            scope: {},
+            scope: false,
+            link: datasetSelectLinkFunction,
             controller: datasetSelectController,
             templateUrl: _vbPluginUrl + 'admin/js/src/datasetSelect.html',
             replace: true

@@ -59,17 +59,17 @@ angular.module('vbAdmin.shortcode', []);
             {
                 id: '1477929661',
                 filename: '1477929661.json',
-                uploaded_filename: 'expenses.csv'
+                uploaded_name: '*expenses.csv'
             },
             {
                 id: '1477929681',
                 filename: '1477929681.json',
-                uploaded_filename: 'revenues.csv'
+                uploaded_name: '*revenues.csv'
             },
             {
                 id: '1477930003',
                 filename: '1477930003.json',
-                uploaded_filename: 'funds.csv'
+                uploaded_name: '*funds.csv'
             }
         ];
 

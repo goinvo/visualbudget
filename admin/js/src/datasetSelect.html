@@ -1,7 +1,8 @@
 <div>
 <select class='vb-dataset-select'
-        ng-model='chartData.dataset'
+        ng-model='$parent.chartData.dataset'
         ng-options='d.uploaded_name for d in $parent.datasets'
+        ng-change='setDataset()'
         ></select>
         <!--
             ng-change='pane.redraw()'

@@ -2,20 +2,25 @@
  * The "chart" directive of the VB dashboard.
  */
 
-let chartController = function($scope, $http) {
+let chartController = function($scope, $http, $sce) {
         $scope.ctrl = this;
         let that = this;
 
         let chartUrl = _vbPluginUrl + 'vis/vis.php?';
 
-        $scope.chartHtml = function() {
+        this.getUrl = function() {
             let atts = $scope.$parent.$parent.atts;
             atts.vis = $scope.vis;
             if ($scope.metric) {
                 atts.metric = $scope.metric;
             }
-            return '[' + chartUrl + that.serialize(atts) + ']';
-            // return $http(chartUrl + that.serialize(atts));
+
+            return chartUrl + that.serialize(atts);
+            // return '[' + chartUrl + that.serialize(atts) + ']';
+        }
+
+        this.setHtml = function(html) {
+            $scope.html = $sce.trustAsHtml(html);
         }
 
         // Turn a JS object into a query string of some form.
@@ -32,20 +37,20 @@ let chartController = function($scope, $http) {
     };
 
 
-// let chartLinkFunction = function(scope, element, attrs, paneController) {
-//         paneController.addChart(scope);
-//     };
+let chartLinkFunction = function(scope, element, attrs, paneController) {
+        paneController.addChart(scope);
+    };
 
 
 
 angular.module('vbAdmin.chart')
     .directive('chart', function() {
         return {
-            // require: '^pane',
+            require: '^pane',
             restrict: 'E',
             transclude: false,
             scope: { vis: '@', metric: '@' },
-            // link: chartLinkFunction,
+            link: chartLinkFunction,
             controller: chartController,
             templateUrl: _vbPluginUrl + 'admin/js/src/chart.html',
             replace: true

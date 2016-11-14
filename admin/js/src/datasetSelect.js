@@ -11,6 +11,7 @@ let datasetSelectController = function($scope, $http) {
 
         $scope.setDataset = function() {
             $scope.$parent.atts.data = $scope.$parent.chartData.dataset.id;
+            $scope.$parent.ctrl.redrawCharts();
         }
 
         $scope.setDataset();

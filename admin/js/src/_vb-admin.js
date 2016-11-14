@@ -30,48 +30,45 @@ angular.module('vbAdmin.shortcode', []);
     vbAdmin.controller('vbController', function($scope, $http) {
         console.log('vbController running.');
 
-
         // We'll collect metadata of datasets here.
-        let datasets = $scope.datasets = [];
+        let datasets = [];
         let ids_url = _vbPluginUrl + 'vis/api.php?filter=id';
 
-        /*
+        $scope.chartData = {};
+
+        $scope.datasets = [
+            {
+                id: '',
+                filename: '#',
+                uploaded_name: 'loading...'
+            }
+        ];
+
+
         // First load all dataset IDs.
         $http.get(ids_url).success( function(ids) {
+            $scope.datasets = [];
+
             // Function to fetch metadata given a dataset ID.
             function fetchMetaFromId(id) {
                 let next_meta_url = _vbPluginUrl + 'vis/api.php?filename=' + id + '_meta.json';
                 let req = $http.get(next_meta_url).success( function(next_meta) {
-                    datasets.push(next_meta);
+                    $scope.datasets.push(next_meta);
+                    if($scope.datasets.length == 1) {
+                        $scope.chartData.dataset = $scope.datasets[0];
+                    }
                 });
                 return req;
             }
             // Then fetch metadata for all datasets.
             $.when.apply($, $.map(ids, fetchMetaFromId))
                 .done(function() {
-                    $scope.datasets = datasets;
+                    // $scope.datasets = datasets;
                     // console.log(datasets.length)
                 });
         });
-        */
 
-        $scope.datasets = [
-            {
-                id: '1477929661',
-                filename: '1477929661.json',
-                uploaded_name: '*expenses.csv'
-            },
-            {
-                id: '1477929681',
-                filename: '1477929681.json',
-                uploaded_name: '*revenues.csv'
-            },
-            {
-                id: '1477930003',
-                filename: '1477930003.json',
-                uploaded_name: '*funds.csv'
-            }
-        ];
+
 
     });
 

@@ -1,11 +1,5 @@
 /*body { font: 12px Arial;}*/
 
-div.vb-chart {
-    height: 350px;
-    width: 100%;
-}
-
-
 
 /* linechart */
 path {
@@ -36,15 +30,28 @@ path {
 
 /* Admin things. */
 
+div.vb-chart {
+    height: 350px;
+    width: 100%;
+}
+.vb-chart-metric {
+    width: 50px;
+    margin: 1em auto;
+    font-size: 2em;
+}
+
+
+.vb-shortcode-wrapper {
+    margin: 1em 0;
+}
+    .vb-shortcode {
+        margin: .5em 0;
+    }
 
 .vb-chart-wrapper {
     background: white;
+    margin: 1em auto;
 }
-.vb-time-slider-range {
-    margin: 0 5rem;
-}
-
-
 .vb-chart {
     background: white;
 }
@@ -54,8 +61,9 @@ path {
     width: 20em;
 }
 
-.vb-select-wrapper {
+.vb-dataset-select-wrapper {
     text-align: center;
+    margin: 1em 0;
 }
     .vb-dataset-select {
         width: 20em;

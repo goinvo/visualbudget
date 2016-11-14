@@ -2,28 +2,11 @@
  * The "pane" directive of the VB dashboard.
  */
 
-let paneController = function($scope) {
+let paneController = function($scope, $http) {
         $scope.ctrl = this;
 
         // Hardcoded for the moment, to get the infrastructure working.
-        $scope.datasets = [
-            {
-                id: '1477929661',
-                filename: '1477929661.json',
-                uploaded_name: 'expenses.csv'
-            },
-            {
-                id: '1477929681',
-                filename: '1477929681.json',
-                uploaded_name: 'revenues.csv'
-            },
-            {
-                id: '1477930003',
-                filename: '1477930003.json',
-                uploaded_name: 'funds.csv'
-            }
-        ];
-
+        $scope.datasets = $scope.$parent.datasets;
 
         let atts = $scope.atts = {};
 
@@ -35,6 +18,15 @@ let paneController = function($scope) {
         let datasetSelect = $scope.datasetSelect = null;
         this.addDatasetSelect = function(select) {
             datasetSelect = select;
+        }
+
+        this.redrawCharts = function() {
+            for (let k = 0; k < $scope.charts.length; k++) {
+                $http.get($scope.charts[k].ctrl.getUrl()).success( function(response) {
+                    $scope.charts[k].ctrl.setHtml(response);
+                    setTimeout(visualbudget.initialize, 200);
+                });
+            }
         }
 
     };

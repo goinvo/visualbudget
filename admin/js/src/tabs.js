@@ -10,6 +10,7 @@ let tabsController = function($scope, $http) {
                 pane.selected = false;
             });
             pane.selected = true;
+            pane.ctrl.redrawCharts();
         }
 
         this.addPane = function(pane) {

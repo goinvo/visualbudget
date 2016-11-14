@@ -26,42 +26,38 @@ angular.module('vbAdmin.shortcode', []);
         console.log('vbController running.');
 
         // We'll collect metadata of datasets here.
-        var datasets = $scope.datasets = [];
+        var datasets = [];
         var ids_url = _vbPluginUrl + 'vis/api.php?filter=id';
 
-        /*
+        $scope.chartData = {};
+
+        $scope.datasets = [{
+            id: '',
+            filename: '#',
+            uploaded_name: 'loading...'
+        }];
+
         // First load all dataset IDs.
-        $http.get(ids_url).success( function(ids) {
+        $http.get(ids_url).success(function (ids) {
+            $scope.datasets = [];
+
             // Function to fetch metadata given a dataset ID.
             function fetchMetaFromId(id) {
-                let next_meta_url = _vbPluginUrl + 'vis/api.php?filename=' + id + '_meta.json';
-                let req = $http.get(next_meta_url).success( function(next_meta) {
-                    datasets.push(next_meta);
+                var next_meta_url = _vbPluginUrl + 'vis/api.php?filename=' + id + '_meta.json';
+                var req = $http.get(next_meta_url).success(function (next_meta) {
+                    $scope.datasets.push(next_meta);
+                    if ($scope.datasets.length == 1) {
+                        $scope.chartData.dataset = $scope.datasets[0];
+                    }
                 });
                 return req;
             }
             // Then fetch metadata for all datasets.
-            $.when.apply($, $.map(ids, fetchMetaFromId))
-                .done(function() {
-                    $scope.datasets = datasets;
-                    // console.log(datasets.length)
-                });
+            $.when.apply($, $.map(ids, fetchMetaFromId)).done(function () {
+                // $scope.datasets = datasets;
+                // console.log(datasets.length)
+            });
         });
-        */
-
-        $scope.datasets = [{
-            id: '1477929661',
-            filename: '1477929661.json',
-            uploaded_name: '*expenses.csv'
-        }, {
-            id: '1477929681',
-            filename: '1477929681.json',
-            uploaded_name: '*revenues.csv'
-        }, {
-            id: '1477930003',
-            filename: '1477930003.json',
-            uploaded_name: '*funds.csv'
-        }];
     });
 })(visualbudget, jQuery);
 'use strict';
@@ -70,20 +66,25 @@ angular.module('vbAdmin.shortcode', []);
  * The "chart" directive of the VB dashboard.
  */
 
-var chartController = function chartController($scope, $http) {
+var chartController = function chartController($scope, $http, $sce) {
     $scope.ctrl = this;
     var that = this;
 
     var chartUrl = _vbPluginUrl + 'vis/vis.php?';
 
-    $scope.chartHtml = function () {
+    this.getUrl = function () {
         var atts = $scope.$parent.$parent.atts;
         atts.vis = $scope.vis;
         if ($scope.metric) {
             atts.metric = $scope.metric;
         }
-        return '[' + chartUrl + that.serialize(atts) + ']';
-        // return $http(chartUrl + that.serialize(atts));
+
+        return chartUrl + that.serialize(atts);
+        // return '[' + chartUrl + that.serialize(atts) + ']';
+    };
+
+    this.setHtml = function (html) {
+        $scope.html = $sce.trustAsHtml(html);
     };
 
     // Turn a JS object into a query string of some form.
@@ -99,18 +100,17 @@ var chartController = function chartController($scope, $http) {
     };
 };
 
-// let chartLinkFunction = function(scope, element, attrs, paneController) {
-//         paneController.addChart(scope);
-//     };
-
+var chartLinkFunction = function chartLinkFunction(scope, element, attrs, paneController) {
+    paneController.addChart(scope);
+};
 
 angular.module('vbAdmin.chart').directive('chart', function () {
     return {
-        // require: '^pane',
+        require: '^pane',
         restrict: 'E',
         transclude: false,
         scope: { vis: '@', metric: '@' },
-        // link: chartLinkFunction,
+        link: chartLinkFunction,
         controller: chartController,
         templateUrl: _vbPluginUrl + 'admin/js/src/chart.html',
         replace: true
@@ -130,6 +130,7 @@ var datasetSelectController = function datasetSelectController($scope, $http) {
 
     $scope.setDataset = function () {
         $scope.$parent.atts.data = $scope.$parent.chartData.dataset.id;
+        $scope.$parent.ctrl.redrawCharts();
     };
 
     $scope.setDataset();
@@ -157,23 +158,11 @@ angular.module('vbAdmin.datasetSelect').directive('datasetSelect', function () {
  * The "pane" directive of the VB dashboard.
  */
 
-var paneController = function paneController($scope) {
+var paneController = function paneController($scope, $http) {
     $scope.ctrl = this;
 
     // Hardcoded for the moment, to get the infrastructure working.
-    $scope.datasets = [{
-        id: '1477929661',
-        filename: '1477929661.json',
-        uploaded_name: 'expenses.csv'
-    }, {
-        id: '1477929681',
-        filename: '1477929681.json',
-        uploaded_name: 'revenues.csv'
-    }, {
-        id: '1477930003',
-        filename: '1477930003.json',
-        uploaded_name: 'funds.csv'
-    }];
+    $scope.datasets = $scope.$parent.datasets;
 
     var atts = $scope.atts = {};
 
@@ -185,6 +174,19 @@ var paneController = function paneController($scope) {
     var datasetSelect = $scope.datasetSelect = null;
     this.addDatasetSelect = function (select) {
         datasetSelect = select;
+    };
+
+    this.redrawCharts = function () {
+        var _loop = function _loop(k) {
+            $http.get($scope.charts[k].ctrl.getUrl()).success(function (response) {
+                $scope.charts[k].ctrl.setHtml(response);
+                setTimeout(visualbudget.initialize, 200);
+            });
+        };
+
+        for (var k = 0; k < $scope.charts.length; k++) {
+            _loop(k);
+        }
     };
 };
 
@@ -254,6 +256,7 @@ var tabsController = function tabsController($scope, $http) {
             pane.selected = false;
         });
         pane.selected = true;
+        pane.ctrl.redrawCharts();
     };
 
     this.addPane = function (pane) {

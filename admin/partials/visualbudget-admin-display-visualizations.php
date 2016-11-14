@@ -25,8 +25,8 @@
                 <iframelink></iframelink>
             </pane>
             <pane title="Metrics">
-                <dataset-select></dataset-select>
                 <chart vis='metric' metric='datetotal'></chart>
+                <dataset-select></dataset-select>
                 <shortcode metric='datetotal'></shortcode>
                 <iframelink metric='datetotal'></iframelink>
                 <!--<chart vis='metric' metric='date'></chart>

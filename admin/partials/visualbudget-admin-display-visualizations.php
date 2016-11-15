@@ -23,8 +23,8 @@
                 <!-- <iframelink></iframelink> -->
             </pane>
             <pane title="Metrics">
+                <p>These metrics will automatically interact with any charts that appear on the same page.</p>
                 <dataset-select></dataset-select>
-                <p>These metrics will interact with any charts on the same page.</p>
                 <chart vis='metric' metric='datetotal'></chart>
                 <shortcode metric='datetotal'></shortcode>
                 <!-- <iframelink metric='datetotal'></iframelink> -->

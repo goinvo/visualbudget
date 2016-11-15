@@ -129,7 +129,7 @@ class VisualBudget {
         $this->loader->add_action( 'admin_notices', $plugin_admin, 'notifications_callback' );
 
         // FIXME: this doesn't work.
-        $this->loader->add_action('wp_enqueue_scripts', $plugin_admin, array($this, 'use_new_jquery'));
+        // $this->loader->add_action('wp_enqueue_scripts', $plugin_admin, array($this, 'use_new_jquery'));
 
         // Intercept admin page load request to render a shortcode.
         $this->loader->add_action('init', $this, 'intercept_query_string_shortcode_render_request');
@@ -146,7 +146,7 @@ class VisualBudget {
         $this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_styles' );
         $this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
 
-        $this->loader->add_action('wp_enqueue_scripts', $plugin_public, array($this, 'use_new_jquery'));
+        // $this->loader->add_action('wp_enqueue_scripts', $plugin_public, array($this, 'use_new_jquery'));
 
 
     }

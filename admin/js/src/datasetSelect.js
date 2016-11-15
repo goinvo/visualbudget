@@ -6,8 +6,8 @@
 let datasetSelectController = function($scope, $http) {
         $scope.ctrl = this;
 
-        $scope.$parent.chartData = {};
-        $scope.$parent.chartData.dataset = $scope.$parent.datasets[0];
+        // $scope.$parent.chartData = {};
+        // $scope.$parent.chartData.dataset = $scope.$parent.datasets[0];
 
         $scope.setDataset = function() {
             $scope.$parent.atts.data = $scope.$parent.chartData.dataset.id;
@@ -34,4 +34,4 @@ angular.module('vbAdmin.datasetSelect')
             templateUrl: _vbPluginUrl + 'admin/js/src/datasetSelect.html',
             replace: true
         };
-    })
+    });

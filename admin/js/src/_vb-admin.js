@@ -27,20 +27,11 @@ angular.module('vbAdmin.shortcode', []);
         'vbAdmin.shortcode'
         ]);
 
-    vbAdmin.controller('vbController', function($scope, $http, $rootScope) {
+    vbAdmin.controller('vbController', function($scope, $http, $rootScope, $timeout) {
         console.log('vbController running.');
 
         // We'll collect metadata of datasets here.
-        let datasets = [];
         let ids_url = _vbPluginUrl + 'vis/api.php?filter=id';
-
-        // While loading, we provide filler data.
-        $scope.chartData = {};
-        $scope.datasets = [{
-                id: 'loading...',
-                uploaded_name: '[loading...]'
-            }];
-        $scope.chartData.dataset = $scope.datasets[0];
 
         // First load all dataset IDs.
         $http.get(ids_url).success( function(ids) {
@@ -49,14 +40,9 @@ angular.module('vbAdmin.shortcode', []);
             function fetchMetaFromId(id) {
                 let next_meta_url = _vbPluginUrl + 'vis/api.php?filename=' + id + '_meta.json';
                 let req = $http.get(next_meta_url).success( function(next_meta) {
-                    if($scope.datasets.length == 0) {
-                        $scope.datasets = [];
-                        $scope.datasets.push(next_meta);
-                        // $rootScope.broadcast('ajax.newDataset', next_meta);
-                        $scope.chartData.dataset = $scope.datasets[0];
-                    } else {
-                        $scope.datasets.push(next_meta);
-                    }
+                    $timeout(function() {
+                        $rootScope.$broadcast('ajax.newDataset', next_meta);
+                    });
                 });
                 return req;
             }
@@ -67,7 +53,6 @@ angular.module('vbAdmin.shortcode', []);
                     // console.log(datasets.length)
                 });
         });
-
 
     });
 

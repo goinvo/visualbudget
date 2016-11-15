@@ -10,6 +10,7 @@ if ( ! isset($_GET['rand']) ) {
 $query_string = http_build_query($_GET);
 $hash = hash('crc32', $query_string);
 $dataset_id = $_GET['data'];
+// FIXME: prepend $_SERVER['HTTP_HOST'] to URL to make it absolute.
 $dataset_url = dirname(dirname($_SERVER["REQUEST_URI"]))
                 . "/datasets/" . $dataset_id . ".json";
 
@@ -35,7 +36,7 @@ $chart_element = "<$element_type "
         . "id='vb-chart-$hash' "
         . "class='vb-chart' "
         . $data_atts
-        . "></$element_type>";
+        . ">&nbsp;</$element_type>";
 
 
 // Check to see if we're displaying an iframe or not.

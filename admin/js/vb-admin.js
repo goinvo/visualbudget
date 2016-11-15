@@ -23,20 +23,11 @@ angular.module('vbAdmin.shortcode', []);
 
     var vbAdmin = angular.module('vbAdmin', ['vbAdmin.tabs', 'vbAdmin.chart', 'vbAdmin.datasetSelect', 'vbAdmin.shortcode']);
 
-    vbAdmin.controller('vbController', function ($scope, $http, $rootScope) {
+    vbAdmin.controller('vbController', function ($scope, $http, $rootScope, $timeout) {
         console.log('vbController running.');
 
         // We'll collect metadata of datasets here.
-        var datasets = [];
         var ids_url = _vbPluginUrl + 'vis/api.php?filter=id';
-
-        // While loading, we provide filler data.
-        $scope.chartData = {};
-        $scope.datasets = [{
-            id: 'loading...',
-            uploaded_name: '[loading...]'
-        }];
-        $scope.chartData.dataset = $scope.datasets[0];
 
         // First load all dataset IDs.
         $http.get(ids_url).success(function (ids) {
@@ -45,14 +36,9 @@ angular.module('vbAdmin.shortcode', []);
             function fetchMetaFromId(id) {
                 var next_meta_url = _vbPluginUrl + 'vis/api.php?filename=' + id + '_meta.json';
                 var req = $http.get(next_meta_url).success(function (next_meta) {
-                    if ($scope.datasets.length == 0) {
-                        $scope.datasets = [];
-                        $scope.datasets.push(next_meta);
-                        // $rootScope.broadcast('ajax.newDataset', next_meta);
-                        $scope.chartData.dataset = $scope.datasets[0];
-                    } else {
-                        $scope.datasets.push(next_meta);
-                    }
+                    $timeout(function () {
+                        $rootScope.$broadcast('ajax.newDataset', next_meta);
+                    });
                 });
                 return req;
             }
@@ -299,8 +285,8 @@ angular.module('vbAdmin.chart').directive('chart', function () {
 var datasetSelectController = function datasetSelectController($scope, $http) {
     $scope.ctrl = this;
 
-    $scope.$parent.chartData = {};
-    $scope.$parent.chartData.dataset = $scope.$parent.datasets[0];
+    // $scope.$parent.chartData = {};
+    // $scope.$parent.chartData.dataset = $scope.$parent.datasets[0];
 
     $scope.setDataset = function () {
         $scope.$parent.atts.data = $scope.$parent.chartData.dataset.id;
@@ -332,13 +318,40 @@ angular.module('vbAdmin.datasetSelect').directive('datasetSelect', function () {
  * The "pane" directive of the VB dashboard.
  */
 
-var paneController = function paneController($scope, $http) {
+var paneController = function paneController($scope, $http, $timeout) {
     $scope.ctrl = this;
+    var that = this;
 
-    // Hardcoded for the moment, to get the infrastructure working.
-    $scope.datasets = $scope.$parent.datasets;
-
+    // These are the chart attributes.
     var atts = $scope.atts = {};
+
+    // While loading, we provide filler data.
+    var loading = true;
+    $scope.chartData = {};
+    $scope.datasets = [{
+        id: 'loading...',
+        uploaded_name: '[loading...]'
+    }];
+    $scope.chartData.dataset = $scope.datasets[0];
+
+    // This happens when a new dataset is broadcast down
+    // from vbAdmin.
+    var addDataset = function addDataset(event, metadata) {
+        if (loading) {
+            loading = false;
+            $scope.datasets = [metadata];
+            $scope.chartData.dataset = $scope.datasets[0];
+            $scope.atts.data = metadata.id;
+
+            if ($scope.selected) {
+                $timeout(that.redrawCharts, 0);
+            }
+        } else {
+            $scope.datasets.push(metadata);
+        }
+    };
+    // Bind the event.
+    $scope.$on('ajax.newDataset', addDataset);
 
     var charts = $scope.charts = [];
     this.addChart = function (chart) {
@@ -351,10 +364,15 @@ var paneController = function paneController($scope, $http) {
     };
 
     this.redrawCharts = function () {
+        // Don't redraw charts if no datasets have been loaded.
+        if (loading) {
+            return;
+        }
+
         var _loop = function _loop(k) {
             $http.get($scope.charts[k].ctrl.getUrl()).success(function (response) {
                 $scope.charts[k].ctrl.setHtml(response);
-                setTimeout(visualbudget.initialize, 0);
+                $timeout(visualbudget.initialize, 0);
             });
         };
 
@@ -390,7 +408,9 @@ var shortcodeController = function shortcodeController($scope, $http) {
     $scope.ctrl = this;
 
     this.shortcode = function () {
-        return '[visualbudget ' + this.serialize($scope.$parent.atts) + ']';
+        var atts = $scope.$parent.$parent.atts;
+        atts.metric = $scope.metric;
+        return '[visualbudget ' + this.serialize(atts) + ']';
     };
 
     // Turn a JS object into a query string of some form.
@@ -410,7 +430,7 @@ angular.module('vbAdmin.shortcode').directive('shortcode', function () {
     return {
         restrict: 'E',
         transclude: false,
-        scope: false,
+        scope: { metric: '@' },
         controller: shortcodeController,
         templateUrl: _vbPluginUrl + 'admin/js/src/shortcode.html',
         replace: true

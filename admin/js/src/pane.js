@@ -24,7 +24,7 @@ let paneController = function($scope, $http) {
             for (let k = 0; k < $scope.charts.length; k++) {
                 $http.get($scope.charts[k].ctrl.getUrl()).success( function(response) {
                     $scope.charts[k].ctrl.setHtml(response);
-                    setTimeout(visualbudget.initialize, 200);
+                    setTimeout(visualbudget.initialize, 0);
                 });
             }
         }

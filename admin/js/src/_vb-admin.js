@@ -7,16 +7,16 @@
 // The _vbAdminGlobal is set by wp_localize_script() in the vb admin php file.
 let _vbPluginUrl = _vbAdminGlobal.vbPluginUrl;
 
+// Initialize all modules.
 angular.module('vbAdmin.tabs', []);
 angular.module('vbAdmin.chart', []);
 angular.module('vbAdmin.datasetSelect', []);
 angular.module('vbAdmin.shortcode', []);
 
-
 /**
  * Kick it off.
  */
-(function(vb, $) {
+(function(vb,$,angular) {
 
     let _vbPluginUrl = _vbAdminGlobal.vbPluginUrl;
 
@@ -27,36 +27,22 @@ angular.module('vbAdmin.shortcode', []);
         'vbAdmin.shortcode'
         ]);
 
-    vbAdmin.controller('vbController', function($scope, $http) {
+    vbAdmin.controller('vbController', function($scope, $http, $rootScope, $timeout) {
         console.log('vbController running.');
 
         // We'll collect metadata of datasets here.
-        let datasets = [];
         let ids_url = _vbPluginUrl + 'vis/api.php?filter=id';
-
-        $scope.chartData = {};
-
-        $scope.datasets = [
-            {
-                id: '',
-                filename: '#',
-                uploaded_name: 'loading...'
-            }
-        ];
-
 
         // First load all dataset IDs.
         $http.get(ids_url).success( function(ids) {
-            $scope.datasets = [];
 
             // Function to fetch metadata given a dataset ID.
             function fetchMetaFromId(id) {
                 let next_meta_url = _vbPluginUrl + 'vis/api.php?filename=' + id + '_meta.json';
                 let req = $http.get(next_meta_url).success( function(next_meta) {
-                    $scope.datasets.push(next_meta);
-                    if($scope.datasets.length == 1) {
-                        $scope.chartData.dataset = $scope.datasets[0];
-                    }
+                    $timeout(function() {
+                        $rootScope.$broadcast('ajax.newDataset', next_meta);
+                    });
                 });
                 return req;
             }
@@ -68,8 +54,6 @@ angular.module('vbAdmin.shortcode', []);
                 });
         });
 
-
-
     });
 
-})(visualbudget, jQuery);
+})(visualbudget, jQuery, angular);

@@ -8,7 +8,12 @@ let shortcodeController = function($scope, $http) {
         $scope.ctrl = this;
 
         this.shortcode = function() {
-            return '[visualbudget ' + this.serialize($scope.$parent.atts) + ']';
+            let atts = angular.copy($scope.$parent.$parent.atts);
+            if ($scope.metric) {
+                atts.metric = $scope.metric;
+            }
+
+            return '[visualbudget ' + this.serialize(atts) + ']';
         }
 
         // Turn a JS object into a query string of some form.
@@ -30,7 +35,7 @@ angular.module('vbAdmin.shortcode')
         return {
             restrict: 'E',
             transclude: false,
-            scope: false,
+            scope: { metric: '@' },
             controller: shortcodeController,
             templateUrl: _vbPluginUrl + 'admin/js/src/shortcode.html',
             replace: true

@@ -10,13 +10,18 @@ if ( ! isset($_GET['rand']) ) {
 $query_string = http_build_query($_GET);
 $hash = hash('crc32', $query_string);
 $dataset_id = $_GET['data'];
+// FIXME: prepend $_SERVER['HTTP_HOST'] to URL to make it absolute.
 $dataset_url = dirname(dirname($_SERVER["REQUEST_URI"]))
                 . "/datasets/" . $dataset_id . ".json";
 
 // The element will be a div if it's a chart, and a span if it's a metric.
 $element_type = 'div';
+$space = '';
 if ($_GET['vis'] == 'metric') {
     $element_type = 'span';
+    $space = '&nbsp;'; // A bit hacky. This is for the dashboard,
+                       // so that the element doesn't flicker when
+                       // reloading.
 }
 
 unset($_GET['rand']);
@@ -35,7 +40,7 @@ $chart_element = "<$element_type "
         . "id='vb-chart-$hash' "
         . "class='vb-chart' "
         . $data_atts
-        . "></$element_type>";
+        . ">$space</$element_type>";
 
 
 // Check to see if we're displaying an iframe or not.

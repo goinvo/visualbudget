@@ -8,8 +8,11 @@ let shortcodeController = function($scope, $http) {
         $scope.ctrl = this;
 
         this.shortcode = function() {
-            let atts = $scope.$parent.$parent.atts;
-            atts.metric = $scope.metric;
+            let atts = angular.copy($scope.$parent.$parent.atts);
+            if ($scope.metric) {
+                atts.metric = $scope.metric;
+            }
+
             return '[visualbudget ' + this.serialize(atts) + ']';
         }
 

@@ -233,8 +233,8 @@ var chartController = function chartController($scope, $http, $sce) {
     var chartUrl = _vbPluginUrl + 'vis/vis.php?';
 
     this.getUrl = function () {
-        var atts = $scope.$parent.$parent.atts;
-        atts.vis = $scope.vis;
+        $scope.$parent.$parent.atts.vis = $scope.vis;
+        var atts = angular.copy($scope.$parent.$parent.atts);
         if ($scope.metric) {
             atts.metric = $scope.metric;
         }
@@ -408,8 +408,11 @@ var shortcodeController = function shortcodeController($scope, $http) {
     $scope.ctrl = this;
 
     this.shortcode = function () {
-        var atts = $scope.$parent.$parent.atts;
-        atts.metric = $scope.metric;
+        var atts = angular.copy($scope.$parent.$parent.atts);
+        if ($scope.metric) {
+            atts.metric = $scope.metric;
+        }
+
         return '[visualbudget ' + this.serialize(atts) + ']';
     };
 

@@ -9,8 +9,8 @@ let chartController = function($scope, $http, $sce) {
         let chartUrl = _vbPluginUrl + 'vis/vis.php?';
 
         this.getUrl = function() {
-            let atts = $scope.$parent.$parent.atts;
-            atts.vis = $scope.vis;
+            $scope.$parent.$parent.atts.vis = $scope.vis;
+            let atts = angular.copy($scope.$parent.$parent.atts);
             if ($scope.metric) {
                 atts.metric = $scope.metric;
             }

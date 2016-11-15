@@ -35,25 +35,26 @@ angular.module('vbAdmin.shortcode', []);
         let ids_url = _vbPluginUrl + 'vis/api.php?filter=id';
 
         $scope.chartData = {};
-
         $scope.datasets = [
             {
                 id: '',
-                filename: '#',
                 uploaded_name: 'loading...'
             }
         ];
+        $scope.chartData.dataset = $scope.datasets[0];
 
 
         // First load all dataset IDs.
         $http.get(ids_url).success( function(ids) {
-            $scope.datasets = [];
 
             // Function to fetch metadata given a dataset ID.
             function fetchMetaFromId(id) {
                 let next_meta_url = _vbPluginUrl + 'vis/api.php?filename=' + id + '_meta.json';
                 let req = $http.get(next_meta_url).success( function(next_meta) {
-                    $scope.datasets.push(next_meta);
+                    if($scope.datasets.length == 0) {
+                        $scope.datasets = [];
+                    }
+                    // $scope.datasets.push(next_meta);
                     if($scope.datasets.length == 1) {
                         $scope.chartData.dataset = $scope.datasets[0];
                     }

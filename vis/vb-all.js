@@ -560,6 +560,16 @@ var VbTreeMap = function (_VbChart) {
         value: function calculateLayout() {
             var _this2 = this;
 
+            // We will count through, getting new colors.
+            var i = 0;
+            var setColor = function setColor(d) {
+                if (!d3.schemeCategory20[i]) {
+                    i = 0;
+                }
+                d.color = d3.schemeCategory20[i];
+                i++;
+            };
+
             this.root = d3.hierarchy(this.data, function (d) {
                 return d.children;
             }).sum(function (d) {
@@ -568,9 +578,8 @@ var VbTreeMap = function (_VbChart) {
             // .sum(d => d.dollarAmounts[dateIndex].dollarAmount)
             .sort(function (a, b) {
                 return b.dollarAmount - a.dollarAmount;
-            }).each(function (d) {
-                d.color = '#d00';
-            });
+            }).each(setColor);
+            // .each(function(d) { d.color = '#d00'; });
 
             // make the treemap
             this.treemap = d3.treemap().size([this.$div.width(), this.$div.height()]).padding(0).round(false);

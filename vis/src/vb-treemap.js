@@ -39,7 +39,7 @@ class VbTreeMap extends VbChart {
     }
 
     initialize($div, data) {
-        d3.select($div.get(0))
+        let theDiv = d3.select($div.get(0))
             .classed('vb-treemap', true);
 
         var width = $div.width(),
@@ -88,6 +88,16 @@ class VbTreeMap extends VbChart {
         nav.grandparent = nav.append("rect")
                 .attr("y", "-20px")
                 .attr("class", "grandparent");
+
+        let p = document.createElement("p");
+        p.setAttribute("id", "vb-zoom-button");
+        $div.get(0).parentNode.insertBefore(p, $div.get(0));
+
+        d3.select('#vb-zoom-button')
+            .text('Zoom out')
+            .on("click", function() {
+                nav.grandparent.dispatch('click');
+            })
 
         // display treemap
         // this.currentData = this.root;

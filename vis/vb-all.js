@@ -511,7 +511,7 @@ var VbTreeMap = function (_VbChart) {
     }, {
         key: 'initialize',
         value: function initialize($div, data) {
-            d3.select($div.get(0)).classed('vb-treemap', true);
+            var theDiv = d3.select($div.get(0)).classed('vb-treemap', true);
 
             var width = $div.width(),
                 height = $div.height();
@@ -550,6 +550,14 @@ var VbTreeMap = function (_VbChart) {
             this.calculateLayout();
 
             nav.grandparent = nav.append("rect").attr("y", "-20px").attr("class", "grandparent");
+
+            var p = document.createElement("p");
+            p.setAttribute("id", "vb-zoom-button");
+            $div.get(0).parentNode.insertBefore(p, $div.get(0));
+
+            d3.select('#vb-zoom-button').text('Zoom out').on("click", function () {
+                nav.grandparent.dispatch('click');
+            });
 
             // display treemap
             // this.currentData = this.root;

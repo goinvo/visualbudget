@@ -176,6 +176,15 @@ div.vb-chart {
   vertical-align: top;
   margin-right: 5px;
 }
+#vb-zoom-button {
+  text-align: center;
+  background-color: #def;
+  cursor: pointer;
+  padding: .2em 0;
+}
+  #vb-zoom-button:hover {
+    background-color: #cde;
+  }
 
 /* line 101, ../../scss/partials/_treemap.scss */
 .popover {

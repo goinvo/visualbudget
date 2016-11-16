@@ -95,11 +95,23 @@ class VbTreeMap extends VbChart {
     }
 
     calculateLayout() {
+
+        // We will count through, getting new colors.
+        let i = 0;
+        let setColor = function(d) {
+            if (!d3.schemeCategory20[i]) {
+                i = 0;
+            }
+            d.color = d3.schemeCategory20[i];
+            i++;
+        }
+
         this.root = d3.hierarchy(this.data, d => d.children)
             .sum(d => d.children.length ? 0 : d.dollarAmounts[this.dateIndex].dollarAmount)
             // .sum(d => d.dollarAmounts[dateIndex].dollarAmount)
             .sort((a, b) => b.dollarAmount - a.dollarAmount)
-            .each(function(d) { d.color = '#d00'; });
+            .each(setColor);
+            // .each(function(d) { d.color = '#d00'; });
 
         // make the treemap
         this.treemap = d3.treemap()

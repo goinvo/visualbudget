@@ -4,6 +4,23 @@
  */
 
 
+.vb-shortcode {
+    margin-top: 1em;
+}
+
+.vb-metrics-table {
+    width: 80%;
+}
+    .vb-metrics-table td {
+        padding: 1em;
+        width: 20%;
+    }
+
+.vb-dataset-select-wrapper {
+    margin: 2em 0 3em;
+}
+
+
 /* *****************************************************
                     DATASET TABLES
    ***************************************************** */
@@ -94,7 +111,8 @@
 .jquerymodal table tr th:first-child::before {
     position: fixed;
     margin-left: -28px;
-    color: white;
+    /*color: white;*/
+    color: transparent;
 }
 
 

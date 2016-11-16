@@ -25,11 +25,19 @@
             <pane title="Metrics">
                 <p>These metrics will automatically interact with any charts that appear on the same page.</p>
                 <dataset-select></dataset-select>
-                <chart vis='metric' metric='datetotal'></chart>
-                <shortcode metric='datetotal'></shortcode>
+                <div class="row">
+                    <div class="col-md-6">
+                        <p style='text-align:center'>The total for a given date:</p>
+                        <chart vis='metric' metric='datetotal'></chart>
+                        <shortcode metric='datetotal'></shortcode>
+                    </div>
+                    <div class="col-md-6">
+                        <p style='text-align:center'>The date:</p>
+                        <chart vis='metric' metric='date'></chart>
+                        <shortcode metric='date'></shortcode>
+                    </div>
+                </div>
                 <!-- <iframelink metric='datetotal'></iframelink> -->
-                <chart vis='metric' metric='date'></chart>
-                <shortcode metric='date'></shortcode>
                 <!-- <iframelink metric='date'></iframelink> -->
             </pane>
             <!--<pane title="Stacked area chart">

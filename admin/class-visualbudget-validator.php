@@ -102,6 +102,7 @@ class VisualBudget_Validator {
      * Sanitize incoming data. The sanitization process includes:
      *      - padding the array to make it rectangular
      *      - removing empty rows and columns
+     *      - removing rows that are subtotals
      *      - removing unallowed characters from header and level fields
      *        (that is, slugifying them)
      *      - inferring level fields
@@ -116,6 +117,7 @@ class VisualBudget_Validator {
         $data_array = self::trim_all_elements($data_array);
         $data_array = self::remove_empty_rows($data_array);
         $data_array = self::remove_empty_cols($data_array);
+        $data_array = self::remove_subtotals($data_array);
         $data_array = $this->slugify_headers($data_array, 0);
         // $data_array = self::slugify_levels($data_array, 0, array('/#/'=>'num'));
         $data_array = $this->infer_levels($data_array);
@@ -193,6 +195,49 @@ class VisualBudget_Validator {
         // array_unshift($array, null);
         // return call_user_func_array('array_map', $array);
         return array_map(null, ...$array);
+    }
+
+    /**
+     * Remove any line items with the string "total" in any LEVEL field
+     */
+    public static function remove_subtotals($array) {
+
+        // Just the first row
+        $header = $array[0];
+
+        // Get an array of the LEVEL column titles, ordered properly
+        // and with the correct indices (i.e. indices referring to
+        // the levels of the original dataset). See function for details.
+        $ordered_levels = array_keys(self::ordered_columns_of_type($header, 1));
+
+        $array = array_filter($array, function($row) use ($ordered_levels) {
+                        // Loop through the levels, searching for the substring "total"
+                        // in each field. If found, delete the row and break.
+                        foreach ($ordered_levels as $n) {
+                            $field_text = $row[$ordered_levels[$n]];
+                            if( stripos($field_text, 'total') ) {
+                                return false;
+                            }
+                        }
+                        return true;
+                    });
+
+        // // Now loop through and fill in the blanks
+        // foreach ($array as $m => $row) {
+
+        //     // Skip the first row.
+        //     if ($m === 0) { continue; }
+
+        //     // Loop through the levels, searching for the substring "total"
+        //     // in each field. If found, delete the row and break.
+        //     foreach ($ordered_levels as $n) {
+        //         $field_text = $row[$ordered_levels[$n]];
+        //         if( stripos($field_text, 'total') ) {
+
+        //         }
+        //     }
+
+        return $array;
     }
 
     /**

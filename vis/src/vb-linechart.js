@@ -83,7 +83,7 @@ class VbLineChart extends VbChart {
         var valueline = d3.line()
             .x( d => x(new Date(d.date)) )
             .y( d => y(d.dollarAmount) )
-            .curve(d3.curveCardinal.tension(0.5));
+            // .curve(d3.curveCardinal.tension(0.5));
 
         // Scale the range of the data
         // x.domain(d3.extent(data.dollarAmounts.filter(inDateRange(null)), function(d) { return d.date; }));

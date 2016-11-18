@@ -1,0 +1,14 @@
+{
+  "name": "my-project",
+  "version": "1.0.0",
+  "scripts": {
+    "build-vb": "babel --presets es2015 vis/src --out-file vis/vb-all.js",
+    "build-admin": "babel --presets es2015 admin/js/src --out-file admin/js/vb-admin.js"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.18.0"
+  },
+  "dependencies": {
+    "angular-PubSub": "^1.0.0"
+  }
+}

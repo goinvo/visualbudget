@@ -32,11 +32,12 @@ paths.pluginExport = '/Users/hrothgar/Desktop/wordpress/wp-content/plugins/';
                 - compiles sass to appropriate place in dist
                 - copies results of vis-build to dist (doesn't vis-build)
 
-            task 'plugin-move'
-                - moves plugin dist files to local path for testing
-
             task 'build'
                 - does all of the above, in that order
+
+            task 'plugin-export'
+                - copies plugin dist files to local path for testing
+
 */
 
 

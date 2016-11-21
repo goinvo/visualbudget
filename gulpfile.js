@@ -6,6 +6,7 @@ const sass = require('gulp-sass');
 const cleanCSS = require('gulp-clean-css');
 const autoprefixer = require('gulp-autoprefixer');
 const rename = require('gulp-rename');
+const zip = require('gulp-zip');
 
 const paths = {
     visSrc:  'vis/src/',
@@ -123,7 +124,13 @@ gulp.task('plugin-copy-vendor-css', () => {
 gulp.task('plugin-copy-vis', () => {
     return gulp.src(paths.visDist + '*')
         .pipe(gulp.dest(paths.pluginDist + 'vis/'))
-})
+});
+
+gulp.task('plugin-zip', () => {
+    return gulp.src(paths.pluginDist + '**/*')
+        .pipe(zip('visualbudget.zip'))
+        .pipe(gulp.dest('zip'));
+});
 
 gulp.task('plugin-build', [
     'plugin-copy-php',
@@ -133,7 +140,8 @@ gulp.task('plugin-build', [
     'plugin-compile-sass',
     'plugin-compile-bootstrap-wrapper-sass',
     'plugin-copy-vendor-css',
-    'plugin-copy-vis'
+    'plugin-copy-vis',
+    'plugin-zip'
     ]);
 
 

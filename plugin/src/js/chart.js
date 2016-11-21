@@ -52,7 +52,7 @@ angular.module('vbAdmin.chart')
             scope: { vis: '@', metric: '@' },
             link: chartLinkFunction,
             controller: chartController,
-            templateUrl: _vbPluginUrl + 'admin/js/src/chart.html',
+            templateUrl: _vbPluginUrl + 'admin/js/templates/chart.html',
             replace: true
         };
     })

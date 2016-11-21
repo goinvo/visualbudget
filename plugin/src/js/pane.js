@@ -75,7 +75,7 @@ angular.module('vbAdmin.tabs')
             transclude: true,
             scope: { title: '@' },
             link: paneLinkFunction,
-            templateUrl: _vbPluginUrl + 'admin/js/src/pane.html',
+            templateUrl: _vbPluginUrl + 'admin/js/templates/pane.html',
             replace: true,
             controller: paneController
         };

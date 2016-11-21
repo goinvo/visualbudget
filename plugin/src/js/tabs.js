@@ -27,7 +27,7 @@ angular.module('vbAdmin.tabs')
             transclude: true,
             scope: false,
             controller: tabsController,
-            templateUrl: _vbPluginUrl + 'admin/js/src/tabs.html',
+            templateUrl: _vbPluginUrl + 'admin/js/templates/tabs.html',
             replace: true
         };
     })

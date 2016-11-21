@@ -31,7 +31,7 @@ angular.module('vbAdmin.datasetSelect')
             scope: false,
             link: datasetSelectLinkFunction,
             controller: datasetSelectController,
-            templateUrl: _vbPluginUrl + 'admin/js/src/datasetSelect.html',
+            templateUrl: _vbPluginUrl + 'admin/js/templates/datasetSelect.html',
             replace: true
         };
     });

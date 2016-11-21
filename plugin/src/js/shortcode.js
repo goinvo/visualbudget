@@ -37,7 +37,7 @@ angular.module('vbAdmin.shortcode')
             transclude: false,
             scope: { metric: '@' },
             controller: shortcodeController,
-            templateUrl: _vbPluginUrl + 'admin/js/src/shortcode.html',
+            templateUrl: _vbPluginUrl + 'admin/js/templates/shortcode.html',
             replace: true
         };
     })

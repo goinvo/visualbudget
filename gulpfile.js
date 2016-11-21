@@ -89,7 +89,7 @@ gulp.task('plugin-compile-js', () => {
 });
 
 gulp.task('plugin-copy-templates', () => {
-    return gulp.src(paths.pluginSrc + 'includes/*')
+    return gulp.src(paths.pluginSrc + 'js/includes/*')
         .pipe(gulp.dest(paths.pluginDist + 'admin/js/templates/'))
 })
 

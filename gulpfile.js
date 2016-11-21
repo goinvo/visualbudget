@@ -144,3 +144,13 @@ gulp.task('build', [
     'vis-build',
     'plugin-build'
     ]);
+
+
+/* * * * * * * * * * * * * * * * * * * * * * * * *
+                EXPORT TO LOCAL PATH
+ * * * * * * * * * * * * * * * * * * * * * * * * */
+
+gulp.task('plugin-export', () => {
+    return gulp.src(paths.pluginDist + '/**/*')
+        .pipe(gulp.dest(paths.pluginExport + 'visualbudget/'))
+});

@@ -5,10 +5,13 @@ const uglify = require('gulp-uglify');
 const sass = require('gulp-sass');
 const cleanCSS = require('gulp-clean-css');
 const autoprefixer = require('gulp-autoprefixer');
+const rename = require('gulp-rename');
 
 const paths = {
-    src: 'src/',
-    dist: 'dist/'
+    visSrc:  'vis/src/',
+    visDist: 'vis/dist/',
+    pluginSrc:  'plugin/src/',
+    pluginDist: 'plugin/dist/'
 };
 
 paths.visLib = paths.src + 'vis_lib/';
@@ -42,27 +45,32 @@ paths.pluginExport = '/Users/hrothgar/Desktop/wordpress/wp-content/plugins/';
 */
 
 gulp.task('vis-compile-js', () => {
-    return gulp.src(paths.visLib + 'js/**/*.js')
+    return gulp.src(paths.visSrc + 'js/**/*.js')
         .pipe(babel({
             presets: ['es2015']
         }))
         .pipe(concat('vb.min.js'))
         .pipe(uglify())
-        .pipe(gulp.dest(paths.dist + 'vis/'))
-        .pipe(gulp.dest(paths.wpPluginDist + 'vis/'));
+        .pipe(gulp.dest(paths.visDist))
 });
 
 gulp.task('vis-compile-sass', () => {
-    return gulp.src(paths.visLib + 'sass/vb.sass')
-        .pipe(sass())
+    return gulp.src(paths.visSrc + 'sass/vb.sass')
+        .pipe(sass({outputStyle: 'compressed'}))
         .pipe(autoprefixer())
+        .pipe(rename('vb.min.css'))
+        .pipe(gulp.dest(paths.visDist))
 });
 
+gulp.task('vis-build', ['vis-compile-js', 'vis-compile-sass']);
 
 
-gulp.task('plugin-copy', () => {
-    return gulp.src([paths.wpPluginDist + '**/*'])
-               .pipe(gulp.dest(paths.pluginExport + 'visualbudget/'));
-});
 
-gulp.task('vis', ['vis-compile-js']);
+
+// gulp.task('')
+
+
+// gulp.task('plugin-copy', () => {
+//     return gulp.src([paths.wpPluginDist + '**/*'])
+//                .pipe(gulp.dest(paths.pluginExport + 'visualbudget/'));
+// });

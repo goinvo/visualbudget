@@ -6,8 +6,8 @@ town's budget for its citizenry.
 
 ## Description
 
-VisualBudget is two things: it is (1) JavaScript module to visualize budget
-data, and (2) a WordPress plugin to facilitate data management and creation of
+VisualBudget is two things: it is both JavaScript module to visualize budget
+data as well as a WordPress plugin to facilitate data management and creation of
 visualizations.
 
 The plugin lets users (1) upload datasets as CSV files, (2) create

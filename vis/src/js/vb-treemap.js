@@ -14,17 +14,34 @@ class VbTreeMap extends VbChart {
 
         // Set up the SVG.
         this.initialize($div, data);
-
-        // Bind events.
-        // this.addActions();
     }
 
     redraw() {
         console.log('Drawing chart ' + this.atts.hash + ' (treemap).');
-        // d3.selectAll('#' + this.$div.attr('id') + ' svg g *').remove();
-        // this.initialize();
+        d3.selectAll('#' + this.$div.attr('id') + ' svg g *').remove();
+        this.adjustSize();
+        this.calculateLayout();
+        this.open();
     }
 
+    // Resize the chart in accordance with the size of its container div.
+    // This is called on initialization and upon window resizing.
+    adjustSize() {
+        let width = this.$div.width();
+        let height = this.$div.height();
+
+        // Resize the svg.
+        d3.select(this.$div.get(0)).select('svg')
+            .attr('width', width)
+            .attr('height', height);
+
+        // Reset the ranges to fit the new div size.
+        this.nav.x.range([0, width]);
+        this.nav.y.range([0, height]);
+    }
+
+    // When a new state is broadcast by a chart this one is interacting with,
+    // this function updates the chart accordingly.
     setState(newState) {
         let oldDate = this.state.date;
         let newDate = newState.date;
@@ -38,6 +55,7 @@ class VbTreeMap extends VbChart {
         }
     }
 
+    // Initialize the treemap.
     initialize($div, data) {
         let theDiv = d3.select($div.get(0))
             .classed('vb-treemap', true);
@@ -45,38 +63,21 @@ class VbTreeMap extends VbChart {
         var width = $div.width(),
             height = $div.height();
 
-        var height = height,
-            formatNumber = d3.format(",d"),
+        var formatNumber = d3.format(",d"),
             transitioning;
 
         // create svg
         let nav = this.nav = d3.select($div.get(0)).append("svg")
-            // .style('padding-top', '20px')
-            .attr("width", width)
-            .attr("height", height)
-            .append("g")
-            .style("shape-rendering", "crispEdges");
+            .append("g").style("shape-rendering", "crispEdges");
 
         // initialize x and y scales
         nav.x = d3.scaleLinear()
             .domain([0, width])
-            .range([0, width]);
 
         nav.y = d3.scaleLinear()
             .domain([0, height])
-            .range([0, height]);
 
-        nav.h = height;
-        nav.w = width;
-
-        // color scale
-        nav.color = d3.schemeCategory20;
-
-        // center zoom button vertically
-        // $('#zoombutton').center();
-
-        // initialize chart
-        // avb.chart.initialize($('#chart'));
+        this.adjustSize();
 
         let dateIndex = this.dateIndex = this.getDateIndex(this.state.date);
 
@@ -100,7 +101,6 @@ class VbTreeMap extends VbChart {
             })
 
         // display treemap
-        // this.currentData = this.root;
         this.currentLevel = this.display(this.currentData);
     }
 
@@ -108,7 +108,7 @@ class VbTreeMap extends VbChart {
 
         // We will count through, getting new colors.
         let i = 0;
-        let setColor = function(d) {
+        let pickAColor = function(d) {
             if (!d3.schemeCategory20[i]) {
                 i = 0;
             }
@@ -118,10 +118,8 @@ class VbTreeMap extends VbChart {
 
         this.root = d3.hierarchy(this.data, d => d.children)
             .sum(d => d.children.length ? 0 : d.dollarAmounts[this.dateIndex].dollarAmount)
-            // .sum(d => d.dollarAmounts[dateIndex].dollarAmount)
             .sort((a, b) => b.dollarAmount - a.dollarAmount)
-            .each(setColor);
-            // .each(function(d) { d.color = '#d00'; });
+            .each(pickAColor);
 
         // make the treemap
         this.treemap = d3.treemap()
@@ -243,7 +241,6 @@ class VbTreeMap extends VbChart {
         //     return g;
         // }
 
-
         // the dateIndex.
         let dateIndex = this.dateIndex;
 
@@ -269,10 +266,9 @@ class VbTreeMap extends VbChart {
         });
 
         return g;
-
     }
 
-
+    // Open a node.
     open(nodeId, transition) {
         // find node with given hash or open root node
         this.zoneClick.call(null, this.currentData, false, transition || 1, this);
@@ -332,11 +328,6 @@ class VbTreeMap extends VbChart {
         that.currentData = d;
         that.state.hash = d.data.hash;
         visualbudget.broadcastStateChange(that.state);
-        // that.currentNode.year = dateIndex; // that.currentNode doesn't exist though?
-
-        // // update chart and cards
-        // avb.chart.open(d, d.color);
-        // avb.cards.open(d);
 
         // prevent further events from happening while transitioning
         nav.transitioning = true;
@@ -349,7 +340,6 @@ class VbTreeMap extends VbChart {
         // Update the domain only after entering new elements.
         nav.x.domain([d.x0, d.x1]);
         nav.y.domain([d.y0, d.y1]);
-        // nav.y.domain([d.y, d.y + d.dy]);
 
         // Enable anti-aliasing during the transition.
         nav.style("shape-rendering", null);
@@ -409,11 +399,9 @@ class VbTreeMap extends VbChart {
                 return nav.y(d.y0);
             })
             .attr("width", function (d) {
-                // return nav.x(d.x + d.dx) - nav.x(d.x);
                 return nav.x(d.x1) - nav.x(d.x0);
             })
             .attr("height", function (d) {
-                // return nav.y(d.y + d.dy) - nav.y(d.y);
                 return nav.y(d.y1) - nav.y(d.y0);
             });
         }

@@ -56,7 +56,6 @@ class VbLineChart extends VbChart {
         let margin = this.chart.margin = {top: 30, right: 20, bottom: 30, left: 50};
         let width  = this.chart.width  = this.$div.width();
         let height = this.chart.height = this.$div.height();
-        console.log(width);
         this.chart.xwidth = width - margin.right - margin.left;
         this.chart.yheight = height - margin.top - margin.bottom;
     }

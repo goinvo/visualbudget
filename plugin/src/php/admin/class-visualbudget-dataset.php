@@ -1,9 +1,8 @@
 <?php
 
 /**
- * Class for representing datasets. This class is used by many other classes,
- * since it is the main interface for slicing and querying datasets
- * on the backend. This class does not, however, write to the filesystem.
+ * Class for representing datasets. This class is used by many other classes.
+ * This class does not write to the filesystem.
  */
 class VisualBudget_Dataset {
 

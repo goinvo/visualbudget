@@ -20,6 +20,11 @@ class VbChart {
             dragging: false,
             mouseX: null
         }
+
+        // Bind the window resize event to the redraw function.
+        window.addEventListener("resize", () => {
+            this.redraw();
+        });
     }
 
 

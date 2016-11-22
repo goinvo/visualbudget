@@ -22,6 +22,7 @@ class VbLineChart extends VbChart {
     redraw() {
         console.log('Drawing chart ' + this.atts.hash + ' (linechart).');
         d3.selectAll('#' + this.$div.attr('id') + ' svg g *').remove();
+        this.adjustSize();
         this.drawChart();
     }
 
@@ -33,24 +34,39 @@ class VbLineChart extends VbChart {
     }
 
     setupChartSvg() {
-        let $div = this.$div;
+        // Set the chart width and height and margin variables.
+        this.setChartVars();
 
-        this.chart = {};
-        let margin = this.chart.margin = {top: 30, right: 20, bottom: 30, left: 50};
-        let width  = this.chart.width  = $div.width();
-        let height = this.chart.height = $div.height();
-        this.chart.xwidth = width - margin.right - margin.left;
-        this.chart.yheight = height - margin.top - margin.bottom;
+        let $div = this.$div;
+        let chart = this.chart;
 
         // Adds the svg canvas
         this.svg = d3.select($div.get(0))
             .append("svg")
                 .attr("class", "svg-chart")
-                .attr("width",  width)
-                .attr("height", height)
+                .attr("width",  chart.width)
+                .attr("height", chart.height)
             .append("g")
                 .attr("transform",
-                      "translate(" + margin.left + "," + margin.top + ")");
+                      "translate(" + chart.margin.left + "," + chart.margin.top + ")");
+    }
+
+    setChartVars() {
+        this.chart = {};
+        let margin = this.chart.margin = {top: 30, right: 20, bottom: 30, left: 50};
+        let width  = this.chart.width  = this.$div.width();
+        let height = this.chart.height = this.$div.height();
+        this.chart.xwidth = width - margin.right - margin.left;
+        this.chart.yheight = height - margin.top - margin.bottom;
+    }
+
+    adjustSize() {
+        this.setChartVars();
+        let chart = this.chart;
+
+        d3.select(this.$div.get(0)).select('svg')
+            .attr('width', chart.width)
+            .attr('height', chart.height)
     }
 
     // FIXME: This function should be broken up into drawAxes(), drawLine(data), etc.

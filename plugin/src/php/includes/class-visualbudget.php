@@ -43,11 +43,12 @@ class VisualBudget {
         define('VISUALBUDGET_PATH', $trailingslashit(dirname(dirname(__FILE__))));
         define('VISUALBUDGET_UPLOAD_PATH', VISUALBUDGET_PATH . VISUALBUDGET_UPLOAD_DIR );
 
-        /* We cannot set the URL if being called statically. */
-        // if (isset($this)) {
         define('VISUALBUDGET_URL', plugin_dir_url( dirname( __FILE__ ) ) );
         define('VISUALBUDGET_UPLOAD_URL', VISUALBUDGET_URL . VISUALBUDGET_UPLOAD_DIR );
-        // }
+
+        // When errors arise in data uploading, the user gets a link to a more full
+        // documentation page on the VisGov website:
+        define('VISGOV_ERROR_URL', 'http://www.visgov.com/plugin/errors/#error-');
     }
 
     /**

@@ -38,7 +38,7 @@ class VisualBudget_Validator {
                 // The uploaded file has no file extension. Let the user know
                 // that that is most definitely not kosher, not kosher at all.
                 $this->notifier->add('Uploaded file must have a file extension. '
-                                . 'Accepted filetypes are CSV and JSON.', 'error');
+                                . 'Accepted filetypes are CSV and JSON.', 'error', 102);
                 return 0;
 
             } else {
@@ -65,7 +65,7 @@ class VisualBudget_Validator {
                             $string_or_array = $result;
                         } else {
                             // The file apparently isn't valid JSON.
-                            $this->notifier->add('The file is not valid JSON.', 'error');
+                            $this->notifier->add('The file is not valid JSON.', 'error', 103);
                             return 0;
                         }
                         break;
@@ -74,7 +74,7 @@ class VisualBudget_Validator {
                         // Unrecognized filetype.
                         $this->notifier->add('Unrecognized filetype "'
                                     . strtolower($filetype) . '". Data files must be'
-                                    . ' either CSV or JSON.', 'error');
+                                    . ' either CSV or JSON.', 'error', 104);
                         return 0;
                 }
             }
@@ -140,7 +140,7 @@ class VisualBudget_Validator {
         if (count(array_unique($row_lengths)) > 1) {
             $this->notifier->add('Not all rows of the uploaded dataset were '
                             . 'the same length. Rows have been extended on the '
-                            . 'right to rectangularize the dataset.', 'warning');
+                            . 'right to rectangularize the dataset.', 'warning', 105);
         }
 
         $max_length = max($row_lengths);
@@ -269,7 +269,7 @@ class VisualBudget_Validator {
                 $text = $empty_counter . " header fields were found be empty. "
                         . "They have been named by the system.";
             }
-            $this->notifier->add($text, 'warning');
+            $this->notifier->add($text, 'warning', 106);
         }
 
         return $array;
@@ -440,7 +440,7 @@ class VisualBudget_Validator {
             // Add a warning to the admin dashboard.
             $this->notifier->add('Malformed dataset: Inference between LEVELs '
                     . 'on ' . $text . '. Dataset may have been incorrectly '
-                    . 'inferred.', 'warning');
+                    . 'inferred.', 'warning', 107);
         }
 
         // Prepend the header row back on and then return it.
@@ -581,7 +581,7 @@ class VisualBudget_Validator {
                         . 'None were found. Note that syntax for timepoint column '
                         . 'headers is strict: the fieldname must be machine-readable '
                         . 'as a date. Try formats like "2012" or "2012-08" or "3Q 2008".'),
-                        'error');
+                        'error', 108);
             return false;
         }
 
@@ -593,7 +593,7 @@ class VisualBudget_Validator {
                         . 'None were found. Note that syntax for LEVEL column '
                         . 'headers is strict: the fieldname must be of the form '
                         . 'LEVEL<N>, where <N> is an integer.'),
-                        'error');
+                        'error', 109);
             return false;
         }
 

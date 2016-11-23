@@ -186,7 +186,7 @@ class VisualBudget_Dataset {
                 $this->notifier->add('There was an error with the remote server, '
                                 . 'so the data file cannot be fetched from URL. '
                                 . 'Perhaps the file does not exist, or perhaps the '
-                                . 'server is down.', 'error');
+                                . 'server is down.', 'error', 101);
             }
         }
     }

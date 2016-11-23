@@ -50,7 +50,7 @@ class VisualBudget_Notifications {
                 // If the error had a code, then include a link to full documentation on visgov.com.
                 $error_html = sprintf($error_code, $notif['error_code'], $notif['error_code']);
                 $error_title = '<span class="error-title">%s %d:</span> ';
-                $error_title = sprintf($error_title, $notif['class'], $notif['error_code']);
+                $error_title = sprintf($error_title, ucfirst($notif['class']), $notif['error_code']);
                 $html .= sprintf($notice, $notif['class'], $error_title . $notif['message'], $error_html);
             } else {
                 // Otherwise, just display the error text.

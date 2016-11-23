@@ -34,12 +34,15 @@ class VisualBudget_Notifications {
     public function get_html() {
 
         // The HTML for a single notice.
-        $notice = "<div class='notice notice-%s is-dismissible'><p>%s</p>%s</div>";
+        $notice_template = "<div class='notice notice-%s is-dismissible'><p>%s</p>%s</div>";
 
         // A link to the error docs on visgov.com.
-        $error_code = '<p><a href="' . VISGOV_ERROR_URL. '%d">'
-            . 'See more information about how to fix Error %d at visgov.com.'
+        $error_link_template = '<p><a href="' . VISGOV_ERROR_URL. '%d">'
+            . 'See more information about how to fix %s at visgov.com.'
             . '</a></p>';
+
+        // Prefix to the error text, if there is number.
+        $error_prefix_template = '<span class="error-title">%s:</span> ';
 
         // Append HTML of all notices together in $html.
         $html = '';
@@ -48,13 +51,15 @@ class VisualBudget_Notifications {
         foreach ($this->notifications as $notif) {
             if ($notif['error_code']) {
                 // If the error had a code, then include a link to full documentation on visgov.com.
-                $error_html = sprintf($error_code, $notif['error_code'], $notif['error_code']);
-                $error_title = '<span class="error-title">%s %d:</span> ';
-                $error_title = sprintf($error_title, ucfirst($notif['class']), $notif['error_code']);
-                $html .= sprintf($notice, $notif['class'], $error_title . $notif['message'], $error_html);
+                $error_name = ucfirst($notif['class']) . ' ' . $notif['error_code'];
+                $error_link = sprintf($error_link_template, $notif['error_code'], $error_name);
+                $error_prefix = sprintf($error_prefix_template, $error_name);
+
+                $html .= sprintf($notice_template, $notif['class'], $error_prefix . $notif['message'], $error_link);
             } else {
                 // Otherwise, just display the error text.
-                $html .= sprintf($notice, $notif['class'], $notif['message'], '');
+                $error_prefix = sprintf($error_prefix_template, ucfirst($notif['class']));
+                $html .= sprintf($notice_template, $notif['class'], $error_prefix . $notif['message'], '');
             }
         }
 

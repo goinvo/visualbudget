@@ -48,7 +48,7 @@ class VisualBudget {
 
         // When errors arise in data uploading, the user gets a link to a more full
         // documentation page on the VisGov website:
-        define('VISGOV_ERROR_URL', 'http://www.visgov.com/plugin/errors/#error-');
+        define('VISGOV_ERROR_URL', 'http://www.visgov.com/plugin/errors/#');
     }
 
     /**

@@ -144,7 +144,7 @@ class VisualBudget_Dataset {
         } else {
 
             // The user tried to upload an empty file.
-            $this->notifier->add('The uploaded file was empty.', 'error');
+            $this->notifier->add('The uploaded file was empty.', 'error', 100);
         }
     }
 

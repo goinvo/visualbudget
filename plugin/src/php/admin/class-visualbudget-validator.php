@@ -112,15 +112,15 @@ class VisualBudget_Validator {
      * The function returns a sanitized version of the data.
      */
     public function sanitize_data($data_array) {
-        // This sequence of events is pretty self-explanatory.
+        // The sequence of these events is important!
         $data_array = $this->pad_to_rectangle($data_array);
         $data_array = self::trim_all_elements($data_array);
         $data_array = self::remove_empty_rows($data_array);
         $data_array = self::remove_empty_cols($data_array);
-        $data_array = self::remove_subtotals($data_array);
         $data_array = $this->slugify_headers($data_array, 0);
         // $data_array = self::slugify_levels($data_array, 0, array('/#/'=>'num'));
         $data_array = $this->infer_levels($data_array);
+        $data_array = self::remove_subtotals($data_array);
 
         return $data_array;
     }
@@ -200,44 +200,45 @@ class VisualBudget_Validator {
     /**
      * Remove any line items with the string "total" in any LEVEL field
      */
-    public static function remove_subtotals($array) {
+    public function remove_subtotals($array) {
 
         // Just the first row
         $header = $array[0];
+        // We don't want to filter the header
+        $data = array_slice($array, 1);
 
         // Get an array of the LEVEL column titles, ordered properly
         // and with the correct indices (i.e. indices referring to
         // the levels of the original dataset). See function for details.
         $ordered_levels = array_keys(self::ordered_columns_of_type($header, 1));
 
-        $array = array_filter($array, function($row) use ($ordered_levels) {
+        $data = array_filter($data, function($row) use ($ordered_levels) {
                         // Loop through the levels, searching for the substring "total"
                         // in each field. If found, delete the row and break.
                         foreach ($ordered_levels as $n) {
-                            $field_text = $row[$ordered_levels[$n]];
-                            if( stripos($field_text, 'total') ) {
+                            $field_text = $row[$n];
+                            if( stripos($field_text, 'total') !== false ) {
                                 return false;
                             }
                         }
                         return true;
                     });
 
-        // // Now loop through and fill in the blanks
-        // foreach ($array as $m => $row) {
+        // Calculate how many rows were removed
+        $num_subtotal_items = count($array) - 1 - count($data); // "- 1" for the header
 
-        //     // Skip the first row.
-        //     if ($m === 0) { continue; }
+        // Let the user know that the subtotal rows have been deleted.
+        if ($num_subtotal_items > 0) {
+            $text = " rows identified as subtotal items have been removed from your dataset.";
+            if ($num_subtotal_items == 1) {
+                $text = " row identified as a subtotal item has been removed from your dataset.";
+            }
+            $this->notifier->add($num_subtotal_items . $text, 'warning', 110);
+        }
 
-        //     // Loop through the levels, searching for the substring "total"
-        //     // in each field. If found, delete the row and break.
-        //     foreach ($ordered_levels as $n) {
-        //         $field_text = $row[$ordered_levels[$n]];
-        //         if( stripos($field_text, 'total') ) {
-
-        //         }
-        //     }
-
-        return $array;
+        // Prepend the header row back on and then return it.
+        array_unshift($data, $header);
+        return $data;
     }
 
     /**

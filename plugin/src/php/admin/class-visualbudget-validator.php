@@ -122,6 +122,7 @@ class VisualBudget_Validator {
         $data_array = $this->infer_levels($data_array);
         $data_array = $this->remove_subtotals($data_array);
         $data_array = $this->remove_duplicates($data_array);
+        $data_array = $this->convert_timepoints_to_numbers($data_array);
 
         return $data_array;
     }
@@ -307,9 +308,8 @@ class VisualBudget_Validator {
         // We don't want to filter the header
         $data = array_slice($array, 1);
 
-        // Get an array of the LEVEL column titles, ordered properly
-        // and with the correct indices (i.e. indices referring to
-        // the levels of the original dataset). See function for details.
+        // Get an array of the LEVEL column indices, ordered properly.
+        // See function for details.
         $ordered_levels = array_keys(self::ordered_columns_of_type($header, 1));
 
         $data = array_filter($data, function($row) use ($ordered_levels) {
@@ -353,9 +353,8 @@ class VisualBudget_Validator {
         // We don't want to filter the header
         $data = array_slice($array, 1);
 
-        // Get an array of the LEVEL column titles, ordered properly
-        // and with the correct indices (i.e. indices referring to
-        // the levels of the original dataset). See function for details.
+        // Get an array of the LEVEL column indices, ordered properly.
+        // See function for details.
         $ordered_levels = array_keys(self::ordered_columns_of_type($header, 1));
 
         // Our hash table for detecting duplicates.
@@ -393,9 +392,36 @@ class VisualBudget_Validator {
 
         // Prepend the header row back on and then return it.
         array_unshift($data, $header);
-        $data = array_values($data);   // Reset the array keys.
         return $data;
     }
+
+
+    /**
+     * Cast all timepoint column values to floats.
+     */
+    public function convert_timepoints_to_numbers($array) {
+
+        // Just the first row
+        $header = $array[0];
+        // We don't want to filter the header
+        $data = array_slice($array, 1);
+
+        // Get an array of the timepoint column indices, ordered properly.
+        // See function for details.
+        $ordered_levels = array_keys(self::ordered_columns_of_type($header, 0));
+
+        // Loop through the data, casting each timepoint column value to a float.
+        foreach ($data as $m => $row) {
+            foreach ($ordered_levels as $n) {
+                $data[$m][$n] = (float) $data[$m][$n];
+            }
+        }
+
+        // Prepend the header row back on and then return it.
+        array_unshift($data, $header);
+        return $data;
+    }
+
 
     /**
      * Return a dataset equivalent to the input,

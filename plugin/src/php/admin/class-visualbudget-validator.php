@@ -114,13 +114,14 @@ class VisualBudget_Validator {
     public function sanitize_data($data_array) {
         // The sequence of these events is important!
         $data_array = $this->pad_to_rectangle($data_array);
-        $data_array = self::trim_all_elements($data_array);
-        $data_array = self::remove_empty_rows($data_array);
-        $data_array = self::remove_empty_cols($data_array);
+        $data_array = $this->trim_all_elements($data_array);
+        $data_array = $this->remove_empty_rows($data_array);
+        $data_array = $this->remove_empty_cols($data_array);
         $data_array = $this->slugify_headers($data_array, 0);
-        // $data_array = self::slugify_levels($data_array, 0, array('/#/'=>'num'));
+        // $data_array = $this->slugify_levels($data_array, 0, array('/#/'=>'num'));
         $data_array = $this->infer_levels($data_array);
-        $data_array = self::remove_subtotals($data_array);
+        $data_array = $this->remove_subtotals($data_array);
+        $data_array = $this->remove_duplicates($data_array);
 
         return $data_array;
     }
@@ -195,50 +196,6 @@ class VisualBudget_Validator {
         // array_unshift($array, null);
         // return call_user_func_array('array_map', $array);
         return array_map(null, ...$array);
-    }
-
-    /**
-     * Remove any line items with the string "total" in any LEVEL field
-     */
-    public function remove_subtotals($array) {
-
-        // Just the first row
-        $header = $array[0];
-        // We don't want to filter the header
-        $data = array_slice($array, 1);
-
-        // Get an array of the LEVEL column titles, ordered properly
-        // and with the correct indices (i.e. indices referring to
-        // the levels of the original dataset). See function for details.
-        $ordered_levels = array_keys(self::ordered_columns_of_type($header, 1));
-
-        $data = array_filter($data, function($row) use ($ordered_levels) {
-                        // Loop through the levels, searching for the substring "total"
-                        // in each field. If found, delete the row and break.
-                        foreach ($ordered_levels as $n) {
-                            $field_text = $row[$n];
-                            if( stripos($field_text, 'total') !== false ) {
-                                return false;
-                            }
-                        }
-                        return true;
-                    });
-
-        // Calculate how many rows were removed
-        $num_subtotal_items = count($array) - 1 - count($data); // "- 1" for the header
-
-        // Let the user know that the subtotal rows have been deleted.
-        if ($num_subtotal_items > 0) {
-            $text = " rows identified as subtotal items have been removed from your dataset.";
-            if ($num_subtotal_items == 1) {
-                $text = " row identified as a subtotal item has been removed from your dataset.";
-            }
-            $this->notifier->add($num_subtotal_items . $text, 'warning', 110);
-        }
-
-        // Prepend the header row back on and then return it.
-        array_unshift($data, $header);
-        return $data;
     }
 
     /**
@@ -338,6 +295,106 @@ class VisualBudget_Validator {
         }
 
         return $text;
+    }
+
+    /**
+     * Remove any line items with the string "total" in any LEVEL field
+     */
+    public function remove_subtotals($array) {
+
+        // Just the first row
+        $header = $array[0];
+        // We don't want to filter the header
+        $data = array_slice($array, 1);
+
+        // Get an array of the LEVEL column titles, ordered properly
+        // and with the correct indices (i.e. indices referring to
+        // the levels of the original dataset). See function for details.
+        $ordered_levels = array_keys(self::ordered_columns_of_type($header, 1));
+
+        $data = array_filter($data, function($row) use ($ordered_levels) {
+                        // Loop through the levels, searching for the substring "total"
+                        // in each field. If found, delete the row and break.
+                        foreach ($ordered_levels as $n) {
+                            $field_text = $row[$n];
+                            if( stripos($field_text, 'total') !== false ) {
+                                return false;
+                            }
+                        }
+                        return true;
+                    });
+
+        // Calculate how many rows were removed
+        $num_subtotal_items = count($array) - 1 - count($data); // "- 1" for the header
+
+        // Let the user know that the subtotal rows have been deleted.
+        if ($num_subtotal_items > 0) {
+            $text = " rows identified as subtotal items have been removed from your dataset.";
+            if ($num_subtotal_items == 1) {
+                $text = " row identified as a subtotal item has been removed from your dataset.";
+            }
+            $this->notifier->add($num_subtotal_items . $text, 'warning', 110);
+        }
+
+        // Prepend the header row back on and then return it.
+        array_unshift($data, $header);
+        return $data;
+    }
+
+    /**
+     * Remove any duplicate line items. Duplicates are two line items with identical
+     * LEVEL field values. The removal rule is to keep only the first and to issue
+     * warnings to the user about any removals.
+     */
+    public function remove_duplicates($array) {
+
+        // Just the first row
+        $header = $array[0];
+        // We don't want to filter the header
+        $data = array_slice($array, 1);
+
+        // Get an array of the LEVEL column titles, ordered properly
+        // and with the correct indices (i.e. indices referring to
+        // the levels of the original dataset). See function for details.
+        $ordered_levels = array_keys(self::ordered_columns_of_type($header, 1));
+
+        // Our hash table for detecting duplicates.
+        $hash_table = array();
+
+        // The number of duplicates.
+        $num_duplicates = 0;
+
+        // Loop through the data, adding each row to a hash table.
+        // If a hash is already encountered, it means the item is a duplicate.
+        foreach ($data as $m => $row) {
+            $hash = '';
+            foreach ($ordered_levels as $n) {
+                $hash .= '->' . $row[$n];
+            }
+
+            // If the array key exists already, that means this item is a duplicate.
+            // Increment the counter and remove this row from the dataset.
+            if (array_key_exists($hash, $hash_table)) {
+                $num_duplicates++;
+                unset($data[$m]);
+            } else {
+                $hash_table[$hash] = 1;
+            }
+        }
+
+        // Let the user know that the duplicate rows have been deleted.
+        if ($num_duplicates > 0) {
+            $text = " rows identified as duplicate items have been removed from your dataset.";
+            if ($num_duplicates == 1) {
+                $text = " row identified as a duplicate item has been removed from your dataset.";
+            }
+            $this->notifier->add($num_duplicates . $text, 'warning', 111);
+        }
+
+        // Prepend the header row back on and then return it.
+        array_unshift($data, $header);
+        $data = array_values($data);   // Reset the array keys.
+        return $data;
     }
 
     /**

@@ -1,4 +1,7 @@
-
+/*
+ * The abstract class VbChart contains methods and properties common
+ * to all the different charts (treemap, linechart, metric, etc).
+ */
 class VbChart {
 
     // Chart
@@ -11,6 +14,14 @@ class VbChart {
 
         // Properties of the chart are specified as HTML data attributes.
         this.atts = this.removeVbPrefixesOnAttributes($div.data());
+
+        // Set the chart width & height if user set them.
+        if(typeof this.atts.width !== undefined) {
+            this.$div.width(this.atts.width);
+        }
+        if(typeof this.atts.height !== undefined) {
+            this.$div.height(this.atts.height);
+        }
 
         // The shared state among charts. These properties are used
         // for the interaction between charts.

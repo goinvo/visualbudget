@@ -1,4 +1,7 @@
-
+/*
+ * Metrics: calculated sums, differences, and averages displayed
+ * as text in a <span> element.
+ */
 class VbMetric extends VbChart {
 
     constructor($div, data) {
@@ -32,7 +35,7 @@ class VbMetric extends VbChart {
                 break;
 
             case 'datetotal':
-                metric = this.getMetricYearTotal(state);
+                metric = this.getMetricDateTotal(state);
                 break;
 
             case 'average':
@@ -44,6 +47,14 @@ class VbMetric extends VbChart {
                 metric = '5-year-average coming soon.';
                 break;
 
+            case 'percentgrowth':
+                metric = this.getPercentGrowth(state);
+                break;
+
+            case 'absgrowth':
+                metric = this.getAbsGrowth(state);
+                break;
+
             default:
                 metric = 'Unrecognized metric.';
         }
@@ -51,7 +62,7 @@ class VbMetric extends VbChart {
         return metric;
     }
 
-    getMetricYearTotal(state) {
+    getMetricDateTotal(state) {
         let metric = this.dollarAmountOfDate(state.date);
         if (metric === null) {
             return 'N/A';
@@ -64,6 +75,42 @@ class VbMetric extends VbChart {
         let metric = this.data.dollarAmounts.reduce((a,b) => a + b.dollarAmount, 0)
                     / this.data.dollarAmounts.length;
         metric = '$' + this.nFormat(metric, 1);
+        return metric;
+    }
+
+    getPercentGrowth(state) {
+        let date = state.date;
+        let metric = "N/A";
+        let sign = "+"; // The default minus sign is really a hyphen.
+
+        // Check to see if the previous year existed.
+        // If not, metric will be "N/A";
+        if (this.getDateIndex(date-1) !== null) {
+            let cur = this.dollarAmountOfDate(date);
+            let prev = this.dollarAmountOfDate(date-1);
+            let pct = (cur - prev) / prev * 100;
+            if(pct < 0) {
+                sign = '&minus;';
+            }
+            metric = sign + Math.abs(pct).toFixed(2) + "%";
+        }
+        return metric;
+    }
+
+    getAbsGrowth(state) {
+        let date = state.date;
+        let metric = "N/A";
+        let sign = "+"; // The default minus sign is really a hyphen.
+
+        // Check to see if the previous year existed.
+        // If not, metric will be "N/A";
+        if (this.getDateIndex(date-1) !== null) {
+            let diff = (this.dollarAmountOfDate(date) - this.dollarAmountOfDate(date-1));
+            if(diff < 0) {
+                sign = '&minus;';
+            }
+            metric = sign + '$' + this.nFormat(Math.abs(diff), 1);
+        }
         return metric;
     }
 

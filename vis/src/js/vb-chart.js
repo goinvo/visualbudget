@@ -125,7 +125,7 @@ class VbChart {
     }
 
     getDateIndex(date) {
-        let index = 0;
+        let index = null;
         for(let i = 0; i < this.data.dollarAmounts.length; i++) {
             if(this.data.dollarAmounts[i].date == date) {
                 index = i;

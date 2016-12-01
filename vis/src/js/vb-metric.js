@@ -62,6 +62,8 @@ class VbMetric extends VbChart {
         return metric;
     }
 
+    /* The total for a certain date.
+     */
     getMetricDateTotal(state) {
         let metric = this.dollarAmountOfDate(state.date);
         if (metric === null) {
@@ -71,6 +73,8 @@ class VbMetric extends VbChart {
         return metric;
     }
 
+    /* The average over all dates.
+     */
     getMetricAverage(state) {
         let metric = this.data.dollarAmounts.reduce((a,b) => a + b.dollarAmount, 0)
                     / this.data.dollarAmounts.length;
@@ -78,6 +82,8 @@ class VbMetric extends VbChart {
         return metric;
     }
 
+    /* The percent growth from the previous year (can be negative).
+     */
     getPercentGrowth(state) {
         let date = state.date;
         let metric = "N/A";
@@ -97,6 +103,8 @@ class VbMetric extends VbChart {
         return metric;
     }
 
+    /* The absolute (dollar-amount) growth from the previous year (can be negative).
+     */
     getAbsGrowth(state) {
         let date = state.date;
         let metric = "N/A";

@@ -102,7 +102,8 @@ class VbLineChart extends VbChart {
             // .curve(d3.curveCardinal.tension(0.5));
 
         // Scale the range of the data
-        // x.domain(d3.extent(data.dollarAmounts.filter(inDateRange(null)), function(d) { return d.date; }));
+        // x.domain(d3.extent(data.dollarAmounts.filter(inDateRange(null)),
+        //     function(d) { return d.date; }));
         x.domain(this.getDateRange())
         y.domain([0, d3.max(data.dollarAmounts.filter(inDateRange(null)), d => d.dollarAmount)]);
 

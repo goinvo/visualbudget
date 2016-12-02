@@ -101,8 +101,8 @@ class VbChart {
         });
 
         // Find the min and max.
-        var minDate = dates.reduce(function(a, b) { return Math.min(a, b); });
-        var maxDate = dates.reduce(function(a, b) { return Math.max(a, b); });
+        var minDate = dates.reduce((a, b) => Math.min(a, b));
+        var maxDate = dates.reduce((a, b) => Math.max(a, b));
 
         return [new Date(minDate), new Date(maxDate)];
     }
@@ -125,13 +125,18 @@ class VbChart {
     }
 
     getDateIndex(date) {
-        let index = 0;
+        let index = null;
         for(let i = 0; i < this.data.dollarAmounts.length; i++) {
             if(this.data.dollarAmounts[i].date == date) {
                 index = i;
             }
         }
         return index;
+    }
+
+    getFirstDate() {
+        let range = this.getDateRange();
+        return range[0].getUTCFullYear();
     }
 
     findHash(hash, root) {

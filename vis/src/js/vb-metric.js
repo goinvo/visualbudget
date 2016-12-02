@@ -43,16 +43,19 @@ class VbMetric extends VbChart {
                 break;
 
             case '5yearaverage':
-                // Do what is necessary for 5 year average.
-                metric = '5-year-average coming soon.';
+                metric = this.getMetric5YearAverage(state);
+                break;
+
+            case 'numyearsaveraged':
+                metric = this.getMetricNumYearsAveraged(state);
                 break;
 
             case 'percentgrowth':
-                metric = this.getPercentGrowth(state);
+                metric = this.getMetricPercentGrowth(state);
                 break;
 
             case 'absgrowth':
-                metric = this.getAbsGrowth(state);
+                metric = this.getMetricAbsGrowth(state);
                 break;
 
             default:
@@ -82,9 +85,26 @@ class VbMetric extends VbChart {
         return metric;
     }
 
+    /* The average of the last 5 years (or less than five years for
+     * the right boundary condition).
+     */
+    getMetric5YearAverage(state) {
+        let metric = 0;
+        return metric;
+    }
+
+    /* Since the 5-year average is not actually always over five years
+     * (because of the boundary condition), this metric gives the actual
+     * number of years that have been averaged.
+     */
+    getMetricNumYearsAveraged(state) {
+        let metric = 0;
+        return metric;
+    }
+
     /* The percent growth from the previous year (can be negative).
      */
-    getPercentGrowth(state) {
+    getMetricPercentGrowth(state) {
         let date = state.date;
         let metric = "N/A";
         let sign = "+"; // The default minus sign is really a hyphen.
@@ -105,7 +125,7 @@ class VbMetric extends VbChart {
 
     /* The absolute (dollar-amount) growth from the previous year (can be negative).
      */
-    getAbsGrowth(state) {
+    getMetricAbsGrowth(state) {
         let date = state.date;
         let metric = "N/A";
         let sign = "+"; // The default minus sign is really a hyphen.

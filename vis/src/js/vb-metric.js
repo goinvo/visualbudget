@@ -89,8 +89,14 @@ class VbMetric extends VbChart {
      * the right boundary condition).
      */
     getMetric5YearAverage(state) {
+        let firstDate = this.getFirstDate();
+        let date = state.date;
+        let diff = Math.min(5, date-firstDate+1);
         let metric = 0;
-        return metric;
+        for(let i = 0; i < diff; i++) {
+            metric = metric + this.dollarAmountOfDate(date-i);
+        }
+        return '$' + this.nFormat(metric / diff);
     }
 
     /* Since the 5-year average is not actually always over five years
@@ -98,8 +104,10 @@ class VbMetric extends VbChart {
      * number of years that have been averaged.
      */
     getMetricNumYearsAveraged(state) {
-        let metric = 0;
-        return metric;
+        let firstDate = this.getFirstDate();
+        let date = state.date;
+        let diff = Math.min(5, date-firstDate+1);
+        return diff;
     }
 
     /* The percent growth from the previous year (can be negative).
@@ -111,7 +119,7 @@ class VbMetric extends VbChart {
 
         // Check to see if the previous year existed.
         // If not, metric will be "N/A";
-        if (this.getDateIndex(date-1) !== null) {
+        if (this.getFirstDate() <= date-1) {
             let cur = this.dollarAmountOfDate(date);
             let prev = this.dollarAmountOfDate(date-1);
             let pct = (cur - prev) / prev * 100;
@@ -132,7 +140,7 @@ class VbMetric extends VbChart {
 
         // Check to see if the previous year existed.
         // If not, metric will be "N/A";
-        if (this.getDateIndex(date-1) !== null) {
+        if (this.getFirstDate() <= date-1) {
             let diff = (this.dollarAmountOfDate(date) - this.dollarAmountOfDate(date-1));
             if(diff < 0) {
                 sign = '&minus;';

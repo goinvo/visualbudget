@@ -7,10 +7,18 @@ class VisualBudget_Activator {
 
 	/**
 	 * Activator hook.
+     * Upon activation, ping Visgov that someone new is using the plugin.
 	 */
 	public static function activate() {
 
-        // Upon activate, ping Visgov that someone new is using the plugin.
+        // Don't ping if user is activating from localhost.
+        $ips_to_ignore = array(
+            '127.0.0.1',
+            '::1'
+        );
+        if(in_array($_SERVER['REMOTE_ADDR'], $ips_to_ignore)){
+            return;
+        }
 
         // Email address to send ping to.
         $to = 'vbping@visgov.com';

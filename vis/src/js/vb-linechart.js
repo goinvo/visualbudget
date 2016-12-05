@@ -93,7 +93,7 @@ class VbLineChart extends VbChart {
         // only show the year in the x-axis, not the month
         var xAxis = d3.axisBottom().scale(x);
         var yAxis = d3.axisLeft().scale(y)
-                        .tickFormat(val => that.nFormat(val, 0));
+                        .tickFormat(val => '$' + that.nFormat(val, 0));
 
         // Define the line
         var valueline = d3.line()
@@ -112,6 +112,8 @@ class VbLineChart extends VbChart {
             .attr("class", "line")
             .attr("d", valueline(data.dollarAmounts.filter(inDateRange(null))));
 
+        // svg.
+
         // Add the X Axis
         svg.append("g")
             .attr("class", "x axis")
@@ -120,8 +122,14 @@ class VbLineChart extends VbChart {
 
         // Add the Y Axis
         svg.append("g")
-            .attr("class", "y axis")
-            .call(yAxis);
+                .attr("class", "y axis")
+                .call(yAxis)
+            .append("text")
+                .attr("transform", "rotate(-90)")
+                .attr("y", 6)
+                .attr("dy", ".71em")
+                .style("text-anchor", "end")
+                .text("Millions of dollars");
 
         // For global use
         chart.x = x;

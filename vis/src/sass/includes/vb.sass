@@ -1,8 +1,9 @@
 /* Line chart
  ------------------------------------------------------- */
-path
+path.line
     stroke: steelblue;
-    stroke-width: 2;
+    stroke-width: 3;
+    opacity: .7;
     fill: none;
 
 .axis
@@ -16,7 +17,7 @@ path
     pointer-events: all;
 
 .hoverline
-    stroke: red;
+    stroke: #888;
     stroke-width: 1;
     shape-rendering: optimizeSpeed;
 
@@ -29,9 +30,12 @@ path
 /* Admin things
  ------------------------------------------------------- */
 
-div.vb-chart
+.vb-chart
     height: 350px;
     width: 100%;
+
+.vb-chart-linechart
+    height: 225px;
 
 .vb-chart-metric
     width: 50px;
@@ -155,13 +159,13 @@ div.vb-chart
         background-color: #cde;
 
 
+
+/* Popovers
+ ------------------------------------------------------- */
+
 .popover
     z-index: 2030;
     font-size: 18px;
-
-
-/* IE only (from VB1)
- ------------------------------------------------------- */
 
 #ie-popover
     z-index: 2030;

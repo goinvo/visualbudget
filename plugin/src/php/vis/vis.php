@@ -38,7 +38,7 @@ $data_atts = "data-vb-hash='" . $hash . "' "
 // Build the chart div.
 $chart_element = "<$element_type "
         . "id='vb-chart-$hash' "
-        . "class='vb-chart vb-chart-" . $_GET['vis'] . "' "
+        . "class='vb-chart' "
         . $data_atts
         . ">$space</$element_type>";
 

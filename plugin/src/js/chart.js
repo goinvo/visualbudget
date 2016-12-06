@@ -42,7 +42,6 @@ let chartLinkFunction = function(scope, element, attrs, paneController) {
     };
 
 
-
 angular.module('vbAdmin.chart')
     .directive('chart', function() {
         return {

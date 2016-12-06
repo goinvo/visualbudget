@@ -1,4 +1,4 @@
-# Plugin Name
+# Visual Budget
 
 Visual Budget is a WordPress plugin designed to make it easy to visualize a
 town's budget for its citizenry.
@@ -49,6 +49,9 @@ After cloning this repo, navigate to it in a terminal and run
 $ npm install
 $ gulp build
 ```
+
+(If the second command returns an error, it may because gulp isn't installed
+globally. You can fix this by running `$ npm install -g gulp`.)
 
 To export the plugin to a local WordPress installation, modify the
 `paths.pluginExport` variable in `gulpfile.js` to point to the plugins

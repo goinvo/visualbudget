@@ -54,7 +54,11 @@ let paneController = function($scope, $http, $timeout) {
             for (let k = 0; k < $scope.charts.length; k++) {
                 $http.get($scope.charts[k].ctrl.getUrl()).success( function(response) {
                     $scope.charts[k].ctrl.setHtml(response);
-                    $timeout(visualbudget.initialize, 0);
+
+                    // On last iteration, re-initialize VB.
+                    if (k == $scope.charts.length - 1) {
+                        $timeout(visualbudget.initialize, 0);
+                    }
                 });
             }
         }

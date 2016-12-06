@@ -7,6 +7,7 @@ const cleanCSS = require('gulp-clean-css');
 const autoprefixer = require('gulp-autoprefixer');
 const rename = require('gulp-rename');
 const zip = require('gulp-zip');
+const runSequence = require('run-sequence');
 
 const paths = {
     visSrc:  'vis/src/',
@@ -132,27 +133,29 @@ gulp.task('plugin-zip', () => {
         .pipe(gulp.dest('zip'));
 });
 
-gulp.task('plugin-build', [
-    'plugin-copy-php',
-    'plugin-compile-js',
-    'plugin-copy-templates',
-    'plugin-copy-vendor-js',
-    'plugin-compile-sass',
-    'plugin-compile-bootstrap-wrapper-sass',
-    'plugin-copy-vendor-css',
-    'plugin-copy-vis',
-    'plugin-zip'
-    ]);
+gulp.task('plugin-build', () => {
+    runSequence(
+    [
+        'plugin-copy-php',
+        'plugin-compile-js',
+        'plugin-copy-templates',
+        'plugin-copy-vendor-js',
+        'plugin-compile-sass',
+        'plugin-compile-bootstrap-wrapper-sass',
+        'plugin-copy-vendor-css',
+        'plugin-copy-vis'
+    ],
+    'plugin-zip');
+});
 
 
 /* * * * * * * * * * * * * * * * * * * * * * * * *
                 FULL BUILD TASK
  * * * * * * * * * * * * * * * * * * * * * * * * */
 
-gulp.task('build', [
-    'vis-build',
-    'plugin-build'
-    ]);
+gulp.task('build', () => {
+  runSequence('vis-build', 'plugin-build');
+});
 
 
 /* * * * * * * * * * * * * * * * * * * * * * * * *

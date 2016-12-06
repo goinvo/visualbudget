@@ -1,10 +1,22 @@
 /* Line chart
  ------------------------------------------------------- */
+
+.svg-chart
+    pointer-events: all;
+
+.click-capture
+    &:hover
+        cursor: pointer;
+
 path
     stroke: steelblue;
     stroke-width: 3;
     opactity: 0.7;
     fill: none;
+
+.circles-line
+    circle
+        fill: darken(steelblue, 10%);
 
 .axis
     path, line
@@ -12,9 +24,6 @@ path
         stroke: grey;
         stroke-width: 1;
         shape-rendering: crispEdges;
-
-.svg-chart
-    pointer-events: all;
 
 .hoverline
     stroke: #555;
@@ -24,8 +33,6 @@ path
 
 .hidden
     opacity: 0;
-
-
 
 
 /* Admin things

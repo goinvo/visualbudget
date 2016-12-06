@@ -112,6 +112,24 @@ class VbLineChart extends VbChart {
             .attr("class", "line")
             .attr("d", valueline(data.dollarAmounts.filter(inDateRange(null))));
 
+
+
+        // Plot points on the line.
+        svg.selectAll("g.circles-line")
+                .data([data.dollarAmounts])
+                .enter()
+            .append("g")
+                .attr("class", "circles-line")
+                .selectAll("circle")
+                .data( d => d )
+                .enter()
+            .append("circle")
+                .attr("r", 4)
+                .attr("cx", (d,i) => x(new Date(d.date)) )
+                .attr("cy", (d,i) => y(d.dollarAmount) );
+
+
+
         // Add the X Axis
         svg.append("g")
             .attr("class", "x axis")
@@ -127,28 +145,27 @@ class VbLineChart extends VbChart {
         chart.x = x;
         chart.y = y;
 
-
+        // This is an invisible div that ensures every click on the chart is captured.
+        // Without it, clicks above the line may not trigger the click event.
         svg.append('rect')
             .attr('class', 'click-capture')
             .style('visibility', 'hidden')
             .attr('width', chart.width)
             .attr('height', chart.height);
 
-
         // Hoverline
         let xpos = this.chart.x(new Date(this.state.date));
         this.hoverline = svg.append("line")
             .attr("x1", xpos).attr("x2", xpos)
             .attr("y1", 0).attr("y2", chart.yheight)
-            .attr("class", "hoverline")
-            // .classed("hidden", true);
+            .attr("class", "hoverline");
     }
 
     moveHoverline() {
-        // note that the year must be a string here, otherwise interpreted as unix time
+        // Note that the year must be a string here;
+        // otherwise it is interpreted as unix time.
         let xpos = this.chart.x(new Date(this.state.date));
         this.hoverline
-            // .classed("hidden", false)
             .attr("x1", xpos).attr("x2", xpos);
     }
 
@@ -212,7 +229,6 @@ class VbLineChart extends VbChart {
         this.svg.on('mousedown', mousedown_callback);
         this.svg.on('mousemove', mousemove_callback);
         this.svg.on('mouseup',   mouseup_callback);
-        // this.svg.on('mouseout',  mouseout_callback); // doesn't work properly
     }
 
 }

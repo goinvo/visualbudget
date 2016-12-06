@@ -327,7 +327,8 @@ class VbTreeMap extends VbChart {
         // remember currently selected section and year
         that.currentData = d;
         that.state.hash = d.data.hash;
-        visualbudget.broadcastStateChange(that.state);
+        // visualbudget.broadcastStateChange(that.state);
+        // FIXME: the above is causing errors when it occurs before line charts are drawn.
 
         // prevent further events from happening while transitioning
         nav.transitioning = true;

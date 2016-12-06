@@ -2,8 +2,6 @@
  ------------------------------------------------------- */
 
 .vb-chart
-    height: 260px;
-    width: 100%;
     background: white;
     margin: 0 auto;
 
@@ -12,38 +10,42 @@
 /* Line chart
  ------------------------------------------------------- */
 
-.svg-chart
-    pointer-events: all;
+.vb-chart-linechart
+    height: 240px;
+    width: 100%;
 
-.click-capture
-    &:hover
-        cursor: pointer;
+    .svg-chart
+        pointer-events: all;
 
-path
-    stroke: steelblue;
-    stroke-width: 3;
-    opactity: 0.7;
-    fill: none;
+    .click-capture
+        &:hover
+            cursor: pointer;
 
-.circles-line
-    circle
-        fill: darken(steelblue, 10%);
-
-.axis
-    path, line
+    path
+        stroke: steelblue;
+        stroke-width: 3;
+        opactity: 0.7;
         fill: none;
-        stroke: grey;
-        stroke-width: 1;
-        shape-rendering: crispEdges;
 
-.hoverline
-    stroke: #555;
-    opacity: 0.4;
-    stroke-width: 2;
-    shape-rendering: optimizeSpeed;
+    .circles-line
+        circle
+            fill: darken(steelblue, 10%);
 
-.hidden
-    opacity: 0;
+    .axis
+        path, line
+            fill: none;
+            stroke: grey;
+            stroke-width: 1;
+            shape-rendering: crispEdges;
+
+    .hoverline
+        stroke: #555;
+        opacity: 0.4;
+        stroke-width: 2;
+        shape-rendering: optimizeSpeed;
+
+    .hidden
+        opacity: 0;
 
 
 
@@ -53,8 +55,9 @@ path
 .vb-chart-treemap
     -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
     position: relative;
-    height: 88%;
+    height: 300px;
     width: 100%;
+    max-width: 600px;
     /*font: 10px sans-serif;*/
 
     svg

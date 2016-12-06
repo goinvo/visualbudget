@@ -25,7 +25,7 @@
             <pane title="Metrics">
                 <p>These metrics will automatically interact with any charts that appear on
                 the same page. This linechart demonstrates the functionality:</p>
-                <!-- <chart vis='linechart'></chart> -->
+                <chart vis='linechart'></chart>
                 <dataset-select></dataset-select>
                 <div class="row" style='margin-top: 2em'>
                     <div class="col-md-6">

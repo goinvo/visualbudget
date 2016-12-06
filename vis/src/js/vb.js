@@ -63,8 +63,13 @@ var visualbudget = (function (vb, $, d3) {
                     newChart = new VbMetric($div, data);
                     break;
 
+                case 'mytaxbill':
+                    newChart = new VbMyTaxBill($div, data);
+                    break;
+
                 default:
                     console.log('VB error: Unrecognized chart type.');
+                    return;
             }
 
             vb.charts.push(newChart);

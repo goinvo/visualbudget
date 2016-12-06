@@ -65,8 +65,16 @@
                         <shortcode metric='numyearsaveraged'></shortcode>
                     </div>
                 </div>
-                <!-- <iframelink metric='datetotal'></iframelink> -->
-                <!-- <iframelink metric='date'></iframelink> -->
+            </pane>
+            <pane title="My Tax Bill">
+                <p>The "My Tax Bill" component allows users to enter their tax bill (in dollars)
+                in order to see through charts where each penny of their tax bill goes.</p>
+                <chart vis='mytaxbill'></chart>
+                <div class="vb-shortcode-wrapper">
+                    <p>Paste the following shortcode in your WordPress page to display this visualization:</p>
+                    <pre class="vb-shortcode">[visualbudget vis=mytaxbill]</pre>
+                </div>
+                <!-- <shortcode explain='true'></shortcode> -->
             </pane>
             <!--<pane title="Stacked area chart">
             </pane>-->

@@ -17,6 +17,7 @@
     "gulp-sass": "^2.3.2",
     "gulp-uglify": "^2.0.0",
     "gulp-zip": "^3.2.0",
+    "run-sequence": "^1.2.2",
     "wrappy": "^1.0.2"
   }
 }

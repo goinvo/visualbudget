@@ -35,7 +35,7 @@ angular.module('vbAdmin.shortcode')
         return {
             restrict: 'E',
             transclude: false,
-            scope: { metric: '@' },
+            scope: { metric: '@', explain: '@' },
             controller: shortcodeController,
             templateUrl: _vbPluginUrl + 'admin/js/templates/shortcode.html',
             replace: true

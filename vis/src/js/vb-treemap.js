@@ -57,8 +57,7 @@ class VbTreeMap extends VbChart {
 
     // Initialize the treemap.
     initialize($div, data) {
-        let theDiv = d3.select($div.get(0))
-            .classed('vb-treemap', true);
+        let theDiv = d3.select($div.get(0));
 
         var width = $div.width(),
             height = $div.height();

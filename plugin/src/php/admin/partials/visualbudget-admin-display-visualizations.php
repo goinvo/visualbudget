@@ -13,13 +13,13 @@
             <pane title="Line chart">
                 <chart vis='linechart'></chart>
                 <dataset-select></dataset-select>
-                <shortcode></shortcode>
+                <shortcode explain='true'></shortcode>
                 <!-- <iframelink></iframelink> -->
             </pane>
             <pane title="Treemap">
                 <chart vis='treemap'></chart>
                 <dataset-select></dataset-select>
-                <shortcode></shortcode>
+                <shortcode explain='true'></shortcode>
                 <!-- <iframelink></iframelink> -->
             </pane>
             <pane title="Metrics">

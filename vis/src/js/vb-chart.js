@@ -85,7 +85,7 @@ class VbChart {
     redraw() {
         // Redraw the chart.
         console.log('Drawing chart ' + this.atts.hash + '.');
-        this.$div.html('This is a chart');
+        this.$div.html('[vb-chart]');
     }
 
     destroy() {

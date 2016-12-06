@@ -93,7 +93,7 @@ class VbLineChart extends VbChart {
         // only show the year in the x-axis, not the month
         var xAxis = d3.axisBottom().scale(x);
         var yAxis = d3.axisLeft().scale(y)
-                        .tickFormat(val => that.nFormat(val, 0));
+                        .tickFormat(val => '$' + that.nFormat(val, 0));
 
         // Define the line
         var valueline = d3.line()

@@ -13,19 +13,19 @@
             <pane title="Line chart">
                 <chart vis='linechart'></chart>
                 <dataset-select></dataset-select>
-                <shortcode></shortcode>
+                <shortcode explain='true'></shortcode>
                 <!-- <iframelink></iframelink> -->
             </pane>
             <pane title="Treemap">
                 <chart vis='treemap'></chart>
                 <dataset-select></dataset-select>
-                <shortcode></shortcode>
+                <shortcode explain='true'></shortcode>
                 <!-- <iframelink></iframelink> -->
             </pane>
             <pane title="Metrics">
                 <p>These metrics will automatically interact with any charts that appear on
                 the same page. This linechart demonstrates the functionality:</p>
-                <!-- <chart vis='linechart'></chart> -->
+                <chart vis='linechart'></chart>
                 <dataset-select></dataset-select>
                 <div class="row" style='margin-top: 2em'>
                     <div class="col-md-6">
@@ -65,8 +65,16 @@
                         <shortcode metric='numyearsaveraged'></shortcode>
                     </div>
                 </div>
-                <!-- <iframelink metric='datetotal'></iframelink> -->
-                <!-- <iframelink metric='date'></iframelink> -->
+            </pane>
+            <pane title="My Tax Bill">
+                <p>The "My Tax Bill" component allows users to enter their tax bill (in dollars)
+                in order to see through charts where each penny of their tax bill goes.</p>
+                <chart vis='mytaxbill'></chart>
+                <div class="vb-shortcode-wrapper">
+                    <p>Paste the following shortcode in your WordPress page to display this visualization:</p>
+                    <pre class="vb-shortcode">[visualbudget vis=mytaxbill]</pre>
+                </div>
+                <!-- <shortcode explain='true'></shortcode> -->
             </pane>
             <!--<pane title="Stacked area chart">
             </pane>-->

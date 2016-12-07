@@ -57,8 +57,7 @@ class VbTreeMap extends VbChart {
 
     // Initialize the treemap.
     initialize($div, data) {
-        let theDiv = d3.select($div.get(0))
-            .classed('vb-treemap', true);
+        let theDiv = d3.select($div.get(0));
 
         var width = $div.width(),
             height = $div.height();
@@ -100,7 +99,27 @@ class VbTreeMap extends VbChart {
                 nav.grandparent.dispatch('click');
             })
 
-        // display treemap
+        // Initialize the tooltips.
+        let tooltipContent = function(that) {
+            return function(d) {
+                let html = "<div class='name'>" + d.data.name + "</div>";
+                if(that.state.myTaxBill !== '') {
+                    let total = that.dollarAmountOfDate(that.state.date);
+                    let myBill = that.state.myTaxBill;
+                    let myContribution = myBill * (d.value / total);
+                    html = html + "<div class='description'>Your contribution is "
+                                + "$" + myContribution.toFixed(2) + ".</div>";
+                }
+                return html;
+            }
+        }
+        this.tip = d3.tip()
+            .attr('class', 'd3-tip')
+            .offset([-10, 0])
+            .html(tooltipContent(this));
+        nav.call(this.tip);
+
+        // Display the treemap.
         this.currentLevel = this.display(this.currentData);
     }
 
@@ -128,7 +147,9 @@ class VbTreeMap extends VbChart {
             .round(false);
 
         this.treemap(this.root);
-        this.currentData = this.currentData ? this.findHash(this.currentData.data.hash, this.root) : this.root;
+        this.currentData = this.currentData ?
+                this.findHash(this.currentData.data.hash, this.root)
+                : this.root;
         this.state.hash = this.currentData.data.hash;
     }
 
@@ -202,8 +223,9 @@ class VbTreeMap extends VbChart {
         g.append("rect")
             .attr("class", "parent")
             .call(that.rect(that.nav))
-            // .attr("fill", "none");
-            .style("fill", d => d.color);
+            .style("fill", d => d.color)
+            .on('mouseenter', this.tip.show)
+            .on('mouseleave', this.tip.hide);
 
         // recursively draw children rectangles
         function addChilds(d, g) {
@@ -327,7 +349,8 @@ class VbTreeMap extends VbChart {
         // remember currently selected section and year
         that.currentData = d;
         that.state.hash = d.data.hash;
-        visualbudget.broadcastStateChange(that.state);
+        // visualbudget.broadcastStateChange(that.state);
+        // FIXME: the above is causing errors when it occurs before line charts are drawn.
 
         // prevent further events from happening while transitioning
         nav.transitioning = true;

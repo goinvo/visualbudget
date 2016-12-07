@@ -26,6 +26,7 @@ class VbChart {
         // The shared state among charts. These properties are used
         // for the interaction between charts.
         this.state = {
+            myTaxBill: 7500, // Default. Q: How to set this?.
             groups: [],
             date: "2016",
             dragging: false,
@@ -85,7 +86,7 @@ class VbChart {
     redraw() {
         // Redraw the chart.
         console.log('Drawing chart ' + this.atts.hash + '.');
-        this.$div.html('This is a chart');
+        this.$div.html('[vb-chart]');
     }
 
     destroy() {

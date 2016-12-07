@@ -30,6 +30,7 @@ var visualbudget = (function (vb, $, d3) {
         var $div = $(this);
         var url = $div.data('vbDatasetUrl');
 
+        // Every chart requires a URL except for the 'mytaxbill' component.
         if(url) {
             var jqXHR = $.getJSON(url)
                 .done(vb.setupChartObject($div))
@@ -38,6 +39,12 @@ var visualbudget = (function (vb, $, d3) {
                     console.log( "Request Failed: " + err );
                 });
             return jqXHR;
+        } else {
+            // So catch that case, and don't try to load any data for it.
+            // FIXME: This is a bit hacky. Is there a better way?
+            if ($div.data('vbVis') == 'mytaxbill') {
+                vb.setupChartObject($div)([]);
+            }
         }
     }
 
@@ -63,8 +70,13 @@ var visualbudget = (function (vb, $, d3) {
                     newChart = new VbMetric($div, data);
                     break;
 
+                case 'mytaxbill':
+                    newChart = new VbMyTaxBill($div);
+                    break;
+
                 default:
                     console.log('VB error: Unrecognized chart type.');
+                    return;
             }
 
             vb.charts.push(newChart);

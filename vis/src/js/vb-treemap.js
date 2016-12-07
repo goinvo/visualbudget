@@ -99,7 +99,26 @@ class VbTreeMap extends VbChart {
                 nav.grandparent.dispatch('click');
             })
 
-        // display treemap
+        // Initialize the tooltips.
+        let tooltipContent = function(that) {
+            return function(d) {
+                let html = "";
+                if(that.state.myTaxBill !== '') {
+                    let total = that.dollarAmountOfDate(that.state.date);
+                    let myBill = that.state.myTaxBill;
+                    let myContribution = myBill * (d.value / total);
+                    html = html + "<span>Your contribution is " + "$" + myContribution.toFixed(2) + "</span>";
+                }
+                return html;
+            }
+        }
+        this.tip = d3.tip()
+            .attr('class', 'd3-tip')
+            .offset([-10, 0])
+            .html(tooltipContent(this));
+        nav.call(this.tip);
+
+        // Display the treemap.
         this.currentLevel = this.display(this.currentData);
     }
 
@@ -201,8 +220,9 @@ class VbTreeMap extends VbChart {
         g.append("rect")
             .attr("class", "parent")
             .call(that.rect(that.nav))
-            // .attr("fill", "none");
-            .style("fill", d => d.color);
+            .style("fill", d => d.color)
+            .on('mouseover', this.tip.show)
+            .on('mouseout', this.tip.hide);
 
         // recursively draw children rectangles
         function addChilds(d, g) {

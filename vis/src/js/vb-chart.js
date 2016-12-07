@@ -26,6 +26,7 @@ class VbChart {
         // The shared state among charts. These properties are used
         // for the interaction between charts.
         this.state = {
+            myTaxBill: '',
             groups: [],
             date: "2016",
             dragging: false,

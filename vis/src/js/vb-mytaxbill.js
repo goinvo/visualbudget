@@ -39,7 +39,10 @@ class VbMyTaxBill extends VbChart {
             let validatedString = string.replace(/[^\d\.]/g, '')
                                     .replace(/^\.*/, '')
                                     .replace(/(\.\d{0,2})(.*)/, '$1');
-            let validNumber = Math.abs(parseFloat(validatedString)) || '';
+            let validNumber = Math.abs(parseFloat(validatedString));
+            if (!validNumber && validNumber !== 0) {
+                validNumber = '';
+            }
 
             // Set the state and broadcast the change.
             // (The value of the input will change upon broadcast,

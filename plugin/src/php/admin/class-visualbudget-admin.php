@@ -357,10 +357,10 @@ class VisualBudget_Admin {
             array(), VISUALBUDGET_VERSION, false );
 
         // Add D3 tooltip lib
-        wp_enqueue_script(
-            'd3-tip',
-            plugin_dir_url( __FILE__ ) . 'js/d3.tip.js',
-            array( 'd3' ), VISUALBUDGET_VERSION, false );
+        // wp_enqueue_script(
+        //     'd3-tip',
+        //     plugin_dir_url( __FILE__ ) . 'js/d3.tip.js',
+        //     array( 'd3' ), VISUALBUDGET_VERSION, false );
 
         // Add jQuery modal
         wp_enqueue_script(

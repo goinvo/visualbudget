@@ -28,8 +28,9 @@ var visualbudget = (function (vb, $, d3) {
      */
     vb.tryToInitializeChart = function() {
         var $div = $(this);
-        var url = $div.data('vbDatasetUrl');
+        var url = $div.data('vbDatasetUrl') || false;
 
+        // Every chart requires a URL except for the 'mytaxbill' component.
         if(url) {
             var jqXHR = $.getJSON(url)
                 .done(vb.setupChartObject($div))
@@ -38,6 +39,12 @@ var visualbudget = (function (vb, $, d3) {
                     console.log( "Request Failed: " + err );
                 });
             return jqXHR;
+        } else {
+            // So catch that case, and don't try to load any data for it.
+            // FIXME: This is a bit hacky. Is there a better way?
+            if ($div.data('vbVis') == 'mytaxbill') {
+                vb.setupChartObject($div);
+            }
         }
     }
 
@@ -64,7 +71,7 @@ var visualbudget = (function (vb, $, d3) {
                     break;
 
                 case 'mytaxbill':
-                    newChart = new VbMyTaxBill($div, data);
+                    newChart = new VbMyTaxBill($div);
                     break;
 
                 default:

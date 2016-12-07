@@ -4,15 +4,20 @@
  * Visualization page, using the API specified in the Github wiki.
  */
 
+
+// Sort out the incoming GET variables.
 if ( ! isset($_GET['rand']) ) {
     $_GET['rand'] = mt_rand(0, PHP_INT_MAX);
 }
 $query_string = http_build_query($_GET);
 $hash = hash('crc32', $query_string);
 $dataset_id = $_GET['data'];
+
+// Set the dataset URL to an empty string if there was no ID given.
 // FIXME: prepend $_SERVER['HTTP_HOST'] to URL to make it absolute.
-$dataset_url = dirname(dirname($_SERVER["REQUEST_URI"]))
-                . "/datasets/" . $dataset_id . ".json";
+$dataset_url = $dataset_id ? dirname(dirname($_SERVER["REQUEST_URI"]))
+                    . "/datasets/" . $dataset_id . ".json"
+                : '';
 
 // The element will be a div if it's a chart, and a span if it's a metric.
 $element_type = 'div';
@@ -24,7 +29,10 @@ if ($_GET['vis'] == 'metric') {
                        // reloading.
 }
 
+// We won't include 'rand' in the HTML data attributes, so unset it.
 unset($_GET['rand']);
+
+// Include all variables as attributes, including arbitrary ones.
 $custom_atts = array();
 foreach ($_GET as $key => $val) {
     array_push($custom_atts, 'data-vb-' . $key . '="' . $val . '"');

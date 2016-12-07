@@ -4,10 +4,10 @@
  */
 class VbMyTaxBill extends VbChart {
 
-    constructor($div, data) {
+    constructor($div) {
 
         // Call super method.
-        super($div, data);
+        super($div, []);
 
         // Make it inline.
         $div.css({"display": "inline"});

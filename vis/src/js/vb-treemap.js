@@ -102,12 +102,13 @@ class VbTreeMap extends VbChart {
         // Initialize the tooltips.
         let tooltipContent = function(that) {
             return function(d) {
-                let html = "";
+                let html = "<div class='name'>" + d.data.name + "</div>";
                 if(that.state.myTaxBill !== '') {
                     let total = that.dollarAmountOfDate(that.state.date);
                     let myBill = that.state.myTaxBill;
                     let myContribution = myBill * (d.value / total);
-                    html = html + "<span>Your contribution is " + "$" + myContribution.toFixed(2) + "</span>";
+                    html = html + "<div class='description'>Your contribution is "
+                                + "$" + myContribution.toFixed(2) + ".</div>";
                 }
                 return html;
             }
@@ -146,7 +147,9 @@ class VbTreeMap extends VbChart {
             .round(false);
 
         this.treemap(this.root);
-        this.currentData = this.currentData ? this.findHash(this.currentData.data.hash, this.root) : this.root;
+        this.currentData = this.currentData ?
+                this.findHash(this.currentData.data.hash, this.root)
+                : this.root;
         this.state.hash = this.currentData.data.hash;
     }
 
@@ -221,8 +224,8 @@ class VbTreeMap extends VbChart {
             .attr("class", "parent")
             .call(that.rect(that.nav))
             .style("fill", d => d.color)
-            .on('mouseover', this.tip.show)
-            .on('mouseout', this.tip.hide);
+            .on('mouseenter', this.tip.show)
+            .on('mouseleave', this.tip.hide);
 
         // recursively draw children rectangles
         function addChilds(d, g) {

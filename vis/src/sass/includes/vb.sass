@@ -102,6 +102,9 @@
             position: relative;
             text-overflow: ellipsis;
 
+    foreignObject
+        pointer-events: none;
+
 
 /* Back button
  ------------------------------------------------------- */
@@ -120,6 +123,7 @@
     background-color: #def;
     cursor: pointer;
     padding: .2em 0;
+    border-radius: 4px;
 
     &:hover
         background-color: #cde;
@@ -146,56 +150,70 @@
  ------------------------------------------------------- */
 
 .d3-tip
-    line-height: 1;
-    font-weight: bold;
-    padding: 12px;
-    background: rgba(0, 0, 0, 0.8);
-    color: #fff;
-    border-radius: 2px;
+    font-size: .8em;
+    padding: 0;
+    background: #fff;
+    color: #333;
+    border-radius: 4px;
+    border: 1px solid #aaa;
     pointer-events: none;
+    max-width: 25em;
+    box-shadow: 0 0 5px #ddd;
+
+    .name
+        padding: .4em .6em .3em;
+        background-color: #f2f2f2;
+
+    .description
+        padding: .4em .6em .3em;
+        border-top: 1px solid #ccc;
 
 
-/* Creates a small triangle extender for the tooltip */
-.d3-tip:after
-    box-sizing: border-box;
-    display: inline;
-    font-size: 10px;
-    width: 100%;
-    line-height: 1;
-    color: rgba(0, 0, 0, 0.8);
-    position: absolute;
-    pointer-events: none;
+
+    /* Creates a small triangle extender for the tooltip */
+    &:after
+        box-sizing: border-box;
+        display: inline;
+        font-size: 10px;
+        width: 100%;
+        line-height: 1;
+        color: #fff;
+        position: absolute;
+        pointer-events: none;
+
+    /* Northward tooltips */
+    &.n:after
+        content: "\25BC";
+        margin: -1px 0 0 0;
+        top: 100%;
+        left: 0;
+        text-align: center;
+        text-shadow: 0 2px #aaa;
 
 
-/* Northward tooltips */
-.d3-tip.n:after
-    content: "\25BC";
-    margin: -1px 0 0 0;
-    top: 100%;
-    left: 0;
-    text-align: center;
+    /* Eastward tooltips */
+    &.e:after
+        content: "\25C0";
+        margin: -4px 0 0 0;
+        top: 50%;
+        left: -8px;
+        text-shadow: 2px 0 #aaa;
 
 
-/* Eastward tooltips */
-.d3-tip.e:after
-    content: "\25C0";
-    margin: -4px 0 0 0;
-    top: 50%;
-    left: -8px;
+    /* Southward tooltips */
+    &.s:after
+        content: "\25B2";
+        margin: 0 0 1px 0;
+        top: -8px;
+        left: 0;
+        text-align: center;
+        text-shadow: 0 -2px #aaa;
 
 
-/* Southward tooltips */
-.d3-tip.s:after
-    content: "\25B2";
-    margin: 0 0 1px 0;
-    top: -8px;
-    left: 0;
-    text-align: center;
-
-
-/* Westward tooltips */
-.d3-tip.w:after
-    content: "\25B6";
-    margin: -4px 0 0 -1px;
-    top: 50%;
-    left: 100%;
+    /* Westward tooltips */
+    &.w:after
+        content: "\25B6";
+        margin: -4px 0 0 -1px;
+        top: 50%;
+        left: 100%;
+        text-shadow: 2px 0 #aaa;

@@ -356,6 +356,12 @@ class VisualBudget_Admin {
             'https://cdnjs.cloudflare.com/ajax/libs/d3/4.2.6/d3.min.js',
             array(), VISUALBUDGET_VERSION, false );
 
+        // Add D3 tooltip lib
+        wp_enqueue_script(
+            'd3-tip',
+            plugin_dir_url( __FILE__ ) . 'js/d3.tip.js',
+            array( 'd3' ), VISUALBUDGET_VERSION, false );
+
         // Add jQuery modal
         wp_enqueue_script(
             'jquerymodal',

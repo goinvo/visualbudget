@@ -3,11 +3,15 @@ class VbComparisonTime extends VbChart {
 
     constructor($div, data) {
 
+
+        console.log(data);
+        
         // Cast the data.
-        data.dollarAmounts.forEach(function(d) {
-            // d.date = Date.parse(d.date);
-            d.dollarAmount = +d.dollarAmount;
-        });
+        data.forEach(function(dataset) {
+            dataset.dollarAmounts.forEach(function(d) {
+                d.dollarAmount = +d.dollarAmount;
+            });
+        })
 
         // Call super method.
         super($div, data);
@@ -19,8 +23,8 @@ class VbComparisonTime extends VbChart {
     redraw() {
         console.log('Drawing chart ' + this.atts.hash + ' (time comparison).');
         d3.selectAll('#' + this.$div.attr('id') + ' svg g *').remove();
-        this.adjustSize();
-        this.drawChart();
+        // this.adjustSize();
+        // this.drawChart();
     }
 
     setState(newState) {

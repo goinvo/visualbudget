@@ -41,10 +41,21 @@ var visualbudget = (function (vb, $, d3) {
                     console.log( "Request Failed: " + err );
                 });
             return jqXHR;
+
         } else if(urls) {
             // If it is a comparison chart and requires multiple datasets.
             urls = urls.split(',');
-            console.log(urls);
+            let requests = urls.map( url => $.getJSON(url) );
+            $.when.apply(this, requests).then(function(...responses) {
+                // Each response is an array: [ data, statusText, jqXHR ]
+                let dataArray = [];
+                for(let i = 0; i < responses.length; i++) {
+                    dataArray.push(responses[i][0]);
+                }
+                vb.setupChartObject($div)(dataArray);
+            });
+            return requests;
+
         } else {
             // So catch that case, and don't try to load any data for it.
             // FIXME: This is hacky. Is there a better way?

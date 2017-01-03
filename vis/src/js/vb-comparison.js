@@ -3,9 +3,6 @@ class VbComparisonTime extends VbChart {
 
     constructor($div, data) {
 
-
-        console.log(data);
-        
         // Cast the data.
         data.forEach(function(dataset) {
             dataset.dollarAmounts.forEach(function(d) {
@@ -23,8 +20,8 @@ class VbComparisonTime extends VbChart {
     redraw() {
         console.log('Drawing chart ' + this.atts.hash + ' (time comparison).');
         d3.selectAll('#' + this.$div.attr('id') + ' svg g *').remove();
-        // this.adjustSize();
-        // this.drawChart();
+        this.adjustSize();
+        this.drawChart();
     }
 
     setState(newState) {
@@ -69,18 +66,138 @@ class VbComparisonTime extends VbChart {
             .attr('height', chart.height)
     }
 
-    // FIXME: This function should be broken up into drawAxes(), drawLine(data), etc.
+    /* Draw the actual chart.
+     * This code is modified from
+     * https://bl.ocks.org/mbostock/3887051
+     */
     drawChart() {
         let that  = this;
         let data  = this.data;
         let chart = this.chart;
         let svg   = this.svg;
 
-        var inDateRange = function(range) {
-            return function(d) {
-                return true; // return d.date >= range[0] && d.date <= range[1];
-            }
-        }
+        // To do: find overlapping years in data.
+
+        let x0 = d3.scaleBand()
+            .rangeRound([0, chart.xwidth])
+            .paddingInner(0.1);
+
+        let x1 = d3.scaleBand()
+            .padding(0.05);
+
+        let y = d3.scaleLinear()
+            .rangeRound([chart.yheight, 0]);
+
+        let z = d3.scaleOrdinal()
+            .range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b",
+                    "#a05d56", "#d0743c", "#ff8c00"]);
+
+
+        // Find the years common between all datasets.
+        let dates = data[0].dollarAmounts.map(d => d.date);
+        data.slice(1).forEach(dataset => {
+            let nextDates = dataset.dollarAmounts.map(d => d.date);
+            dates = dates.filter(d => nextDates.indexOf(d) >= 0 ? 1 : 0);
+        });
+
+
+        // Create a flat data array of all the datapoints we wish to plot.
+        // Right now the datapoints are distributed between multiple
+        // hierarchial JSON objects.
+        let datapoints = [];
+        let datasetNames = [];
+        data.forEach(dataset => {
+            datasetNames.push(dataset.name);
+            dataset.dollarAmounts.forEach(d => {
+                // Check that we actually want to plot this year.
+                if(dates.indexOf(d.date)) {
+                    datapoints.push({
+                        datasetName: dataset.name,
+                        dollarAmount: d.dollarAmount,
+                        date: d.date
+                    });
+                }
+            });
+        });
+
+console.log(datapoints)
+
+        x0.domain(datapoints.map( d => d.date ));
+        x1.domain(datasetNames).rangeRound([0, x0.bandwidth()]);
+        y.domain([0, d3.max(datapoints, d => d.dollarAmount)]).nice();
+
+        svg.append("g")
+          .selectAll("g")
+          .data(datapoints)
+          .enter().append("g")
+            .attr("transform", d => "translate(" + x0(d.date) + ",0)")
+          .selectAll("rect")
+          .data(d => datasetNames.map(datasetName => ({
+                    datasetName: datasetName,
+                    dollarAmount: d.dollarAmount
+                }) ))
+          .enter().append("rect")
+            .attr("x", d => x1(d.datasetName) )
+            .attr("y", d => y(d.dollarAmount) )
+            .attr("width", x1.bandwidth())
+            .attr("height", d => chart.yheight - y(d.dollarAmount) )
+            .attr("fill", d => z(d.datasetName) );
+
+        svg.append("g")
+            .attr("class", "axis")
+            .attr("transform", "translate(0," + chart.yheight + ")")
+            .call(d3.axisBottom(x0));
+
+        svg.append("g")
+            .attr("class", "axis")
+            .call(d3.axisLeft(y).ticks(null, "s"));
+          // .append("text")
+          //   .attr("x", 2)
+          //   .attr("y", y(y.ticks().pop()) + 0.5)
+          //   .attr("dy", "0.32em")
+          //   .attr("fill", "#000")
+          //   .attr("font-weight", "bold")
+          //   .attr("text-anchor", "start")
+          //   .text("Total $");
+
+/*
+        var legend = g.append("g")
+            .attr("font-family", "sans-serif")
+            .attr("font-size", 10)
+            .attr("text-anchor", "end")
+          .selectAll("g")
+          .data(keys.slice().reverse())
+          .enter().append("g")
+            .attr("transform", (d,i) => "translate(0," + i * 20 + ")" );
+
+        legend.append("rect")
+            .attr("x", width - 19)
+            .attr("width", 19)
+            .attr("height", 19)
+            .attr("fill", z);
+
+        legend.append("text")
+            .attr("x", width - 24)
+            .attr("y", 9.5)
+            .attr("dy", "0.32em")
+            .text(d => d);
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+
 
         // Parse the date / time
         var parseDate = d3.timeFormat("%d-%b-%y").parse;
@@ -159,6 +276,7 @@ class VbComparisonTime extends VbChart {
             .attr("x1", xpos).attr("x2", xpos)
             .attr("y1", 0).attr("y2", chart.yheight)
             .attr("class", "hoverline");
+*/
     }
 
 }

@@ -106,12 +106,17 @@ class VbComparisonTime extends VbChart {
             dates = dates.filter(d => nextDates.indexOf(d) >= 0 ? 1 : 0);
         });
 
+        // Set the dataset names to be as defined in the "legend"
+        // attribute if that is set.
+        let datasetNames = [];
+        if (this.atts.legend) {
+            datasetNames = this.atts.legend.split(',');
+        }
 
         // Create a flat data array of all the datapoints we wish to plot.
         // Right now the datapoints are distributed between multiple
         // hierarchial JSON objects.
         let datapoints = [];
-        let datasetNames = [];
         data.forEach(dataset => {
             datasetNames.push(dataset.name);
             dataset.dollarAmounts.forEach(d => {
@@ -134,7 +139,7 @@ class VbComparisonTime extends VbChart {
         // The domains
         x0.domain(datapoints.map( d => d.date ));
         x1.domain(datasetNames).rangeRound([0, x0.bandwidth()]);
-        y.domain([0, d3.max(datapoints, d => d.dollarAmount)]).nice();
+        y.domain([0, 1.3*d3.max(datapoints, d => d.dollarAmount)]).nice();
 
         // Add the bars of the chart
         svg.append("g")
@@ -162,28 +167,27 @@ class VbComparisonTime extends VbChart {
             .attr("class", "axis")
             .call(d3.axisLeft(y).ticks(null, "s"));
 
-/*
-        var legend = g.append("g")
+        // Add the legend
+        let legend = svg.append("g")
             .attr("font-family", "sans-serif")
             .attr("font-size", 10)
             .attr("text-anchor", "end")
           .selectAll("g")
-          .data(keys.slice().reverse())
+          .data(datasetNames.slice().reverse())
           .enter().append("g")
             .attr("transform", (d,i) => "translate(0," + i * 20 + ")" );
 
         legend.append("rect")
-            .attr("x", width - 19)
+            .attr("x", chart.xwidth - 19)
             .attr("width", 19)
             .attr("height", 19)
             .attr("fill", z);
 
         legend.append("text")
-            .attr("x", width - 24)
+            .attr("x", chart.xwidth - 24)
             .attr("y", 9.5)
             .attr("dy", "0.32em")
             .text(d => d);
-*/
 
     }
 

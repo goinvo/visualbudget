@@ -22,6 +22,12 @@
                 <shortcode explain='true'></shortcode>
                 <!-- <iframelink></iframelink> -->
             </pane>
+            <pane title="Comparison">
+                <chart vis='comparisontime'></chart>
+                <dataset-select></dataset-select>
+                <shortcode explain='true'></shortcode>
+                <!-- <iframelink></iframelink> -->
+            </pane>
             <pane title="Metrics">
                 <p>These metrics will automatically interact with any charts that appear on
                 the same page. This linechart demonstrates the functionality:</p>

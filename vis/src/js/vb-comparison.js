@@ -76,6 +76,7 @@ class VbComparisonTime extends VbChart {
         let chart = this.chart;
         let svg   = this.svg;
  
+        // Set up the dimensions
         let x0 = d3.scaleBand()
             .rangeRound([0, chart.xwidth])
             .paddingInner(0.1);
@@ -117,14 +118,18 @@ class VbComparisonTime extends VbChart {
                 }
             });
         });
+
+        // These are the data formatted as required by the D3 code below.
         let nestedDatapoints = d3.nest()
             .key(d => d.date)
             .entries(datapoints);
 
+        // The domains
         x0.domain(datapoints.map( d => d.date ));
         x1.domain(datasetNames).rangeRound([0, x0.bandwidth()]);
         y.domain([0, d3.max(datapoints, d => d.dollarAmount)]).nice();
 
+        // Add the bars of the chart
         svg.append("g")
           .selectAll("g")
           .data(nestedDatapoints)
@@ -139,22 +144,16 @@ class VbComparisonTime extends VbChart {
             .attr("height", d => chart.yheight - y(d.dollarAmount) )
             .attr("fill", d => z(d.datasetName) );
 
+        // X axis
         svg.append("g")
             .attr("class", "axis")
             .attr("transform", "translate(0," + chart.yheight + ")")
             .call(d3.axisBottom(x0));
 
+        // Y axis
         svg.append("g")
             .attr("class", "axis")
             .call(d3.axisLeft(y).ticks(null, "s"));
-          // .append("text")
-          //   .attr("x", 2)
-          //   .attr("y", y(y.ticks().pop()) + 0.5)
-          //   .attr("dy", "0.32em")
-          //   .attr("fill", "#000")
-          //   .attr("font-weight", "bold")
-          //   .attr("text-anchor", "start")
-          //   .text("Total $");
 
 /*
         var legend = g.append("g")
@@ -179,100 +178,6 @@ class VbComparisonTime extends VbChart {
             .text(d => d);
 */
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*
-
-
-        // Parse the date / time
-        var parseDate = d3.timeFormat("%d-%b-%y").parse;
-
-        // Set the ranges
-        var x = d3.scaleTime().range([0, chart.xwidth]);
-        var y = d3.scaleLinear().range([chart.yheight, 0]);
-
-        // Define the axes
-        // only show the year in the x-axis, not the month
-        var xAxis = d3.axisBottom().scale(x);
-        var yAxis = d3.axisLeft().scale(y)
-                        .tickFormat(val => '$' + that.nFormat(val, 0));
-
-        // Define the line
-        var valueline = d3.line()
-            .x( d => x(new Date(d.date)) )
-            .y( d => y(d.dollarAmount) )
-            // .curve(d3.curveCardinal.tension(0.5));
-
-        // Scale the range of the data
-        // x.domain(d3.extent(data.dollarAmounts.filter(inDateRange(null)),
-        //     function(d) { return d.date; }));
-        x.domain(this.getDateRange())
-        y.domain([0, d3.max(data.dollarAmounts.filter(inDateRange(null)), d => d.dollarAmount)]);
-
-        // Add the valueline path.
-        svg.append("path")
-            .attr("class", "line")
-            .attr("d", valueline(data.dollarAmounts.filter(inDateRange(null))));
-
-
-
-        // Plot points on the line.
-        svg.selectAll("g.circles-line")
-                .data([data.dollarAmounts])
-                .enter()
-            .append("g")
-                .attr("class", "circles-line")
-                .selectAll("circle")
-                .data( d => d )
-                .enter()
-            .append("circle")
-                .attr("r", 4)
-                .attr("cx", (d,i) => x(new Date(d.date)) )
-                .attr("cy", (d,i) => y(d.dollarAmount) );
-
-
-
-        // Add the X Axis
-        svg.append("g")
-            .attr("class", "x axis")
-            .attr("transform", "translate(0," + chart.yheight + ")")
-            .call(xAxis);
-
-        // Add the Y Axis
-        svg.append("g")
-            .attr("class", "y axis")
-            .call(yAxis);
-
-        // For global use
-        chart.x = x;
-        chart.y = y;
-
-        // This is an invisible div that ensures every click on the chart is captured.
-        // Without it, clicks above the line may not trigger the click event.
-        svg.append('rect')
-            .attr('class', 'click-capture')
-            .style('visibility', 'hidden')
-            .attr('width', chart.width)
-            .attr('height', chart.height);
-
-        // Hoverline
-        let xpos = this.chart.x(new Date(this.state.date));
-        this.hoverline = svg.append("line")
-            .attr("x1", xpos).attr("x2", xpos)
-            .attr("y1", 0).attr("y2", chart.yheight)
-            .attr("class", "hoverline");
-*/
     }
 
 }

@@ -11,13 +11,30 @@ if ( ! isset($_GET['rand']) ) {
 }
 $query_string = http_build_query($_GET);
 $hash = hash('crc32', $query_string);
-$dataset_id = $_GET['data'];
 
+
+
+// Function to convert a dataset ID to a dataset URL.
 // Set the dataset URL to an empty string if there was no ID given.
 // FIXME: prepend $_SERVER['HTTP_HOST'] to URL to make it absolute.
-$dataset_url = $dataset_id ? dirname(dirname($_SERVER["REQUEST_URI"]))
-                    . "/datasets/" . $dataset_id . ".json"
-                : '';
+$id_to_url = function($id) {
+    if($id) {
+        return dirname(dirname($_SERVER["REQUEST_URI"]))
+                    . "/datasets/" . $id . ".json";
+    } else {
+        return '';
+    }
+};
+
+// Sort out the dataset ID(s). If the "data" string contains a comma,
+// then it is actually a list of IDs.
+$dataset_id   = $_GET['data'];
+$dataset_url  = $id_to_url($dataset_id);
+$dataset_urls = null;
+if(strpos($dataset_id, ',')) {
+    $dataset_ids  = explode(',', $_GET['data']);
+    $dataset_urls = implode(',', array_map($id_to_url, $dataset_ids));
+}
 
 // The element will be a div if it's a chart, and a span if it's a metric.
 $element_type = 'div';
@@ -39,9 +56,16 @@ foreach ($_GET as $key => $val) {
 }
 
 // Build a string of the data attributes.
-$data_atts = "data-vb-hash='" . $hash . "' "
-        . "data-vb-dataset-url='". $dataset_url . "' "
-        . implode(' ', $custom_atts);
+if($dataset_urls) {
+    $data_atts = "data-vb-hash='" . $hash . "' "
+            . "data-vb-dataset-urls='". $dataset_urls . "' "
+            . implode(' ', $custom_atts);
+} else {
+    $data_atts = "data-vb-hash='" . $hash . "' "
+            . "data-vb-dataset-url='". $dataset_url . "' "
+            . implode(' ', $custom_atts);
+}
+
 
 // Build the chart div.
 $chart_element = "<$element_type "

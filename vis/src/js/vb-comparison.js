@@ -75,9 +75,7 @@ class VbComparisonTime extends VbChart {
         let data  = this.data;
         let chart = this.chart;
         let svg   = this.svg;
-
-        // To do: find overlapping years in data.
-
+ 
         let x0 = d3.scaleBand()
             .rangeRound([0, chart.xwidth])
             .paddingInner(0.1);
@@ -119,8 +117,9 @@ class VbComparisonTime extends VbChart {
                 }
             });
         });
-
-console.log(datapoints)
+        let nestedDatapoints = d3.nest()
+            .key(d => d.date)
+            .entries(datapoints);
 
         x0.domain(datapoints.map( d => d.date ));
         x1.domain(datasetNames).rangeRound([0, x0.bandwidth()]);
@@ -128,14 +127,11 @@ console.log(datapoints)
 
         svg.append("g")
           .selectAll("g")
-          .data(datapoints)
+          .data(nestedDatapoints)
           .enter().append("g")
-            .attr("transform", d => "translate(" + x0(d.date) + ",0)")
+            .attr("transform", d => "translate(" + x0(d.key) + ",0)")
           .selectAll("rect")
-          .data(d => datasetNames.map(datasetName => ({
-                    datasetName: datasetName,
-                    dollarAmount: d.dollarAmount
-                }) ))
+          .data(d => d.values)
           .enter().append("rect")
             .attr("x", d => x1(d.datasetName) )
             .attr("y", d => y(d.dollarAmount) )

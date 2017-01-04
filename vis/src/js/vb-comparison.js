@@ -3,6 +3,13 @@ class VbComparisonTime extends VbChart {
 
     constructor($div, data) {
 
+        // Make sure the data is an array. If only one dataset was
+        // passed, we can still make a chart -- but we need it to
+        // be an array with one object in it.
+        if(data.constructor !== Array) {
+            data = [data];
+        }
+
         // Cast the data.
         data.forEach(function(dataset) {
             dataset.dollarAmounts.forEach(function(d) {

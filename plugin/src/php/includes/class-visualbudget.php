@@ -39,6 +39,7 @@ class VisualBudget {
 
         define('VISUALBUDGET_SLUG', 'visualbudget' );
         define('VISUALBUDGET_VERSION', '0.1.0' );
+        define('VISUALBUDGET_ALIASES_FILE', 'aliases.json' );
         define('VISUALBUDGET_UPLOAD_DIR', 'datasets/' );
         define('VISUALBUDGET_PATH', $trailingslashit(dirname(dirname(__FILE__))));
         define('VISUALBUDGET_UPLOAD_PATH', VISUALBUDGET_PATH . VISUALBUDGET_UPLOAD_DIR );

@@ -11,10 +11,12 @@ let datasetSelectController = function($scope, $http) {
 
         $scope.setDataset = function() {
             $scope.$parent.atts.data = $scope.$parent.chartData.dataset.id;
-            $scope.$parent.ctrl.redrawCharts();
-        }
 
-        $scope.setDataset();
+            // Redraw only if this pane is selected.
+            if ($scope.$parent.selected) {
+                $scope.$parent.ctrl.redrawCharts();
+            }
+        }
     };
 
 let datasetSelectLinkFunction = function(scope, element, attrs, paneController) {

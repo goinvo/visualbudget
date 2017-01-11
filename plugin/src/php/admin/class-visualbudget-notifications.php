@@ -37,7 +37,7 @@ class VisualBudget_Notifications {
         $notice_template = "<div class='notice notice-%s is-dismissible'><p>%s</p>%s</div>";
 
         // A link to the error docs on visgov.com.
-        $error_link_template = '<p><a href="' . VISGOV_ERROR_URL. '%d">'
+        $error_link_template = '<p><a target="_blank" href="' . VISGOV_ERROR_URL. '%d">'
             . 'See more information about how to fix %s at visgov.com.'
             . '</a></p>';
 

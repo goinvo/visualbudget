@@ -41,6 +41,7 @@ angular.module('vbAdmin.shortcode', []);
                 let next_meta_url = _vbPluginUrl + 'vis/api.php?filename=' + id + '_meta.json';
                 let req = $http.get(next_meta_url).success( function(next_meta) {
                     $timeout(function() {
+                        next_meta.type = 'Uploaded file name';
                         $rootScope.$broadcast('ajax.newDataset', next_meta);
                     });
                 });
@@ -52,6 +53,22 @@ angular.module('vbAdmin.shortcode', []);
                     // $scope.datasets = datasets;
                     // console.log(datasets.length)
                 });
+        });
+
+        // Also load the aliases.
+        let alises_url = _vbPluginUrl + 'vis/aliases.json';
+        $http.get(alises_url).success( function(aliases) {
+            console.log(aliases);
+            for(let alias in aliases) {
+                let metadata = {
+                    id: alias,
+                    uploaded_name: alias,
+                    type: 'Aliases'
+                };
+                $timeout(function() {
+                    $rootScope.$broadcast('ajax.newDataset', metadata);
+                });
+            }
         });
 
     });

@@ -97,6 +97,47 @@ class VisualBudget_DatasetManager {
     }
 
     /**
+     * Read the aliases.json file and return its contents as an
+     * associative array.
+     */
+    public function get_aliases() {
+        try {
+            // WordPress's own filesystem class.
+            global $wp_filesystem;
+
+            // Get the existing contents.
+            $contents = $wp_filesystem->get_contents(VISUALBUDGET_PATH . VISUALBUDGET_ALIASES_FILE);
+            $aliases_array = json_decode($contents, true); // "true" makes it an associative array
+            if (!$aliases_array) {
+                $aliases_array = array();
+            }
+
+            // Return the aliases.
+            return $aliases_array;
+
+        } catch (Exception $e) {
+            // FIXME: What to do with this error?
+        }
+    }
+
+    /**
+     * This function updates the aliases.json file with
+     * any new or changed aliases as submitted by the user.
+     * Note that the aliases submitted by the user COMPLETELY
+     * OVERWRITE any existing aliases.
+     */
+    public function update_aliases($new_aliases_array) {
+        // Write the new file
+        try {
+            global $wp_filesystem; // WordPress's own filesystem class.
+            $wp_filesystem->put_contents(VISUALBUDGET_PATH . VISUALBUDGET_ALIASES_FILE,
+                                json_encode($new_aliases_array, JSON_PRETTY_PRINT));
+        } catch (Exception $e) {
+            // FIXME: What to do with this error?
+        }
+    }
+
+    /**
      * Check to see if X a file, where X is in the uploads directory.
      *
      * @param  string  $filename  Filename to be checked. Can also be

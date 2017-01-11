@@ -131,9 +131,13 @@ class VisualBudget_Admin {
         // we may handle any uploads taking place.
         $this->handle_file_uploads();
         $this->handle_file_deletions();
+        $this->handle_alias_updates();
 
         // Now construct the dataset objects and store them in $this->datasets.
         $this->datasets = $this->construct_dataset_objects();
+
+        // Now set up the aliases array and store it in $this->aliases.
+        $this->aliases = $this->datasetmanager->get_aliases();
     }
 
     /**
@@ -243,6 +247,21 @@ class VisualBudget_Admin {
             header("Refresh:0; url=?" . $query);
         }
 
+    }
+
+    /**
+     * Add a new alias and change any old ones that are to be changed.
+     */
+    public function handle_alias_updates() {
+        if($_POST['visualbudget_submit_aliases']) {
+            $aliases = array();
+            foreach($_POST['visualbudget_alias_name'] as $n => $alias) {
+                if($alias != '') {
+                    $aliases[$alias] = $_POST['visualbudget_alias_id'][$n];
+                }
+            }
+            $this->datasetmanager->update_aliases($aliases);
+        }
     }
 
     /**

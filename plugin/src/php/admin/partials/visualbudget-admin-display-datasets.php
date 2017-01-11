@@ -30,6 +30,56 @@ do_settings_sections( 'visualbudget_tab_datasets' );
 submit_button('Add new dataset');
 ?>
 </form>
+
+<hr/>
+<h2>Aliases</h2>
+<form method="post" action="<?php echo $_SERVER['REQUEST_URI']?>">
+<?php
+$datasets = $this->datasets;
+
+// Only offer the option to create aliases if there are already datasets uploaded.
+if(!empty($datasets)) {
+
+    // Create the HTML for a <select> component. The given $id will be
+    // preselected if it is given and matches the ID of an existing dataset.
+    $select_html = function($datasets, $selected_id=false) {
+        $html = '<select name="visualbudget_alias_id[]">';
+        foreach($datasets as $dataset) {
+            // Get the dataset's properties.
+            $props = $dataset->get_properties();
+
+            // Determine if the current option is selected.
+            $selected = '';
+            if($props['id'] == $selected_id) {
+                $selected = ' selected="SELECTED"';
+            }
+
+            // Build the HTML for this option.
+            $html .= '<option value="' . $props['id'] . '"' . $selected . '>';
+            $html .= $props['uploaded_name'] . ' - (ID: ' . $props['id'] . ')</option>';
+        }
+        $html .= '</select>';
+        return $html;
+    };
+
+    // Print all existing aliases.
+    $aliases = $this->aliases;
+    foreach($aliases as $alias => $id) {
+        echo '<input type="text" name="visualbudget_alias_name[]" value="' . $alias . '" />';
+        echo $select_html($datasets, $id);
+        echo "<br/>";
+    }
+
+    // Print another field for creating a new alias.
+    echo '<input type="text" name="visualbudget_alias_name[]" value="" placeholder="New alias" />';
+    echo $select_html($datasets);
+    echo "<br/>";
+}
+?>
+<input type='submit' name='visualbudget_submit_aliases' value='Update aliases'>
+</form>
+<hr/>
+
 <h2>My datasets</h2>
 <div class='bootstrap-wrapper dataset-listings'><!-- Bootstrap styles work inside this div -->
 <?php

@@ -30,10 +30,23 @@ angular.module('vbAdmin.shortcode', []);
     vbAdmin.controller('vbController', function($scope, $http, $rootScope, $timeout) {
         console.log('vbController running.');
 
-        // We'll collect metadata of datasets here.
-        let ids_url = _vbPluginUrl + 'vis/api.php?filter=id';
+        // Load the aliases.
+        let alises_url = _vbPluginUrl + 'vis/aliases.json';
+        $http.get(alises_url).success( function(aliases) {
+            for(let alias in aliases) {
+                let metadata = {
+                    id: alias,
+                    uploaded_name: alias,
+                    type: 'Aliases'
+                };
+                $timeout(function() {
+                    $rootScope.$broadcast('ajax.newDataset', metadata);
+                });
+            }
+        });
 
-        // First load all dataset IDs.
+        // And load all dataset IDs.
+        let ids_url = _vbPluginUrl + 'vis/api.php?filter=id';
         $http.get(ids_url).success( function(ids) {
 
             // Function to fetch metadata given a dataset ID.
@@ -41,6 +54,7 @@ angular.module('vbAdmin.shortcode', []);
                 let next_meta_url = _vbPluginUrl + 'vis/api.php?filename=' + id + '_meta.json';
                 let req = $http.get(next_meta_url).success( function(next_meta) {
                     $timeout(function() {
+                        next_meta.type = 'Uploaded file names';
                         $rootScope.$broadcast('ajax.newDataset', next_meta);
                     });
                 });

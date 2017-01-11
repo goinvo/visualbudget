@@ -41,7 +41,7 @@ angular.module('vbAdmin.shortcode', []);
                 let next_meta_url = _vbPluginUrl + 'vis/api.php?filename=' + id + '_meta.json';
                 let req = $http.get(next_meta_url).success( function(next_meta) {
                     $timeout(function() {
-                        next_meta.type = 'Uploaded file name';
+                        next_meta.type = 'Uploaded file names';
                         $rootScope.$broadcast('ajax.newDataset', next_meta);
                     });
                 });

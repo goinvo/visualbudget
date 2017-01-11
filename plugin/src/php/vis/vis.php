@@ -104,7 +104,7 @@ if($dataset_url) {
     $data_atts = "data-vb-dataset-url='". $dataset_url . "' "
             . implode(' ', $custom_atts);
 } else {
-    $data_atts = "data-vb-dataset-urls='". $dataset_urls . "' "
+    $data_atts = "data-vb-dataset-urls='". implode(',', $dataset_urls) . "' "
             . implode(' ', $custom_atts);
 }
 

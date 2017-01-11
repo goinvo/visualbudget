@@ -152,10 +152,12 @@ class VbComparisonTime extends VbChart {
             .attr("fill", d => z(d.datasetName) );
 
         // X axis
+        let ticks_count = chart.xwidth < 400 ? 2 : null;
         svg.append("g")
             .attr("class", "axis")
             .attr("transform", "translate(0," + chart.yheight + ")")
-            .call(d3.axisBottom(x0));
+            .call(d3.axisBottom(x0).ticks(ticks_count));
+            // FIXME: Why doesn't this ticks_count work?
 
         // Y axis
         svg.append("g")

@@ -65,11 +65,7 @@ angular.module('vbAdmin.iframelink', []);
                 }
 
                 // Then fetch metadata for all datasets.
-                $.when.apply($, $.map(ids, fetchMetaFromId))
-                    .done(function() {
-                        // $scope.datasets = datasets;
-                        // console.log(datasets.length)
-                    });
+                $.apply($, $.map(ids, fetchMetaFromId));
             });
 
         }

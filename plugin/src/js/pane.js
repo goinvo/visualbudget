@@ -33,32 +33,6 @@ let paneController = function($scope, $http, $timeout, datasetsService) {
             }
         });
 
-        // This happens when a new dataset is broadcast down
-        // from vbAdmin.
-        let addDataset = function(event, metadata) {
-            if (loading) {
-                loading = false;
-                $scope.datasets = [metadata];
-                $scope.chartData.dataset = $scope.datasets[0];
-                $scope.atts.data = metadata.id;
-
-                if($scope.selected) {
-                    $timeout(that.redrawCharts, 0);
-                }
-            } else {
-                // We want aliases to appear at the top.
-                // FIXME: the order within each category is random,
-                //        based on load times.
-                if (metadata.type == 'Aliases') {
-                    $scope.datasets.unshift(metadata);
-                } else {
-                    $scope.datasets.push(metadata);
-                }
-            }
-        }
-        // Bind the event.
-        $scope.$on('ajax.newDataset', addDataset);
-
         let charts = $scope.charts = [];
         this.addChart = function(chart) {
             charts.push(chart);
@@ -84,12 +58,6 @@ let paneController = function($scope, $http, $timeout, datasetsService) {
                 });
             }
         }
-
-
-        // We need to make sure the pane is initiated before
-        // loading datasets (otherwise they won't be loaded here),
-        // So emit an event telling the vbAdmin to load datasets.
-        $scope.$emit('ajax.broadcastDatasets', null);
 
     };
 

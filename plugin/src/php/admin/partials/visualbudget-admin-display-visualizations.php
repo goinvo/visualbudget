@@ -20,13 +20,13 @@
                 <chart vis='treemap'></chart>
                 <dataset-select></dataset-select>
                 <shortcode explain='true'></shortcode>
-                <!-- <iframelink></iframelink> -->
+                <iframelink></iframelink>
             </pane>
             <pane title="Comparison">
                 <chart vis='comparisontime'></chart>
                 <dataset-select></dataset-select>
                 <shortcode explain='true'></shortcode>
-                <!-- <iframelink></iframelink> -->
+                <iframelink></iframelink>
             </pane>
             <pane title="Metrics">
                 <p>These metrics will automatically interact with any charts that appear on
@@ -38,11 +38,13 @@
                         <p style='text-align:center'>The total for a given date:</p>
                         <chart vis='metric' metric='datetotal'></chart>
                         <shortcode metric='datetotal'></shortcode>
+                        <iframelink metric='datetotal'></iframelink>
                     </div>
                     <div class="col-md-6">
                         <p style='text-align:center'>The date:</p>
                         <chart vis='metric' metric='date'></chart>
                         <shortcode metric='date'></shortcode>
+                        <iframelink metric='date'></iframelink>
                     </div>
                 </div>
                 <div class="row" style='margin-top: 2em'>
@@ -50,11 +52,13 @@
                         <p style='text-align:center'>The percent growth from previous year:</p>
                         <chart vis='metric' metric='percentgrowth'></chart>
                         <shortcode metric='percentgrowth'></shortcode>
+                        <iframelink metric='percentgrowth'></iframelink>
                     </div>
                     <div class="col-md-6">
                         <p style='text-align:center'>The absolute growth from previous year:</p>
                         <chart vis='metric' metric='absgrowth'></chart>
                         <shortcode metric='absgrowth'></shortcode>
+                        <iframelink metric='absgrowth'></iframelink>
                     </div>
                 </div>
                 <div class="row" style='margin-top: 2em'>
@@ -63,12 +67,14 @@
                             <small>(or fewer, on the boundary)</small></p>
                         <chart vis='metric' metric='5yearaverage'></chart>
                         <shortcode metric='5yearaverage'></shortcode>
+                        <iframelink metric='5yearaverage'></iframelink>
                     </div>
                     <div class="col-md-6">
                         <p style='text-align:center'>Number of years averaged:<br>
                             <small>(usually 5, except on the boundary)</small></p>
                         <chart vis='metric' metric='numyearsaveraged'></chart>
                         <shortcode metric='numyearsaveraged'></shortcode>
+                        <iframelink metric='numyearsaveraged'></iframelink>
                     </div>
                 </div>
             </pane>

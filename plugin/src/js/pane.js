@@ -2,7 +2,7 @@
  * The "pane" directive of the VB dashboard.
  */
 
-let paneController = function($scope, $http, $timeout) {
+let paneController = function($scope, $http, $timeout, datasetsService) {
         $scope.ctrl = this;
         let that = this;
 
@@ -17,25 +17,21 @@ let paneController = function($scope, $http, $timeout) {
                 uploaded_name: '[loading...]'
             }];
         $scope.chartData.dataset = $scope.datasets[0];
+        $scope.atts.data = $scope.datasets[0].id;
 
-        // This happens when a new dataset is broadcast down
-        // from vbAdmin.
-        let addDataset = function(event, metadata) {
+        // Watch function for when new datasets are loaded.
+        $scope.$watch(datasetsService.getCount, function(count) {
+            $scope.datasets = datasetsService.getDatasets();
             if (loading) {
                 loading = false;
-                $scope.datasets = [metadata];
                 $scope.chartData.dataset = $scope.datasets[0];
-                $scope.atts.data = metadata.id;
+                $scope.atts.data = $scope.datasets[0].id;
 
                 if($scope.selected) {
                     $timeout(that.redrawCharts, 0);
                 }
-            } else {
-                $scope.datasets.push(metadata);
             }
-        }
-        // Bind the event.
-        $scope.$on('ajax.newDataset', addDataset);
+        });
 
         let charts = $scope.charts = [];
         this.addChart = function(chart) {

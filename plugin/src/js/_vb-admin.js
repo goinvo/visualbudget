@@ -12,6 +12,7 @@ angular.module('vbAdmin.tabs', []);
 angular.module('vbAdmin.chart', []);
 angular.module('vbAdmin.datasetSelect', []);
 angular.module('vbAdmin.shortcode', []);
+angular.module('vbAdmin.iframelink', []);
 
 /**
  * Kick it off.
@@ -24,7 +25,8 @@ angular.module('vbAdmin.shortcode', []);
         'vbAdmin.tabs',
         'vbAdmin.chart',
         'vbAdmin.datasetSelect',
-        'vbAdmin.shortcode'
+        'vbAdmin.shortcode',
+        'vbAdmin.iframelink'
         ]);
 
     vbAdmin.controller('vbController', function($scope, $http, $rootScope, $timeout) {

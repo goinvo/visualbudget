@@ -14,7 +14,7 @@
                 <chart vis='linechart'></chart>
                 <dataset-select></dataset-select>
                 <shortcode explain='true'></shortcode>
-                <!-- <iframelink></iframelink> -->
+                <iframelink></iframelink>
             </pane>
             <pane title="Treemap">
                 <chart vis='treemap'></chart>

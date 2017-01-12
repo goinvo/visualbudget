@@ -2,7 +2,7 @@
  * The "pane" directive of the VB dashboard.
  */
 
-let paneController = function($scope, $http, $timeout) {
+let paneController = function($scope, $http, $timeout, datasetsService) {
         $scope.ctrl = this;
         let that = this;
 
@@ -17,6 +17,21 @@ let paneController = function($scope, $http, $timeout) {
                 uploaded_name: '[loading...]'
             }];
         $scope.chartData.dataset = $scope.datasets[0];
+        $scope.atts.data = $scope.datasets[0].id;
+
+        // Watch function for when new datasets are loaded.
+        $scope.$watch(datasetsService.getCount, function(count) {
+            $scope.datasets = datasetsService.getDatasets();
+            if (loading) {
+                loading = false;
+                $scope.chartData.dataset = $scope.datasets[0];
+                $scope.atts.data = $scope.datasets[0].id;
+
+                if($scope.selected) {
+                    $timeout(that.redrawCharts, 0);
+                }
+            }
+        });
 
         // This happens when a new dataset is broadcast down
         // from vbAdmin.
@@ -31,7 +46,14 @@ let paneController = function($scope, $http, $timeout) {
                     $timeout(that.redrawCharts, 0);
                 }
             } else {
-                $scope.datasets.push(metadata);
+                // We want aliases to appear at the top.
+                // FIXME: the order within each category is random,
+                //        based on load times.
+                if (metadata.type == 'Aliases') {
+                    $scope.datasets.unshift(metadata);
+                } else {
+                    $scope.datasets.push(metadata);
+                }
             }
         }
         // Bind the event.
@@ -62,6 +84,12 @@ let paneController = function($scope, $http, $timeout) {
                 });
             }
         }
+
+
+        // We need to make sure the pane is initiated before
+        // loading datasets (otherwise they won't be loaded here),
+        // So emit an event telling the vbAdmin to load datasets.
+        $scope.$emit('ajax.broadcastDatasets', null);
 
     };
 

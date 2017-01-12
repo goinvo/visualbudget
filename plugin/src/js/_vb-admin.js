@@ -29,47 +29,74 @@ angular.module('vbAdmin.iframelink', []);
         'vbAdmin.iframelink'
         ]);
 
-    vbAdmin.controller('vbController', function($scope, $http, $rootScope, $timeout) {
-        console.log('vbController running.');
+    vbAdmin.factory("datasetsService", function($http, $timeout) {
+        let count = 0;
+        let datasets = [];
 
-        // Load the aliases.
-        let alises_url = _vbPluginUrl + 'vis/aliases.json';
-        $http.get(alises_url).success( function(aliases) {
-            for(let alias in aliases) {
-                let metadata = {
-                    id: alias,
-                    uploaded_name: alias,
-                    type: 'Aliases'
-                };
-                $timeout(function() {
-                    $rootScope.$broadcast('ajax.newDataset', metadata);
-                });
-            }
-        });
+        // Function to load all datasets via Ajax calls.
+        function loadDatasets() {
 
-        // And load all dataset IDs.
-        let ids_url = _vbPluginUrl + 'vis/api.php?filter=id';
-        $http.get(ids_url).success( function(ids) {
+            // Load the aliases.
+            let aliases_url = _vbPluginUrl + 'vis/aliases.json';
+            $http.get(aliases_url).success( function(aliases) {
+                for(let alias in aliases) {
+                    let metadata = {
+                        id: alias,
+                        uploaded_name: alias,
+                        type: 'Aliases'
+                    };
 
-            // Function to fetch metadata given a dataset ID.
-            function fetchMetaFromId(id) {
-                let next_meta_url = _vbPluginUrl + 'vis/api.php?filename=' + id + '_meta.json';
-                let req = $http.get(next_meta_url).success( function(next_meta) {
-                    $timeout(function() {
+                    addDataset(metadata);
+                }
+            });
+
+            // And load all dataset IDs.
+            let ids_url = _vbPluginUrl + 'vis/api.php?filter=id';
+            $http.get(ids_url).success( function(ids) {
+
+                // Function to fetch metadata given a dataset ID.
+                function fetchMetaFromId(id) {
+                    let next_meta_url = _vbPluginUrl + 'vis/api.php?filename=' + id + '_meta.json';
+                    let req = $http.get(next_meta_url).success( function(next_meta) {
                         next_meta.type = 'Uploaded file names';
-                        $rootScope.$broadcast('ajax.newDataset', next_meta);
+                        addDataset(next_meta);
                     });
-                });
-                return req;
-            }
-            // Then fetch metadata for all datasets.
-            $.when.apply($, $.map(ids, fetchMetaFromId))
-                .done(function() {
-                    // $scope.datasets = datasets;
-                    // console.log(datasets.length)
-                });
-        });
+                    return req;
+                }
 
+                // Then fetch metadata for all datasets.
+                $.when.apply($, $.map(ids, fetchMetaFromId))
+                    .done(function() {
+                        // $scope.datasets = datasets;
+                        // console.log(datasets.length)
+                    });
+            });
+
+        }
+
+        function addDataset(meta) {
+            datasets.push(meta);
+            count = count + 1;
+        }
+
+        function getCount() {
+            return count;
+        }
+
+        function getDatasets() {
+            return datasets;
+        }
+
+        return {
+            getCount: getCount,
+            getDatasets: getDatasets,
+            loadDatasets: loadDatasets
+        }
+    });
+
+    vbAdmin.controller('vbController', function($scope, datasetsService) {
+        console.log('vbController running.');
+        datasetsService.loadDatasets();
     });
 
 })(visualbudget, jQuery, angular);

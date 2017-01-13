@@ -100,7 +100,9 @@ foreach ($_GET as $key => $val) {
 }
 
 // Build a string of the data attributes.
-if($dataset_url) {
+if ($_GET['vis'] == 'mytaxbill') {
+    $data_atts = implode(' ', $custom_atts);   
+} elseif($dataset_url) {
     $data_atts = "data-vb-dataset-url='". $dataset_url . "' "
             . implode(' ', $custom_atts);
 } else {

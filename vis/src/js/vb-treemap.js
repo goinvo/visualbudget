@@ -142,10 +142,10 @@ class VbTreeMap extends VbChart {
 
         // make the treemap
         this.treemap = d3.treemap()
+            .tile(d3.treemapBinary) // FIXME: This is causing errors even though it works.
             .size([this.$div.width(), this.$div.height()])
             .padding(0)
-            .tile(d3.treemapBinary)
-            .round(false);
+            .round(1);
 
         this.treemap(this.root);
         this.currentData = this.currentData ?
@@ -270,19 +270,24 @@ class VbTreeMap extends VbChart {
         // assign label through foreign object
         // foreignobjects allows the use of divs and textwrapping
         g.each(function () {
+            var nolabel = false;
             var label = d3.select(this).append("foreignObject")
                 .call(that.rect(that.nav))
                 // .style("background", "#bca")
                 .attr("class", "foreignobj")
                 .append("xhtml:div")
                 .html(function (d) {
+                    if (d.x1 - d.x0 < 40 || d.y1 - d.y0 < 20) {
+                        nolabel = true;
+                    }
                     var title = '<div class="titleLabel">' + d.data.name + '</div>',
                         values = '<div class="valueLabel">'
                             + '$' + that.nFormat(d.value)
                             + '</div>';
                     return title + values;
                 })
-                .attr("class", "textdiv");
+                .attr("class", "textdiv")
+                .classed("no-label", nolabel);
 
             // textLabels.call(this); // FIXME
 

@@ -144,6 +144,7 @@ class VbTreeMap extends VbChart {
         this.treemap = d3.treemap()
             .size([this.$div.width(), this.$div.height()])
             .padding(0)
+            .tile(d3.treemapBinary)
             .round(false);
 
         this.treemap(this.root);

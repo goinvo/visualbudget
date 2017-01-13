@@ -104,9 +104,11 @@
         position: relative;
 
     .children.no-label
-        .titleLabel, .valueLabel,
-        text
+        .titleLabel, .valueLabel, text
             display: none;
+
+    .children.no-value .valueLabel
+        display: none;
 
     .textdiv
         padding: 8px;
@@ -116,11 +118,12 @@
         .titleLabel,
         .valueLabel
             overflow: hidden;
-            position: relative;
+            /* position: relative; */
             text-overflow: ellipsis;
 
     foreignObject
         pointer-events: none;
+        overflow: hidden;
 
 
 /* Back button

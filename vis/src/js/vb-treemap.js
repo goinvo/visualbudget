@@ -270,24 +270,20 @@ class VbTreeMap extends VbChart {
         // assign label through foreign object
         // foreignobjects allows the use of divs and textwrapping
         g.each(function () {
-            var nolabel = false;
-            var label = d3.select(this).append("foreignObject")
+            let label = d3.select(this).append("foreignObject")
                 .call(that.rect(that.nav))
                 // .style("background", "#bca")
                 .attr("class", "foreignobj")
                 .append("xhtml:div")
                 .html(function (d) {
-                    if (d.x1 - d.x0 < 40 || d.y1 - d.y0 < 20) {
-                        nolabel = true;
-                    }
-                    var title = '<div class="titleLabel">' + d.data.name + '</div>',
+                    let title = '<div class="titleLabel">' + d.data.name + '</div>',
                         values = '<div class="valueLabel">'
                             + '$' + that.nFormat(d.value)
                             + '</div>';
                     return title + values;
                 })
                 .attr("class", "textdiv")
-                .classed("no-label", nolabel);
+                .classed("no-label", true);
 
             // textLabels.call(this); // FIXME
 
@@ -379,7 +375,22 @@ class VbTreeMap extends VbChart {
         });
 
         // Fade-in entering text.
-        g2.selectAll(".foreignobj").style("fill-opacity", 0);
+        g2.selectAll(".foreignobj")
+            .style("fill-opacity", 0)
+            .each(function(d,i) {
+                // Determine whether to show the label.
+                // The magic number 0.067 was found by testing:
+                // on a chart which is 600x300px, the label is shown
+                // if the cell size is at least 40x20px.
+                let xDomain = nav.x.domain();
+                let yDomain = nav.y.domain();
+                let xSizeFraction = (d.x1 - d.x0) / (xDomain[1] - xDomain[0]);
+                let ySizeFraction = (d.y1 - d.y0) / (yDomain[1] - yDomain[0]);
+                if ( xSizeFraction > 0.067 && ySizeFraction > 0.067 ) {
+                    console.log(d3.select(this))
+                    d3.select(this).selectAll('.textdiv').classed('no-label', false);
+                }
+            });
 
         // Transition to the new view
         t1.style('opacity', 0);

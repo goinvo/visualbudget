@@ -142,7 +142,7 @@ class VbTreeMap extends VbChart {
 
         // make the treemap
         this.treemap = d3.treemap()
-            // .tile(d3.treemapBinary) // FIXME: This is causing errors even though it works.
+            .tile(d3.treemapBinary) // FIXME: This is causing errors even though it works.
             .size([this.$div.width(), this.$div.height()])
             .padding(0)
             .round(1);
@@ -400,9 +400,11 @@ class VbTreeMap extends VbChart {
         that.currentLevel = g2;
 
         // Broadcast the state change so other charts can "dive down" into the data.
-        visualbudget.broadcastStateChange({
-            hash: d.data.hash
-        });
+        setTimeout(function() {
+            visualbudget.broadcastStateChange({
+                hash: d.data.hash
+            });
+        }, 0);
     }
 
     /*

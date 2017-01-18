@@ -20,11 +20,14 @@ class VbMetric extends VbChart {
 
     redraw() {
         console.log('Drawing chart ' + this.atts.hash + ' (metric).');
-        var metric = this.getMetric(this.atts.metric, this.state);
+
+        let data = this.getNodeByHash(this.state.hash);
+        let metric = this.getMetric(this.atts.metric, this.state, data);
+
         this.$div.html(metric);
     }
 
-    getMetric(name, state) {
+    getMetric(name, state, data) {
         var metric = null;
 
         switch (name) {
@@ -33,15 +36,15 @@ class VbMetric extends VbChart {
                 break;
 
             case 'datetotal':
-                metric = this.getMetricDateTotal(state);
+                metric = this.getMetricDateTotal(state, data);
                 break;
 
             case 'average':
-                metric = this.getMetricAverage(state);
+                metric = this.getMetricAverage(state, data);
                 break;
 
             case '5yearaverage':
-                metric = this.getMetric5YearAverage(state);
+                metric = this.getMetric5YearAverage(state, data);
                 break;
 
             case 'numyearsaveraged':
@@ -49,11 +52,11 @@ class VbMetric extends VbChart {
                 break;
 
             case 'percentgrowth':
-                metric = this.getMetricPercentGrowth(state);
+                metric = this.getMetricPercentGrowth(state, data);
                 break;
 
             case 'absgrowth':
-                metric = this.getMetricAbsGrowth(state);
+                metric = this.getMetricAbsGrowth(state, data);
                 break;
 
             default:
@@ -65,8 +68,8 @@ class VbMetric extends VbChart {
 
     /* The total for a certain date.
      */
-    getMetricDateTotal(state) {
-        let metric = this.dollarAmountOfDate(state.date);
+    getMetricDateTotal(state, data) {
+        let metric = this.dollarAmountOfDate(state.date, data);
         if (metric === null) {
             return 'N/A';
         }
@@ -76,9 +79,9 @@ class VbMetric extends VbChart {
 
     /* The average over all dates.
      */
-    getMetricAverage(state) {
-        let metric = this.data.dollarAmounts.reduce((a,b) => a + b.dollarAmount, 0)
-                    / this.data.dollarAmounts.length;
+    getMetricAverage(state, data) {
+        let metric = data.dollarAmounts.reduce((a,b) => a + b.dollarAmount, 0)
+                    / data.dollarAmounts.length;
         metric = '$' + this.nFormat(metric, 1);
         return metric;
     }
@@ -86,13 +89,13 @@ class VbMetric extends VbChart {
     /* The average of the last 5 years (or less than five years for
      * the right boundary condition).
      */
-    getMetric5YearAverage(state) {
+    getMetric5YearAverage(state, data) {
         let firstDate = this.getFirstDate();
         let date = state.date;
         let diff = Math.min(5, date-firstDate+1);
         let metric = 0;
         for(let i = 0; i < diff; i++) {
-            metric = metric + this.dollarAmountOfDate(date-i);
+            metric = metric + this.dollarAmountOfDate(date-i, data);
         }
         return '$' + this.nFormat(metric / diff);
     }
@@ -110,7 +113,7 @@ class VbMetric extends VbChart {
 
     /* The percent growth from the previous year (can be negative).
      */
-    getMetricPercentGrowth(state) {
+    getMetricPercentGrowth(state, data) {
         let date = state.date;
         let metric = "N/A";
         let sign = "+"; // The default minus sign is really a hyphen.
@@ -118,8 +121,8 @@ class VbMetric extends VbChart {
         // Check to see if the previous year existed.
         // If not, metric will be "N/A";
         if (this.getFirstDate() <= date-1) {
-            let cur = this.dollarAmountOfDate(date);
-            let prev = this.dollarAmountOfDate(date-1);
+            let cur = this.dollarAmountOfDate(date, data);
+            let prev = this.dollarAmountOfDate(date-1, data);
             let pct = (cur - prev) / prev * 100;
             if(pct < 0) {
                 sign = '&minus;';
@@ -131,7 +134,7 @@ class VbMetric extends VbChart {
 
     /* The absolute (dollar-amount) growth from the previous year (can be negative).
      */
-    getMetricAbsGrowth(state) {
+    getMetricAbsGrowth(state, data) {
         let date = state.date;
         let metric = "N/A";
         let sign = "+"; // The default minus sign is really a hyphen.
@@ -139,7 +142,7 @@ class VbMetric extends VbChart {
         // Check to see if the previous year existed.
         // If not, metric will be "N/A";
         if (this.getFirstDate() <= date-1) {
-            let diff = (this.dollarAmountOfDate(date) - this.dollarAmountOfDate(date-1));
+            let diff = (this.dollarAmountOfDate(date, data) - this.dollarAmountOfDate(date-1, data));
             if(diff < 0) {
                 sign = '&minus;';
             }

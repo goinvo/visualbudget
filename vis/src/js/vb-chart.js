@@ -69,9 +69,12 @@ class VbChart {
         return newAtts;
     }
 
-    dollarAmountOfDate(date) {
-        for(let i = 0; i < this.data.dollarAmounts.length; i++) {
-            let obj = this.data.dollarAmounts[i];
+    dollarAmountOfDate(date, data) {
+        if (!data) {
+            data = this.data;
+        }
+        for(let i = 0; i < data.dollarAmounts.length; i++) {
+            let obj = data.dollarAmounts[i];
             if(obj.date == date) {
                 return obj.dollarAmount;
             }

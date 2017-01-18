@@ -142,7 +142,7 @@ class VbTreeMap extends VbChart {
 
         // make the treemap
         this.treemap = d3.treemap()
-            .tile(d3.treemapBinary) // FIXME: This is causing errors even though it works.
+            // .tile(d3.treemapBinary) // FIXME: This is causing errors even though it works.
             .size([this.$div.width(), this.$div.height()])
             .padding(0)
             .round(1);
@@ -323,41 +323,33 @@ class VbTreeMap extends VbChart {
         // or data not defined
         if (nav.transitioning || !d) return;
 
-        // go back if click happened on the same zone
+        // Go back if click happened on the same zone
         if (click && d.data.hash === that.currentData.data.hash) {
-            // $('#zoombutton').trigger('click');
-            nav.grandparent.dispatch('click')
+            nav.grandparent.dispatch('click');
             return;
         }
 
-        // push url to browser history
-        if (click) {
-            // pushUrl(avb.section, avb.thisYear, avb.mode, d.hash);
-        }
-
-        // reset year
-        // dateIndex = avb.thisYear - avb.firstYear;
+        // Reset year
         let dateIndex = that.dateIndex;
 
-        //
         if(d.value === 0) {
             that.zoneClick.call(null, d.parent || that.root.data.hash, 0, that);
             return;
         }
 
-        // remove old labels
+        // Remove old labels
         nav.selectAll('text').remove();
 
-        // remember currently selected section and year
+        // Remember currently selected section and year
         that.currentData = d;
         that.state.hash = d.data.hash;
         // visualbudget.broadcastStateChange(that.state);
         // FIXME: the above is causing errors when it occurs before line charts are drawn.
 
-        // prevent further events from happening while transitioning
+        // Prevent further events from happening while transitioning
         nav.transitioning = true;
 
-        // initialize transitions
+        // Initialize transitions
         let g2 = that.display(d);
         let t1 = that.currentLevel.transition().duration(transition);
         let t2 = g2.transition().duration(transition);
@@ -387,7 +379,6 @@ class VbTreeMap extends VbChart {
                 let xSizeFraction = (d.x1 - d.x0) / (xDomain[1] - xDomain[0]);
                 let ySizeFraction = (d.y1 - d.y0) / (yDomain[1] - yDomain[0]);
                 if ( xSizeFraction > 0.067 && ySizeFraction > 0.067 ) {
-                    console.log(d3.select(this))
                     d3.select(this).selectAll('.textdiv').classed('no-label', false);
                 }
             });
@@ -399,21 +390,6 @@ class VbTreeMap extends VbChart {
         t1.selectAll("rect").call(that.rect(nav));
         t2.selectAll("rect").call(that.rect(nav));
 
-        // add labels to new elements
-        /*
-        t2.each(function () {
-            if (ie()) return;
-            textLabels.call(that);
-        })
-        t2.each("end", function () {
-            if (ie()) {
-                ieLabels.call(that);
-            } else {
-                textLabels.call(that);
-            }
-        })
-        */
-
         // Remove the old node when the transition is finished.
         t1.remove().on("end", function () {
             nav.style("shape-rendering", "crispEdges");
@@ -423,6 +399,10 @@ class VbTreeMap extends VbChart {
         // update current level
         that.currentLevel = g2;
 
+        // Broadcast the state change so other charts can "dive down" into the data.
+        visualbudget.broadcastStateChange({
+            hash: d.data.hash
+        });
     }
 
     /*

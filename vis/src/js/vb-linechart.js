@@ -23,14 +23,23 @@ class VbLineChart extends VbChart {
         console.log('Drawing chart ' + this.atts.hash + ' (linechart).');
         d3.selectAll('#' + this.$div.attr('id') + ' svg g *').remove();
         this.adjustSize();
-        this.drawChart();
+
+        let data = this.getNodeByHash(this.state.hash);
+        this.drawChart(data);
     }
 
     setState(newState) {
+        let oldHash = this.state.hash;
+        let newHash = newState.hash;
         this.state = Object.assign({}, this.state, newState);
 
         // Do not redraw everything here.
         this.moveHoverline();
+
+        // ...unless the hash is changed.
+        if(oldHash != newHash) {
+            this.redraw();
+        }
     }
 
     setupChartSvg() {
@@ -70,9 +79,8 @@ class VbLineChart extends VbChart {
     }
 
     // FIXME: This function should be broken up into drawAxes(), drawLine(data), etc.
-    drawChart() {
+    drawChart(data) {
         let that  = this;
-        let data  = this.data;
         let chart = this.chart;
         let svg   = this.svg;
 

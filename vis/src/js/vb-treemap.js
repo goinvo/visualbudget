@@ -89,8 +89,14 @@ class VbTreeMap extends VbChart {
                 .attr("y", "-20px")
                 .attr("class", "grandparent");
 
+        // Create the "zoom out" button
         let p = document.createElement("p");
         p.setAttribute("id", "vb-zoom-button");
+        if(typeof this.atts.width !== undefined) {
+            p.style.width = this.atts.width;
+            p.style.marginRight = 'auto';
+            p.style.marginLeft = 'auto';
+        }
         $div.get(0).parentNode.insertBefore(p, $div.get(0));
 
         d3.select('#vb-zoom-button')

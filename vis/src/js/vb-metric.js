@@ -59,6 +59,10 @@ class VbMetric extends VbChart {
                 metric = this.getMetricAbsGrowth(state, data);
                 break;
 
+            case 'name':
+                metric = this.getMetricName(state, data);
+                break;
+
             default:
                 metric = '?'; // Don't be too disruptive to the viewer.
         }
@@ -151,4 +155,23 @@ class VbMetric extends VbChart {
         return metric;
     }
 
+    /* Get the name of the node
+     */
+    getMetricName(state, data) {
+        if(this.isNumeric(data.name)) {
+            if(typeof this.atts.name !== undefined) {
+                return this.atts.name;
+            } else {
+                return '';
+            }
+        }
+
+        return data.name;
+    }
+
+    /* Checks to see if input is numeric
+     */
+    isNumeric(n) {
+      return !isNaN(parseFloat(n)) && isFinite(n);
+    }
 }

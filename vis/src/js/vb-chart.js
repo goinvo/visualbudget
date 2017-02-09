@@ -15,11 +15,18 @@ class VbChart {
         // Properties of the chart are specified as HTML data attributes.
         this.atts = this.removeVbPrefixesOnAttributes($div.data());
 
+        // Set the name of the dataset.
+        if (typeof this.atts.name !== 'undefined') {
+            this.data.name = this.atts.name;
+        } else {
+            this.data.name = this.toTitleCase(this.atts.data.toString());
+        }
+
         // Set the chart width & height if user set them.
-        if(typeof this.atts.width !== undefined) {
+        if(typeof this.atts.width !== 'undefined') {
             this.$div.width(this.atts.width);
         }
-        if(typeof this.atts.height !== undefined) {
+        if(typeof this.atts.height !== 'undefined') {
             this.$div.height(this.atts.height);
         }
 
@@ -69,12 +76,20 @@ class VbChart {
         return newAtts;
     }
 
-    dollarAmountOfDate(date, data) {
-        if (!data) {
-            data = this.data;
+    dollarAmountOfDate(date, node=this.data) {
+        for(let i = 0; i < node.dollarAmounts.length; i++) {
+            let obj = node.dollarAmounts[i];
+            if(obj.date == date) {
+                return obj.dollarAmount;
+            }
         }
-        for(let i = 0; i < data.dollarAmounts.length; i++) {
-            let obj = data.dollarAmounts[i];
+        return null;
+    }
+
+    dollarAmountOfCurrentDate(node=this.data) {
+        let date = this.state.date;
+        for(let i = 0; i < node.dollarAmounts.length; i++) {
+            let obj = node.dollarAmounts[i];
             if(obj.date == date) {
                 return obj.dollarAmount;
             }
@@ -129,6 +144,25 @@ class VbChart {
         return num.toFixed(digits).replace(rx, "$1");
     }
 
+    // Format amount, exactly
+    nFormatExact(value) {
+        let commasFormatter = d3.format(",.0f");
+        return commasFormatter(value);
+    }
+
+    // Format a percentage (with sign)
+    formatPercentage(value) {
+        value = value.toFixed(2);
+        if (value > 0) {
+            return "+ " + value.toString() + "%";
+        } else if (value < 0) {
+            return "– " + Math.abs(value).toString() + "%";
+        } else {
+            return Math.abs(value).toString() + "%";
+        }
+    }
+
+    // Get the index of a certain date in the dollarAmounts array.
     getDateIndex(date) {
         let index = null;
         for(let i = 0; i < this.data.dollarAmounts.length; i++) {
@@ -139,11 +173,13 @@ class VbChart {
         return index;
     }
 
+    // What is the earliest date in the dataset?
     getFirstDate() {
         let range = this.getDateRange();
         return range[0].getUTCFullYear();
     }
 
+    // Return a node based on its hash.
     // FIXME: this function is used only by the treemap
     // and is specific to the d3.hierarchy object type.
     findHash(hash, root) {
@@ -154,6 +190,13 @@ class VbChart {
             }
         });
         return node;
+    }
+
+    // To title case
+    toTitleCase(str) {
+        return str.replace(/(?:^|\s)\w/g, function(match) {
+            return match.toUpperCase();
+        });
     }
 
     // FIXME: this function is basically same as above,

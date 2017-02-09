@@ -152,6 +152,93 @@
         background-color: darken(#f2f5fb, 2%);
 
 
+/* Tabular
+ ------------------------------------------------------- */
+.vb-chart-table
+    min-width: 900px;
+    overflow-x: scroll;
+
+.tablerow
+    height: 30px;
+    cursor: pointer;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid #aaaaaa;
+    line-height: 30px;
+
+    &.atomic .expand-icon
+        display: none;
+
+    &:last-child
+        border-bottom: 0;
+
+    .value
+        text-align: center;
+        width: 120px;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        display: inline-block;
+
+        &.long
+            width: 250px;
+
+        &.textleft
+            text-align: left;
+
+        &.textright
+            text-align: right;
+
+        &.numeric
+            font-family: "Georgia";
+
+        &.head
+            font-weight: bold;
+
+        &.maplink
+            width: 40px;
+            opacity: 0.1;
+
+    &:hover
+        background-color: #ebebeb;
+
+        .value.maplink
+            opacity: 0.8;
+
+    .group
+        display: none;
+
+    .bullet, .sparkline
+        vertical-align: bottom;
+
+    .bullet
+        width: 20px;
+        vertical-align: top;
+        display: inline-block;
+
+    .bullet-hidden
+        opacity: 0;
+
+    .sparkline
+        line-height: 0px;
+
+        .line
+            stroke-width: 1px;
+
+        svg rect
+            fill: white;
+            opacity: 0.001;
+
+
+@media only screen and (min-device-width: 768px) and (max-device-width: 1024px)
+    .tablerow .value
+        width: 120px;
+    .tablerow .value.long
+        width: 220px;
+    .tablerow .value.parent
+        width: 150px;
+
+
 /* My tax bill
  ------------------------------------------------------- */
 

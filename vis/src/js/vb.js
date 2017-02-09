@@ -87,6 +87,10 @@ var visualbudget = (function (vb, $, d3) {
                     newChart = new VbTreeMap($div, data);
                     break;
 
+                case 'table':
+                    newChart = new VbTable($div, data);
+                    break;
+
                 case 'metric':
                     newChart = new VbMetric($div, data);
                     break;

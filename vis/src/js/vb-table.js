@@ -120,7 +120,7 @@ class VbTable extends VbChart {
                 value: function(node) {
                     let val = that.dollarAmountOfCurrentDate(node);
                     let total = that.dollarAmountOfCurrentDate();
-                    return that.formatPercentage(val/total);
+                    return that.formatPercentage(val/total*100, 0);
                 }
             },
             {
@@ -139,9 +139,10 @@ class VbTable extends VbChart {
                         
                         // If we divided by zero, we'll say 100% growth.
                         if (!pct && pct !== 0) {
-                            pct = 100
-                        };
-                        percent = that.formatPercentage(pct);
+                            percent = '';
+                        } else {
+                            percent = that.formatPercentage(pct);
+                        }
                     }
 
                     return percent;

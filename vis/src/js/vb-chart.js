@@ -151,8 +151,8 @@ class VbChart {
     }
 
     // Format a percentage (with sign)
-    formatPercentage(value) {
-        value = value.toFixed(2);
+    formatPercentage(value, digits=2) {
+        value = value.toFixed(digits);
         if (value > 0) {
             return "+ " + value.toString() + "%";
         } else if (value < 0) {

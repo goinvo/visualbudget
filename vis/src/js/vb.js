@@ -148,6 +148,7 @@ var visualbudget = (function (vb, $, d3) {
 /**
  * Kick it off.
  */
+let $ = jQuery;
 (function(vb, $) {
     $(document).ready(function () {
         'use strict';

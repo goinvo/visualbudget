@@ -34,10 +34,7 @@ class VbTable extends VbChart {
 
     redraw() {
         console.log('Drawing chart ' + this.atts.hash + ' (table).');
-        this.initialize(this.$div, this.data);
-
-        // Open the first group
-        $(this.$div).children().eq(1).click();
+        this.initialize(this.$div, this.data);        
     }
 
     /*
@@ -51,7 +48,8 @@ class VbTable extends VbChart {
         let that = this;
 
         // remove old rows
-        $('.tablerow').remove();
+        $table.find('.tablerow').remove();
+        $table.find('.group').remove();
 
         // load row template
         let tableStats = this.tableStats();
@@ -67,6 +65,10 @@ class VbTable extends VbChart {
 
         // render all nodes (all search results)
         this.renderNode(data, 0, $table);
+
+        // Open the first group
+        $table.children().eq(1).click();
+        console.log($table.children().eq(1))
     }
 
 
@@ -155,7 +157,7 @@ class VbTable extends VbChart {
     *  Renders the header based on node data
     */
     renderHeader(tableStats) {
-        let template = '<div class="tablerow" id="vb-table-header" data-level=0>' +
+        let template = '<div class="tablerow header" id="vb-table-header" data-level=0>' +
                          '{{#.}}' +
                            '<div class="{{cellClass}} head">{{title}}</div>' +
                          '{{/.}}' +

@@ -136,6 +136,11 @@ class VbTable extends VbChart {
                         let cur = that.dollarAmountOfDate(date, node);
                         let prev = that.dollarAmountOfDate(date-1, node);
                         let pct = (cur - prev) / prev * 100;
+                        
+                        // If we divided by zero, we'll say 100% growth.
+                        if (!pct && pct !== 0) {
+                            pct = 100
+                        };
                         percent = that.formatPercentage(pct);
                     }
 

@@ -72,6 +72,11 @@ $id_or_alias_to_url = function($string) use ($get_aliases) {
 // If neither, set the URL anyway using the string provided (the user will
 // get an error). [FIXME: << is that right? should the chart just
 // say "invalid chart"?]
+
+// If there is no "data" variable, then it should be a "mytaxbill" vis.
+if(!isset($_GET['data'])) {
+    $_GET['data'] = '';
+}
 $dataset_names_array = $data_query_to_array($_GET['data']);
 $dataset_urls = array_map($id_or_alias_to_url, $dataset_names_array);
 if(count($dataset_urls) == 1) {
@@ -120,7 +125,7 @@ $chart_element = "<$element_type "
 
 
 // Check to see if we're displaying an iframe or not.
-if ($_GET['iframe']) {
+if (isset($_GET['iframe'])) {
 
     // Include iframe.php, which is the iframe template.
     // Note: iframe.php uses the variable $chart_element.

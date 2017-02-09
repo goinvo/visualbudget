@@ -33,6 +33,7 @@ class VbChart {
         // The shared state among charts. These properties are used
         // for the interaction between charts.
         this.state = {
+            hash: this.data.hash,
             myTaxBill: 7500, // Default. Q: How to set this?.
             groups: [],
             date: "2016",
@@ -178,7 +179,9 @@ class VbChart {
         return range[0].getUTCFullYear();
     }
 
-    // Return a node based on its hash
+    // Return a node based on its hash.
+    // FIXME: this function is used only by the treemap
+    // and is specific to the d3.hierarchy object type.
     findHash(hash, root) {
         let node = null;
         root.each(function(d) {
@@ -195,4 +198,28 @@ class VbChart {
             return match.toUpperCase();
         });
     }
+
+    // FIXME: this function is basically same as above,
+    // only it works on the VB chart data object type.
+    getNodeByHash(hash, data) {
+
+        if (!data) {
+            data = this.data;
+        }
+
+        if (data.hash == hash) {
+            return data;
+        }
+
+        let node = null;
+        for(let i = 0; i < data.children.length; i++) {
+            node = this.getNodeByHash(hash, data.children[i]);
+            if(node) {
+                break;
+            }
+        }
+
+        return node;
+    }
+
 }

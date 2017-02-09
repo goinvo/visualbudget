@@ -31,9 +31,11 @@ class VbTable extends VbChart {
 
     redraw() {
         console.log('Drawing chart ' + this.atts.hash + ' (table).');
-        //
-    }
+        this.initialize(this.$div, this.data);
 
+        // Open the first group
+        $(this.$div).children().eq(1).click();
+    }
 
     /*
     * Initializes table
@@ -42,48 +44,26 @@ class VbTable extends VbChart {
     *   @param {node} data - nodes to be displayed
     */
     initialize($container, data) {
-        var $table = $container;
+        let $table = $container;
+        let that = this;
 
         // remove old rows
         $('.tablerow').remove();
 
-        if (data instanceof Array) {
+        // load row template
+        let tableStats = this.tableStats();
 
-            /*
-             * Data is flat (search results)
-             */
-
-            // load row template
-            tableStats = tables.search;
-
-            // display no results message should that be the case
-            if (data.length === 0) {
-                textRow('No results found.', $table);
-                return;
-            }
-            // render table head
-            $table.append(Mustache.render($('#table-header-template').html(), tableStats));
-
-            // render all nodes (all search results)
-            $.each(data, function () {
-                renderNode(this, 0, $table);
-            });
-        } else {
-
-            /*
-             * Data in nested (datasets)
-             */
-
-            tableStats = tables[avb.section];
-
-            // render table head
-            $table.append(Mustache.render($('#table-header-template').html(), tableStats));
-            // initialize scale
-            amountScale.domain([0, data.values[yearIndex].val * 0.5]);
-            // render root node (cascades to children)
-            renderNode(data, 0, $table).trigger('click');
+        // display no results message should that be the case
+        if (data.length === 0) {
+            textRow('No results found.', $table);
+            return;
         }
 
+        // render table head
+        $table.append(this.renderHeader(tableStats));
+
+        // render all nodes (all search results)
+        this.renderNode(data, 0, $table);
     }
 
 
@@ -91,19 +71,68 @@ class VbTable extends VbChart {
     *   Aligns columns when the indentation level changes
     */
     alignRows() {
-        // could do this using a stack
-        var maxLevel = 0;
-        // find maximum depth level
+        // Could do this using a stack.
+        let maxLevel = 0;
+
+        // Find maximum depth level.
         $('.tablerow').each(function () {
-            if ($(this).data('level') > maxLevel) maxLevel = $(this).data('level');
-        })
-        // assign each first column a margin-right so that all the remaining
-        // columns will be aligned
+            if ($(this).data('level') > maxLevel) {
+                maxLevel = $(this).data('level');
+            }
+        });
+
+        // Assign each first column a margin-right so that all the remaining
+        // columns will be aligned.
         $('.tablerow').each(function () {
+            let thisLevel = $(this).data('level') || 0;
             $(this).find('.name').animate({
-                'margin-right': (maxLevel - $(this).data('level')) * indent
+                'margin-right': (maxLevel - thisLevel) * 25
             }, 250);
         });
+    }
+
+    /*
+    * Defines the statistics to display in the table.
+    * Each object of the array has properties "title", "cellClass",
+    * and "value".
+    */
+    tableStats() {
+        let that = this;
+        return [
+            {
+                title: "Name",
+                cellClass: "value name long textleft",
+                value: function(node) { return node.name; }
+            },
+            {
+                title: "Value",
+                cellClass: "value textright",
+                value: function(node) {
+                    return '$' + that.nFormatExact(that.dollarAmountOfCurrentDate(node));
+                }
+            }
+        ];
+    }
+
+    /*
+    *  Renders the header based on node data
+    */
+    renderHeader(tableStats) {
+        let template = '<div class="tablerow" id="vb-table-header" data-level=0>' +
+                         '{{#.}}' +
+                           '<div class="{{cellClass}} head">{{title}}</div>' +
+                         '{{/.}}' +
+                       '</div>';
+        return Mustache.render(template, tableStats);
+    }
+
+    /*
+    *  The template for a table row.
+    */
+    rowTemplate() {
+        return  '<div class="tablerow">' +
+                    '<div class="bullet {{hidden}}">&#9656;</div>' +
+                '</div>';
     }
 
     /*
@@ -113,60 +142,12 @@ class VbTable extends VbChart {
     *   @param {jQuery obj} table - container
     */
     textRow(msg, $table) {
-        var template = $('#row-template');
-        var rendered = $table.append(Mustache.render(template.html())).children().last();
+        let template = this.rowTemplate();
+        let rendered = $table.append(Mustache.render(template)).children().last();
         // align text to center
         rendered.css({
             'text-align': 'center'
         }).text(msg);
-    }
-
-    /*
-    *   Click event for rows
-    */
-    rowClick() {
-        var row = $(this);
-        var node = row.data();
-        // atomic nodes don't need to expand or collapse
-        if (row.hasClass('atomic')) return;
-
-        if (row.hasClass('expanded')) {
-
-            /*
-             *  Collapse row if expanded
-             */
-
-            // retrieve children rows
-            var child = row.data('childDiv');
-            // slide up children rows
-            child.slideUp(250, function () {
-                $(this).remove();
-                alignRows();
-            })
-
-            row.removeClass('expanded');
-
-        } else {
-
-            /*
-             *  Expand row is collapsed
-             */
-
-            // container
-            var childDiv = $('<div class="group"></div>').insertAfter(row);
-
-            // render children rows
-            for (var i = 0; i < node.sub.length; i++) {
-                renderNode(node.sub[i], row.data('level') + 1, childDiv);
-                row.data('childDiv', childDiv);
-            }
-
-            // show children rows
-            alignRows();
-            childDiv.slideDown(250);
-
-            row.addClass('expanded');
-        }
     }
 
     /*
@@ -180,23 +161,24 @@ class VbTable extends VbChart {
     */
     renderNode(node, level, container) {
         // append row to container
-        var template = $('#row-template');
-        var rendered = container.append(Mustache.render(template.html(), node)).children().last();
+        let template = this.rowTemplate();
+        let rendered = container.append(Mustache.render(template,
+                {hidden: node.children.length ? '' : 'hidden'})).children().last();
+        let tableStats = this.tableStats();
 
         // check whether node has children
-        rendered.addClass((node.sub === undefined || node.sub.length === 0) ? 'atomic' : '');
+        rendered.addClass((node.children.length === 0) ? 'atomic' : '');
         rendered.data(node);
         rendered.data('level', level);
 
         // recreate indentation style based on level
         rendered.css({
-            'padding-left': level * indent
+            'padding-left': level * 25
         });
-
 
         $.each(tableStats, function () {
             // append new cell to row
-            var newcell = $('<div class="' + this.cellClass + '"> </div>').appendTo(rendered);
+            let newcell = $('<div class="' + this.cellClass + '"> </div>').appendTo(rendered);
             if (this.cellFunction) {
                 // function (eg. formatting numerical value)
                 this.cellFunction(node, newcell.get(0));
@@ -204,41 +186,62 @@ class VbTable extends VbChart {
                 // text (eg. row title)
                 newcell.text(this.value(node));
             }
-        })
-
-        // append popover
-        if (node.descr.length !== 0) {
-            rendered.find('.long').popover({
-                // trigger : 'hover' is not the best solution
-                // as it will show the popover mid-row, which
-                // what we want
-                trigger: 'manual',
-                animation : false,
-                // calculate best position for popover placement
-                placement: function (context, source) {
-                    var position = $(source).position();
-                    if (position.top < 150) {
-                        return "bottom";
-                    } else {
-                        return "top";
-                    }
-                },
-                // assign popover content
-                content: node.descr
-            });
-        }
-        // show popover on hover
-        rendered.mouseenter(function () {
-            rendered.find('.long').popover('show');
-        });
-        rendered.mouseleave(function () {
-            rendered.find('.long').popover('hide');
         });
 
         // attach click event 
-        rendered.click(rowClick);
+        rendered.click(this.rowClick(this));
 
         return rendered;
+    }
+
+    /*
+    *   Click event for rows
+    */
+    rowClick(that) {
+        return function() {
+            let row = $(this);
+            let node = row.data();
+            // atomic nodes don't need to expand or collapse
+            if (row.hasClass('atomic')) return;
+
+            if (row.hasClass('expanded')) {
+
+                /*
+                 *  Collapse row if expanded
+                 */
+
+                // retrieve children rows
+                let child = row.data('childDiv');
+                // slide up children rows
+                child.slideUp(250, function () {
+                    $(this).remove();
+                    that.alignRows();
+                })
+
+                row.removeClass('expanded');
+
+            } else {
+
+                /*
+                 *  Expand row if collapsed
+                 */
+
+                // container
+                let childDiv = $('<div class="group"></div>').insertAfter(row);
+
+                // render children rows
+                for (let i = 0; i < node.children.length; i++) {
+                    that.renderNode(node.children[i], row.data('level') + 1, childDiv);
+                    row.data('childDiv', childDiv);
+                }
+
+                // show children rows
+                that.alignRows();
+                childDiv.slideDown(250);
+
+                row.addClass('expanded');
+            }
+        }
     }
 
     /*
@@ -342,7 +345,8 @@ class VbTable extends VbChart {
         } else {
             // non-edge case
             // growth calculation
-            perc = Math.round(100 * 100 * (data.values[yearIndex].val - previous) / data.values[yearIndex].val) / 100;
+            perc = Math.round(100 * 100 * (data.values[yearIndex].val - previous)
+                            / data.values[yearIndex].val) / 100;
         }
 
         // change color depending of growth magnitude and direction
@@ -352,86 +356,4 @@ class VbTable extends VbChart {
         $(cell).text(formatPercentage(perc));
 
     }
-
-    /*
-    *   Draws amount cell for current node
-    *
-    *   @param {object} data - current node
-    *   @param {jquery object} - current cell
-    */
-    renderAmount(data, cell) {
-        var amount = (data.values[yearIndex].val);
-        // apply color based on scale
-        if (tableStats !== tables.search) $(cell).css({
-            "color": amountScale(amount)
-        });
-        // format numeric value
-        $(cell).text(formatCurrencyExact(amount));
-    }
-
-    /*
-    *   Draws inpact cell for current node
-    *
-    *   @param {object} data - current node
-    *   @param {jquery object} - current cell
-    */
-    renderImpact(data, cell) {
-        var impact = stats.impact.value(data);
-        // apply color based on scale
-        $(cell).css({
-            "color": impactScale(impact)
-        });
-        $(cell).text(impact);
-    }
-
-    /*
-    *   Draws links that redirect to treemap representation of current entry
-    *
-    *   @param {object} data - current node
-    *   @param {jquery object} - current cell
-    */
-    renderMaplink(data, cell){
-        $(cell).html('<i class="icon-chevron-right maplink"></i>');
-        $(cell).click(function(){
-            avb.section = findSection(data.hash).key.toLowerCase();
-            switchMode('t', true);
-            // give enough time to load data
-            setTimeout(function(){
-                avb.treemap.open(data.hash, false, false);
-            }, 50)
-            
-        });
-    }
-
-    open(){
-
-    }
-
-    /*
-    *   Updates/re-renders table rows
-    */
-    update() {
-        // update all rows
-        $('.tablerow').each(function () {
-            var node = $(this);
-
-            // do not update table header
-            if (node.is('#table-header')) return;
-
-            // assumption. cell order and tableStats array do not change
-            // update all cells
-            for (var i = 0; i < tableStats.length; i++) {
-                var cell = $($(node).find('.value').get(i));
-                // refresh cell value
-                if (tableStats[i].cellFunction) {
-                    // function (eg. formatting numerical value)
-                    tableStats[i].cellFunction(node.data(), cell.get(0));
-                } else {
-                    // text (eg. row title)
-                    cell.text(tableStats[i].value(node));
-                }
-            };
-        })
-    };
-
 }

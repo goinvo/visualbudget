@@ -29,6 +29,9 @@ class VbTable extends VbChart {
             .range(["#aaa", "#333"]);
     }
 
+    resize() {
+    }
+
     redraw() {
         console.log('Drawing chart ' + this.atts.hash + ' (table).');
         this.initialize(this.$div, this.data);
@@ -105,10 +108,38 @@ class VbTable extends VbChart {
                 value: function(node) { return node.name; }
             },
             {
-                title: "Value",
+                title: "Amount",
                 cellClass: "value textright",
                 value: function(node) {
                     return '$' + that.nFormatExact(that.dollarAmountOfCurrentDate(node));
+                }
+            },
+            {
+                title: "Portion",
+                cellClass: "value textright",
+                value: function(node) {
+                    let val = that.dollarAmountOfCurrentDate(node);
+                    let total = that.dollarAmountOfCurrentDate();
+                    return that.formatPercentage(val/total);
+                }
+            },
+            {
+                title: "Growth",
+                cellClass: "value textright",
+                value: function(node) {
+                    let date = that.state.date;
+                    let percent = that.formatPercentage(100);
+
+                    // Check to see if the previous year existed.
+                    // If not, percent will be "N/A";
+                    if (that.getFirstDate() <= date-1) {
+                        let cur = that.dollarAmountOfDate(date, node);
+                        let prev = that.dollarAmountOfDate(date-1, node);
+                        let pct = (cur - prev) / prev * 100;
+                        percent = that.formatPercentage(pct);
+                    }
+
+                    return percent;
                 }
             }
         ];
@@ -242,118 +273,5 @@ class VbTable extends VbChart {
                 row.addClass('expanded');
             }
         }
-    }
-
-    /*
-    * Draws D3 sparkline in cell
-    *
-    *   @param {object} data - current node
-    *   @param {jquery object} - current cell
-    */
-    renderSparkline(node, cell) {
-
-        // delete old sparklines
-        d3.select(cell).select('svg').remove();
-
-        // svg initialization
-        var width = $(cell).width(),
-            height = $(cell).parent().height();
-        var sparkline = d3.select(cell).append('svg')
-            .attr('width', width).attr('height', height);
-
-        // scale initialization
-        var xscale = d3.scale.linear().range([5, width-5])
-            .domain([avb.firstYear, avb.lastYear]);
-        var yscale = d3.scale.linear().range([height - 2, 2])
-            .domain([0, d3.max(node.values, function (d) {
-                return d.val
-            })]);
-
-        // line initialization
-        var line = d3.svg.line().interpolate("monotone")
-            .x(function (d) {
-                return xscale(d.year);
-            })
-            .y(function (d) {
-                return yscale(d.val);
-            });
-
-        // draw sparkline
-        sparkline.append('g').append("svg:path").classed("line", true)
-            .attr("d", line(node.values)).style("stroke", 'black');
-
-        // draw point to indicate current year
-        var pointer = sparkline.append('g').append("svg:circle").attr("r", 2)
-            .datum({
-                cx : xscale(node.values[yearIndex].year),
-                cy : yscale(node.values[yearIndex].val)
-            })
-            .attr("cx", xscale(node.values[yearIndex].year))
-            .attr("cy", yscale(node.values[yearIndex].val));
-
-        // mouse moving in sparkline
-        sparkline.on('mousemove', function(){
-            // find year from x coordinate
-            var year = Math.round(xscale.invert(d3.mouse(this)[0]));
-            // move circle to another year
-            pointer.attr("cx",  xscale(year))
-            .attr("cy", yscale(node.values[year - avb.firstYear].val));
-
-            // redraw popover
-            $(pointer.node()).tooltip('destroy');
-            $(pointer.node()).tooltip({
-                // popover is appended to sparkline cell
-                // this is done to avoid mouseleave events should the tooltip
-                // be attached to 'body'. Obviously we cannot attach the tooltip
-                // to the svg itself.
-                container : sparkline.node().parentNode,
-                title : year,
-                animation : false
-            })
-            $(pointer.node()).tooltip('show');
-        });
-
-        // mouse leaving sparkline
-        d3.select(sparkline.node().parentNode).on('mouseleave', function(){
-            // return year pointer to its original location
-            var pos = pointer.datum();
-            pointer.attr("cx", pos.cx)
-            .attr("cy", pos.cy);
-            // remove tooltip
-            $(pointer.node()).tooltip('destroy');
-        });
-
-    }
-
-    /*
-    *   Draws growth cell for current node
-    *
-    *   @param {object} data - current node
-    *   @param {jquery object} - current cell
-    */
-    renderGrowth(data, cell) {
-        // when year is first year report previous year value to be 0
-        // growth will result to be 100%
-        var previous = (data.values[yearIndex - 1]) ? data.values[yearIndex - 1].val : 0;
-        // edge case
-        if (data.values[yearIndex].val === 0) {
-            if (previous === 0) {
-                perc = 0;
-            } else {
-                perc = 100;
-            }
-        } else {
-            // non-edge case
-            // growth calculation
-            perc = Math.round(100 * 100 * (data.values[yearIndex].val - previous)
-                            / data.values[yearIndex].val) / 100;
-        }
-
-        // change color depending of growth magnitude and direction
-        $(cell).css({
-            "color": growthScale(perc)
-        });
-        $(cell).text(formatPercentage(perc));
-
     }
 }

@@ -199,7 +199,7 @@ class VbTable extends VbChart {
         // append row to container
         let template = this.rowTemplate();
         let rendered = container.append(Mustache.render(template,
-                {hidden: node.children.length ? '' : 'hidden'})).children().last();
+                {hidden: node.children.length ? '' : 'bullet-hidden'})).children().last();
         let tableStats = this.tableStats();
 
         // check whether node has children

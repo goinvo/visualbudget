@@ -6,6 +6,7 @@
 
 // The _vbAdminGlobal is set by wp_localize_script() in the vb admin php file.
 let _vbPluginUrl = _vbAdminGlobal.vbPluginUrl;
+let $ = jQuery;
 
 // Initialize all modules.
 angular.module('vbAdmin.tabs', []);

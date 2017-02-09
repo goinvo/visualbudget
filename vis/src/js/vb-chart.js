@@ -19,7 +19,7 @@ class VbChart {
         if (typeof this.atts.name !== 'undefined') {
             this.data.name = this.atts.name;
         } else {
-            this.data.name = this.toTitleCase(this.atts.data);
+            this.data.name = this.toTitleCase(this.atts.data.toString());
         }
 
         // Set the chart width & height if user set them.

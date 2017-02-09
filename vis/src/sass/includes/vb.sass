@@ -154,6 +154,10 @@
 
 /* Tabular
  ------------------------------------------------------- */
+.vb-chart-table
+    min-width: 900px;
+    overflow-x: scroll;
+
 .tablerow
     height: 30px;
     cursor: pointer;
@@ -204,9 +208,6 @@
     .group
         display: none;
 
-    .hidden
-        opacity: 0;
-
     .bullet, .sparkline
         vertical-align: bottom;
 
@@ -214,6 +215,9 @@
         width: 20px;
         vertical-align: top;
         display: inline-block;
+
+    .bullet-hidden
+        opacity: 0;
 
     .sparkline
         line-height: 0px;

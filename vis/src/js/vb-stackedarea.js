@@ -13,7 +13,7 @@ class VbStackedArea extends VbChart {
         super($div, data);
 
         // Smooth or stepwise graph?
-        this.smooth = true;
+        this.atts.smooth = this.atts.smooth || false;
 
         // Set up the SVG.
         this.setupChartSvg();
@@ -123,26 +123,28 @@ class VbStackedArea extends VbChart {
         x.domain(this.getDateRange())
         y.domain([0, d3.max(data.dollarAmounts.filter(inDateRange(null)), d => d.dollarAmount)]);
 
-        // Add the valueline path.
-        svg.append("path")
-            .attr("class", "line")
-            .attr("d", valueline(data.dollarAmounts.filter(inDateRange(null))));
+
+        if(this.isSmooth()) {
+            // Add the valueline path.
+            svg.append("path")
+                .attr("class", "line")
+                .attr("d", valueline(data.dollarAmounts.filter(inDateRange(null))));
 
 
-        // Plot points on the line.
-        svg.selectAll("g.circles-line")
-                .data([data.dollarAmounts])
-                .enter()
-            .append("g")
-                .attr("class", "circles-line")
-                .selectAll("circle")
-                .data( d => d )
-                .enter()
-            .append("circle")
-                .attr("r", 4)
-                .attr("cx", (d,i) => x(new Date(d.date)) )
-                .attr("cy", (d,i) => y(d.dollarAmount) );
-
+            // Plot points on the line.
+            svg.selectAll("g.circles-line")
+                    .data([data.dollarAmounts])
+                    .enter()
+                .append("g")
+                    .attr("class", "circles-line")
+                    .selectAll("circle")
+                    .data( d => d )
+                    .enter()
+                .append("circle")
+                    .attr("r", 4)
+                    .attr("cx", (d,i) => x(new Date(d.date)) )
+                    .attr("cy", (d,i) => y(d.dollarAmount) );
+        }
 
         // Add the X Axis
         svg.append("g")
@@ -245,9 +247,6 @@ class VbStackedArea extends VbChart {
             let newChildren = jQuery.extend({}, data);
             data.children.push(newChildren);
             data.children[0].children = [];
-            // delete data['area'];
-            // delete data['value'];
-            // delete data['z'];
             data.depth = 0;
         }
 
@@ -263,7 +262,7 @@ class VbStackedArea extends VbChart {
             .y0( d => yscale(d[0]) )
             .y1( d => yscale(d[1]) );
 
-        // We have to reorder the data.
+        // We have to reorder the data for the stack.
         let newData = [];
         let keys = data.children.map( d => d.name );
         let colors = data.children.map( d => d.color );
@@ -278,42 +277,50 @@ class VbStackedArea extends VbChart {
             newData.push(dataPoint);
         }
 
-        // stack declaration
+        // Stack declaration
         let stack = d3.stack()
             .keys(keys)
             .order(d3.stackOrderAscending);
-
         let instance = stack(newData);
 
-        // calculate areas
-        let regions = layers.selectAll(".browser")
-            .data(instance)
-            .enter().append("g")
-            .attr("class", "browser");
+        // Calculate areas
+        if(this.isSmooth()) {
+            // It will be a line chart.
 
-        // draw areas
-        layers.areas = regions.append("path")
-            .attr("class", "multiarea")
-            .attr("d", area )
-            .style("fill", (d,i) => colors[i] );
+            let regions = layers.selectAll(".browser")
+                .data(instance)
+                .enter().append("g")
+                    .attr('fill', (d,i) => colors[i])
+                .attr("class", "browser");
 
-        // append boundary shadow
-        // appendShadow(layers);
+            // draw areas
+            layers.areas = regions.append("path")
+                .attr("class", "multiarea")
+                .attr("d", area )
+                .style("fill", (d,i) => colors[i] );
 
-        // introduces feedback when user changes year
-        // chart layer boundary is moved to current year x coordinate
-        /*
-        if(avb.thisYear != chart.year){
-            chart.layersWidth = chart.xscale(avb.thisYear);
-            chart.year = avb.thisYear;
+        } else {
+            // It will be a bar chart.
+
+            let newx = d3.scaleBand()
+                .rangeRound([0, chart.xwidth])
+                .padding(0.15)
+                .align(0.3)
+                .domain(keys);
+
+            let regions = layers.selectAll(".browser")
+                .data(instance)
+                .enter().append("g")
+                    .attr('fill', (d,i) => colors[i])
+                .selectAll("rect")
+                .data( d => d )
+                .enter().append("rect")
+                    .attr('class', 'multibar')
+                    .attr("x", d => xscale(new Date(d.data.date)) )
+                    .attr("y", d => yscale(d[1]) )
+                    .attr("height", d => yscale(d[0]) - yscale(d[1]) )
+                    .attr("width", d => newx.bandwidth() );
         }
-        */
-
-        /*
-        setTimeout(function(){
-            slideLayers(chart.layersWidth);
-        }, 10);
-        */
 
     };
 
@@ -388,6 +395,10 @@ class VbStackedArea extends VbChart {
         this.svg.on('mousedown', mousedown_callback);
         this.svg.on('mousemove', mousemove_callback);
         this.svg.on('mouseup',   mouseup_callback);
+    }
+
+    isSmooth() {
+        return this.atts.smooth;
     }
 
 }

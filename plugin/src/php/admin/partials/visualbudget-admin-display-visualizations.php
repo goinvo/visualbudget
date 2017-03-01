@@ -10,6 +10,12 @@
     <div ng-app="vbAdmin" ng-controller="vbController as vbCtrl">
 
         <tabs>
+            <pane title="Stacked area chart">
+                <chart vis='stackedarea'></chart>
+                <dataset-select></dataset-select>
+                <shortcode explain='true'></shortcode>
+                <iframelink></iframelink>
+            </pane>
             <pane title="Line chart">
                 <chart vis='linechart'></chart>
                 <dataset-select></dataset-select>

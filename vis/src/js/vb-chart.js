@@ -7,7 +7,9 @@ class VbChart {
     // Chart
     constructor($div, data) {
 
-        this.setColors(data);
+        if(data.constructor !== Array) {
+            this.setColors(data);
+        }
 
         // The jQuery object for the chart div
         // and the chart's data.

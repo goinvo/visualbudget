@@ -6,7 +6,6 @@
     margin: 0 auto;
 
 
-
 /* Line chart
  ------------------------------------------------------- */
 
@@ -46,6 +45,73 @@
 
     .hidden
         opacity: 0;
+
+
+/* Stacked area chart
+ ------------------------------------------------------- */
+
+.vb-chart-stackedarea
+    height: 240px;
+    width: 100%;
+
+    .svg-chart
+        pointer-events: all;
+
+    .click-capture
+        &:hover
+            cursor: pointer;
+
+    path
+        stroke: steelblue;
+        stroke-width: 3;
+        opactity: 0.7;
+        fill: none;
+
+    .circles-line
+        circle
+            fill: darken(steelblue, 10%);
+
+    .axis
+        path, line
+            fill: none;
+            stroke: grey;
+            stroke-width: 1;
+            shape-rendering: crispEdges;
+
+    .hoverline
+        stroke: #555;
+        opacity: 0.4;
+        stroke-width: 2;
+        shape-rendering: optimizeSpeed;
+
+    .hidden
+        opacity: 0;
+
+    .multiarea
+        fill-opacity: 0.65;
+        stroke: none;
+
+    .multiline
+        fill: none;
+        stroke-width: 2px;
+        opacity: 1;
+
+    .multiaxis path
+        stroke-width: 0;
+        fill: none;
+
+    .multigrid .tick
+        stroke: lightgray;
+        opacity: 0;
+
+    .multigrid path
+        stroke-width: 1;
+
+    .layerLine, .sideShadow
+        box-shadow: -3px 0px 8px black;
+        margin-left: 10px;
+
+
 
 
 /* Comparison

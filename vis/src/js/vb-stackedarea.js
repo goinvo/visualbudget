@@ -280,13 +280,6 @@ class VbStackedArea extends VbChart {
             .y0( d => yscale(d[0]) )
             .y1( d => yscale(d[1]) );
 
-        // area declaration
-        let line = d3.line()
-            // .interpolate("monotone")
-            .x( d => xscale(new Date(d.data.date)) )
-            .y( d => yscale(d[1]) );
-
-
         // We have to reorder the data.
         let newData = [];
         let keys = data.children.map( d => d.name );
@@ -322,20 +315,6 @@ class VbStackedArea extends VbChart {
             .style("fill", function (d, i) {
                 return singleAreaColor || d3.schemeCategory20[i % 20];
             });
-
-        // draw lines
-        layers.lines = regions.append("path")
-            .attr("class", "multiline")
-            .attr("d", d => line )
-            .style("stroke", function (d, i) {
-                return d3.schemeCategory20[i % 20];
-            });
-
-        // legend
-        // legend(regions, data);
-
-        // not fundamental, improves layers looks
-        // $('.layers g:last .multiline').remove();
 
         // append boundary shadow
         // appendShadow(layers);

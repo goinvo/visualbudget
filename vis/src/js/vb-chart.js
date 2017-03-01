@@ -7,6 +7,8 @@ class VbChart {
     // Chart
     constructor($div, data) {
 
+        this.setColors(data);
+
         // The jQuery object for the chart div
         // and the chart's data.
         this.$div = $div;
@@ -47,6 +49,31 @@ class VbChart {
         });
     }
 
+    setColors(data) {
+        // We will count through, getting new colors.
+        let i = 0;
+        let pickAColor = function() {
+            if (!d3.schemeCategory20[i]) {
+                i = 0;
+            }
+            return d3.schemeCategory20[i++];
+        }
+
+        // Recurse through the hierarchy.
+        let setColorsRecurse = function(array) {
+            if (array.children.length > 0) {
+                for(let j = 0; j < array.children.length; j++) {
+                    array.children[j].color = pickAColor();
+                }
+                for(let j = 0; j < array.children.length; j++) {
+                    setColorsRecurse(array.children[j]);
+                }
+            }
+        }
+
+        data.color = pickAColor();
+        setColorsRecurse(data);
+    }
 
     // The data-* properties are specified in the HTML with the additional
     // prefix of vb, so they are data-vb-*. Let's remove that unnecessary vb.

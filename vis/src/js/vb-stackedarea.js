@@ -256,8 +256,6 @@ class VbStackedArea extends VbChart {
 
         layers.xscale = xscale;
 
-        let color = d3.schemeCategory20;
-
         // line declaration
         let area = d3.area()
             // .interpolate("monotone")
@@ -268,6 +266,7 @@ class VbStackedArea extends VbChart {
         // We have to reorder the data.
         let newData = [];
         let keys = data.children.map( d => d.name );
+        let colors = data.children.map( d => d.color );
         for (let i = 0; i < data.dollarAmounts.length; i++) {
             let date = data.dollarAmounts[i].date;
             let dataPoint = {};
@@ -296,10 +295,7 @@ class VbStackedArea extends VbChart {
         layers.areas = regions.append("path")
             .attr("class", "multiarea")
             .attr("d", area )
-            // .attr("d", function(d) {console.log(d)} )
-            .style("fill", function (d, i) {
-                return singleAreaColor || d3.schemeCategory20[i % 20];
-            });
+            .style("fill", (d,i) => colors[i] );
 
         // append boundary shadow
         // appendShadow(layers);

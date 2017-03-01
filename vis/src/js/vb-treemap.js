@@ -131,20 +131,9 @@ class VbTreeMap extends VbChart {
 
     calculateLayout() {
 
-        // We will count through, getting new colors.
-        let i = 0;
-        let pickAColor = function(d) {
-            if (!d3.schemeCategory20[i]) {
-                i = 0;
-            }
-            d.color = d3.schemeCategory20[i];
-            i++;
-        }
-
         this.root = d3.hierarchy(this.data, d => d.children)
             .sum(d => d.children.length ? 0 : d.dollarAmounts[this.dateIndex].dollarAmount)
-            .sort((a, b) => b.dollarAmount - a.dollarAmount)
-            .each(pickAColor);
+            .sort((a, b) => b.dollarAmount - a.dollarAmount);
 
         // make the treemap
         this.treemap = d3.treemap()
@@ -168,9 +157,6 @@ class VbTreeMap extends VbChart {
     display(d) {
         let that = this;
         let nav = this.nav;
-
-        // remove all popovers
-        // $('.no-value').popover('destroy');
 
         var formatNumber = d3.format(",d"),
             // flag will be used to avoid overlapping transitions
@@ -230,7 +216,7 @@ class VbTreeMap extends VbChart {
         g.append("rect")
             .attr("class", "parent")
             .call(that.rect(that.nav))
-            .style("fill", d => d.color)
+            .style("fill", d => d.data.color)
             .on('mouseenter', this.tip.show)
             .on('mouseleave', this.tip.hide);
 

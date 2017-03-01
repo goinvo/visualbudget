@@ -29,12 +29,11 @@ class VbStackedArea extends VbChart {
 
         let data = this.getNodeByHash(this.state.hash);
         this.drawChart(data);
-        this.drawLayers(data);
     }
 
     setState(newState) {
         let oldHash = this.state.hash;
-        let newHash = newState.hash;
+        let newHash = newState.hash || oldHash;
         this.state = Object.assign({}, this.state, newState);
 
         // Do not redraw everything here.
@@ -174,28 +173,14 @@ class VbStackedArea extends VbChart {
             .attr("x1", xpos).attr("x2", xpos)
             .attr("y1", 0).attr("y2", chart.yheight)
             .attr("class", "hoverline");
+
+        this.drawLayers(data);
+        this.moveHoverline();
     }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     /*
-    *   Draws stacked area chart
+    *   Draws stacked area layers
     *
     *   @param {node} data - node for which data has to be displayed
     */
@@ -319,10 +304,6 @@ class VbStackedArea extends VbChart {
         // append boundary shadow
         // appendShadow(layers);
 
-        // trick that solves IE10 bug which keeps chart
-        // for expanding past its initial width
-
-
         // introduces feedback when user changes year
         // chart layer boundary is moved to current year x coordinate
         /*
@@ -338,35 +319,7 @@ class VbStackedArea extends VbChart {
         }, 10);
         */
 
-
     };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
     moveHoverline() {
@@ -375,6 +328,8 @@ class VbStackedArea extends VbChart {
         let xpos = this.chart.x(new Date(this.state.date));
         this.hoverline
             .attr("x1", xpos).attr("x2", xpos);
+
+        this.svg.layers.svg.attr('width', xpos);
     }
 
     // Add interaction actions.

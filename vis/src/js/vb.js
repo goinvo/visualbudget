@@ -79,6 +79,10 @@ var visualbudget = (function (vb, $, d3) {
                     newChart = new VbLineChart($div, data);
                     break;
 
+                case 'stackedarea':
+                    newChart = new VbStackedArea($div, data);
+                    break;
+
                 case 'comparisontime':
                     newChart = new VbComparisonTime($div, data);
                     break;

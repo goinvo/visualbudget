@@ -110,11 +110,16 @@ class VbTreeMap extends VbChart {
             return function(d) {
                 let html = "<div class='name'>" + d.data.name + "</div>";
                 if(that.state.myTaxBill !== '') {
-                    let total = that.dollarAmountOfDate(that.state.date);
+                    let total = that.taxAdjustedDollarAmountOfDate(that.state.date);
+                    let subTotal = that.taxAdjustedDollarAmountOfDate(that.state.date, d.data);
                     let myBill = that.state.myTaxBill;
-                    let myContribution = myBill * (d.value / total);
+                    let myContribution = myBill * (subTotal / total);
+                    let fundedByTaxes = subTotal / that.dollarAmountOfDate(that.state.date, d.data);
+                    fundedByTaxes = Math.round(100*fundedByTaxes);
+                    let taxesNote = " (" + fundedByTaxes + "% is paid for by taxes.)";
                     html = html + "<div class='description'>Your contribution is "
-                                + "$" + myContribution.toFixed(2) + ".</div>";
+                                + "$" + myContribution.toFixed(2) + "."
+                                + taxesNote + "</div>";
                 }
                 return html;
             }
@@ -130,7 +135,6 @@ class VbTreeMap extends VbChart {
     }
 
     calculateLayout() {
-
         this.root = d3.hierarchy(this.data, d => d.children)
             .sum(d => d.children.length ? 0 : d.dollarAmounts[this.dateIndex].dollarAmount)
             .sort((a, b) => b.dollarAmount - a.dollarAmount);

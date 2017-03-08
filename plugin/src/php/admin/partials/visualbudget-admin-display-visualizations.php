@@ -91,12 +91,16 @@
                 </div>
                 <div class="row" style='margin-top: 2em'>
                     <div class="col-md-6">
+                        <p style='text-align:center'>My tax contribution:</p>
+                        <chart vis='metric' metric='mytaxcontribution'></chart>
+                        <shortcode metric='mytaxcontribution'></shortcode>
+                        <iframelink metric='mytaxcontribution'></iframelink>
+                    </div>
+                    <div class="col-md-6">
                         <p style='text-align:center'>Download link:</p>
                         <chart vis='metric' metric='download'></chart>
                         <shortcode metric='download'></shortcode>
                         <iframelink metric='download'></iframelink>
-                    </div>
-                    <div class="col-md-6">
                     </div>
                 </div>
             </pane>

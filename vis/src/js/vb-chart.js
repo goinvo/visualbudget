@@ -121,19 +121,33 @@ class VbChart {
         return newAtts;
     }
 
+    // What is the dollarAmound corresponding to a given date for
+    // a given node in the dataset?
     dollarAmountOfDate(date, node=this.data) {
+        // Find the right dollar amount for our date.
         let dollarAmountObjs = [...node.dollarAmounts];
         let obj = this.filterTakeFirst(dollarAmountObjs, e => e.date == date);
         return obj.dollarAmount;
     }
 
+    // Returns the dollarAmount of the date multiplied by the tax ratio
+    // (i.e. the meta property "FUNDED_BY_TAXES") for the item.
+    // This function is recursive, calculating dollarAmount*taxRatio for each
+    // leaf before summing them.
     taxAdjustedDollarAmountOfDate(date, node=this.data) {
         if(node.children.length == 0) {
+            // Find the right dollar amount for our date.
             let dollarAmountObjs = [...node.dollarAmounts];
             let obj = this.filterTakeFirst(dollarAmountObjs, e => e.date == date);
+
+            // Get the "FUNDED_BY_TAXES" fraction. Constrain it to [0,1].
             let fundedByTaxes = this.getMetaProperty("FUNDED_BY_TAXES", 1, node);
+            fundedByTaxes = Math.min(Math.max(fundedByTaxes, 0), 1);
+
+            // Simply multiply
             return obj.dollarAmount * fundedByTaxes;
         } else {
+            // There are children. Recurse over them.
             let childDollarAmounts = node.children.map(
                             e => this.taxAdjustedDollarAmountOfDate(date, e)
                         );
@@ -141,8 +155,9 @@ class VbChart {
         }
     }
 
-    getMetaProperty(propName, defaultValue, node=this.data) {
-        let meta = this.filterTakeFirst(node.meta, e => e.name == "FUNDED_BY_TAXES");
+    // Get a meta property by name.
+    getMetaProperty(propName, defaultValue='', node=this.data) {
+        let meta = this.filterTakeFirst(node.meta, e => e.name == propName);
         return meta ? meta.value : defaultValue;
     }
 

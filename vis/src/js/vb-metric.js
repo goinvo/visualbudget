@@ -67,6 +67,10 @@ class VbMetric extends VbChart {
                 metric = this.getMetricDownloadLink();
                 break;
 
+            case 'mytaxcontribution':
+                metric = this.getMetricMyTaxContribution(state, data);
+                break;
+
             default:
                 metric = '?'; // Don't be too disruptive to the viewer.
         }
@@ -214,6 +218,21 @@ class VbMetric extends VbChart {
             html = '<!-- No dataset URLs specified. -->';
         }
         return html;
+    }
+
+
+    /* Get the metric for "my tax contribution"
+     */
+    getMetricMyTaxContribution(state, data) {
+        let metric = '';
+        if(state.myTaxBill !== '') {
+            let total = this.taxAdjustedDollarAmountOfDate(state.date);
+            let subTotal = this.taxAdjustedDollarAmountOfDate(state.date, data);
+            let myBill = state.myTaxBill;
+            let myContribution = myBill * (subTotal / total);
+            metric = "$" + myContribution.toFixed(2);
+        }
+        return metric;
     }
 
     /* Checks to see if input is numeric

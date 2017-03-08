@@ -30,7 +30,7 @@
             </pane>
             <pane title="Comparison">
                 <chart vis='comparisontime'></chart>
-                <dataset-select></dataset-select>
+                <dataset-select multiple></dataset-select>
                 <shortcode explain='true'></shortcode>
                 <iframelink></iframelink>
             </pane>

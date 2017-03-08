@@ -16,7 +16,6 @@ let chartController = function($scope, $http, $sce) {
             }
 
             return chartUrl + that.serialize(atts);
-            // return '[' + chartUrl + that.serialize(atts) + ']';
         }
 
         this.setHtml = function(html) {

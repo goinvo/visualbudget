@@ -21,9 +21,11 @@ let shortcodeController = function($scope, $http) {
         this.serialize = function(obj) {
             let sep = ' ';
             let str = [];
-            for(var p in obj)
+            for(let p in obj)
                 if (obj.hasOwnProperty(p)) {
-                    str.push(encodeURIComponent(p) + "=" + encodeURIComponent(obj[p]));
+                    let prop = encodeURIComponent(p);
+                    let val = encodeURIComponent(obj[p]).replace(/%2C/g,","); // Commas abide.
+                    str.push(prop + "=" + val);
                 }
             return str.join(sep);
         }

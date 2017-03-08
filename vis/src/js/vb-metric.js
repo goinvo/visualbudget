@@ -7,10 +7,10 @@ class VbMetric extends VbChart {
     constructor($div, data) {
 
         // Cast the data.
-        data.dollarAmounts.forEach(function(d) {
-            // d.date = Date.parse(d.date);
-            d.dollarAmount = +d.dollarAmount;
-        });
+        // data.dollarAmounts.forEach(function(d) {
+        //     // d.date = Date.parse(d.date);
+        //     d.dollarAmount = +d.dollarAmount;
+        // });
 
         // Call super method.
         super($div, data);
@@ -61,6 +61,10 @@ class VbMetric extends VbChart {
 
             case 'name':
                 metric = this.getMetricName(state, data);
+                break;
+
+            case 'download':
+                metric = this.getMetricDownloadLink();
                 break;
 
             default:
@@ -167,6 +171,49 @@ class VbMetric extends VbChart {
         }
 
         return data.name;
+    }
+
+    /* Get the download link. Multiple links if multiple datasets.
+     */
+    getMetricDownloadLink() {
+        // Set defaults for attributes.
+        if(!("text" in this.atts)) {
+            this.atts.text = "Download data";
+        }
+        if(!("title" in this.atts)) {
+            this.atts.title = "Download data";
+        }
+        if(!("target" in this.atts)) {
+            this.atts.target = "_blank";
+        }
+
+        // Initialize the html variable.
+        let html = '';
+
+        if("datasetUrls" in this.atts) {
+            let urls = this.atts.datasetUrls.split(',');
+            let linkStrings = [];
+            html = this.atts.text;
+            for(let i = 0; i < urls.length; i++) {
+                linkStrings.push(jQuery('<a>', {
+                        text:   (i+1) + '',         // convert to string
+                        title:  this.atts.title,
+                        href:   urls[i],
+                        target: this.atts.target
+                    }).prop('outerHTML'));
+            }
+            html += ' [' + linkStrings.join(', ') + ']';
+        } else if("datasetUrl" in this.atts) {
+            html = jQuery('<a>', {
+                text:   this.atts.text,
+                title:  this.atts.title,
+                href:   this.atts.datasetUrl,
+                target: this.atts.target
+            }).prop('outerHTML');
+        } else {
+            html = '<!-- No dataset URLs specified. -->';
+        }
+        return html;
     }
 
     /* Checks to see if input is numeric

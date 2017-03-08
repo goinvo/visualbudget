@@ -82,7 +82,7 @@ class VbChart {
     removeVbPrefixesOnAttributes(atts) {
 
         function firstCharToLower(string) {
-            return string.charAt(0).toLowerCase() + string.slice(1).toLowerCase();
+            return string.charAt(0).toLowerCase() + string.slice(1);
         }
         function removeVbPrefix(str) {
             return str.replace(/^vb/, '');

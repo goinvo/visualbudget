@@ -130,7 +130,6 @@ class VbTreeMap extends VbChart {
     }
 
     calculateLayout() {
-
         this.root = d3.hierarchy(this.data, d => d.children)
             .sum(d => d.children.length ? 0 : d.dollarAmounts[this.dateIndex].dollarAmount)
             .sort((a, b) => b.dollarAmount - a.dollarAmount);

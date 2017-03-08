@@ -51,6 +51,22 @@ class VbChart {
         });
     }
 
+    redraw() {
+        // Redraw the chart.
+        console.log('Drawing chart ' + this.atts.hash + '.');
+        this.$div.html('[vb-chart]');
+    }
+
+    destroy() {
+        // Remove everything in the chart.
+        console.log('Destroying chart ' + this.atts.hash + '.');
+    }
+
+    setState(newState) {
+        this.state = Object.assign({}, this.state, newState);
+        this.redraw();
+    }
+
     setColors(data) {
         // We will count through, getting new colors.
         let i = 0;
@@ -106,40 +122,33 @@ class VbChart {
     }
 
     dollarAmountOfDate(date, node=this.data) {
-        for(let i = 0; i < node.dollarAmounts.length; i++) {
-            let obj = node.dollarAmounts[i];
-            if(obj.date == date) {
-                return obj.dollarAmount;
-            }
-        }
-        return null;
+        let dollarAmounts = [...node.dollarAmounts];
+        let filtered = this.filterTakeFirst(dollarAmounts, e => e.date == date);
+        return filtered.dollarAmount;
+    }
+
+    taxAdjustedDollarAmountOfDate(date, node=this.data) {
+        let dollarAmounts = [...node.dollarAmounts];
+        let filtered = this.filterTakeFirst(dollarAmounts, e => e.date == date);
+        return filtered.dollarAmount;
     }
 
     dollarAmountOfCurrentDate(node=this.data) {
-        let date = this.state.date;
-        for(let i = 0; i < node.dollarAmounts.length; i++) {
-            let obj = node.dollarAmounts[i];
-            if(obj.date == date) {
-                return obj.dollarAmount;
-            }
+        return this.dollarAmountOfDate(this.state.date, node);
+    }
+
+    // Apply a filter function to an array and return the first match.
+    // Return null if nothing in the array passes the filter.
+    filterTakeFirst(array, filterFunc) {
+        let filtered = array.filter(filterFunc);
+
+        if(filtered.length == 0) {
+            // There were no elements matching the filter function.
+            return null;
+        } else {
+            // Choose the first one, like the function name says.
+            return filtered[0];
         }
-        return null;
-    }
-
-    setState(newState) {
-        this.state = Object.assign({}, this.state, newState);
-        this.redraw();
-    }
-
-    redraw() {
-        // Redraw the chart.
-        console.log('Drawing chart ' + this.atts.hash + '.');
-        this.$div.html('[vb-chart]');
-    }
-
-    destroy() {
-        // Remove everything in the chart.
-        console.log('Destroying chart ' + this.atts.hash + '.');
     }
 
     getDateRange(data=this.data) {

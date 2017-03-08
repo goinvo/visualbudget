@@ -16,8 +16,12 @@ let paneController = function($scope, $http, $timeout, datasetsService) {
                 id: 'loading...',
                 uploaded_name: '[loading...]'
             }];
-        $scope.chartData.dataset = $scope.datasets[0];
+        $scope.chartData.dataset = $scope.datasets[0];      // for <select>
+        $scope.chartData.datasets = $scope.datasets[0];     // for <select multiple>
         $scope.atts.data = $scope.datasets[0].id;
+
+        // A flag we use in the $watch function and addSecondDefaultSelectedDataset().
+        let toAddSecondDataset = false;
 
         // Watch function for when new datasets are loaded.
         $scope.$watch(datasetsService.getCount, function(count) {
@@ -25,13 +29,42 @@ let paneController = function($scope, $http, $timeout, datasetsService) {
             if (loading) {
                 loading = false;
                 $scope.chartData.dataset = $scope.datasets[0];
+                $scope.chartData.datasets = [$scope.datasets[0]];
                 $scope.atts.data = $scope.datasets[0].id;
 
                 if($scope.selected) {
                     $timeout(that.redrawCharts, 0);
                 }
             }
+
+            if (toAddSecondDataset && count > 1) {
+                this.addSecondDefaultSelectedDataset();
+            }
         });
+
+        // Add a second dataset to the chartdata.
+        // A <select multiple> can emit an event to trigger this.
+        this.addSecondDefaultSelectedDataset = function() {
+            // Add a second default-selected dataset
+            // for <select multiple>.
+            if (datasetsService.getCount() > 1) {
+                $scope.chartData.datasets.push($scope.datasets[1]);
+                $scope.atts.data = $scope.chartData.datasets.map(e => e.id).join(',');
+
+                if($scope.selected) {
+                    $timeout(that.redrawCharts, 0);
+                }
+
+                toAddSecondDataset = false;
+            } else {
+                // More datasets haven't loaded yet, so set the flag.
+                toAddSecondDataset = true;
+            }
+        }
+
+        // The dataset <select> has to emit whether it is a multiple select or not,
+        // once it is created. Register that event.
+        $scope.$on('addSecondDefaultSelectedDataset', this.addSecondDefaultSelectedDataset);
 
         let charts = $scope.charts = [];
         this.addChart = function(chart) {

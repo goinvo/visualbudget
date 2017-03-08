@@ -3,14 +3,17 @@
  */
 
 
-let datasetSelectController = function($scope, $http) {
+let datasetSelectController = function($scope, $http, $attrs) {
         $scope.ctrl = this;
-
-        // $scope.$parent.chartData = {};
-        // $scope.$parent.chartData.dataset = $scope.$parent.datasets[0];
+        $scope.multiple = ('multiple' in $attrs);
+        if($scope.multiple) {
+            $scope.$emit('addSecondDefaultSelectedDataset');
+        }
 
         $scope.setDataset = function() {
-            $scope.$parent.atts.data = $scope.$parent.chartData.dataset.id;
+            $scope.$parent.atts.data = $scope.multiple
+                ? $scope.$parent.chartData.datasets.map(e => e.id).join(',')
+                : $scope.$parent.chartData.dataset.id;
 
             // Redraw only if this pane is selected.
             if ($scope.$parent.selected) {

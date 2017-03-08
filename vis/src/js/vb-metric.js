@@ -63,6 +63,10 @@ class VbMetric extends VbChart {
                 metric = this.getMetricName(state, data);
                 break;
 
+            case 'download':
+                metric = this.getMetricDownloadLink();
+                break;
+
             default:
                 metric = '?'; // Don't be too disruptive to the viewer.
         }
@@ -167,6 +171,38 @@ class VbMetric extends VbChart {
         }
 
         return data.name;
+    }
+
+    /* Get the download link. Multiple links if multiple datasets.
+     */
+    getMetricDownloadLink() {
+        // Set defaults for attributes.
+        if(!("text" in this.atts)) {
+            this.atts.text = "Download";
+        }
+        if(!("title" in this.atts)) {
+            this.atts.title = "Download this dataset";
+        }
+        if(!("target" in this.atts)) {
+            this.atts.target = "_blank";
+        }
+
+        // Initialize the link variable.
+        let link = '';
+
+        if("datasetUrls" in this.atts) {
+            // to do.
+        } else if("datasetUrl" in this.atts) {
+            link = jQuery('<a>', {
+                text:   this.atts.text,
+                title:  this.atts.title,
+                href:   this.atts.datasetUrl,
+                target: this.atts.target
+            });
+        } else {
+            link = '<!-- No dataset URLs specified. -->';
+        }
+        return link;
     }
 
     /* Checks to see if input is numeric

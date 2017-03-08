@@ -122,15 +122,28 @@ class VbChart {
     }
 
     dollarAmountOfDate(date, node=this.data) {
-        let dollarAmounts = [...node.dollarAmounts];
-        let filtered = this.filterTakeFirst(dollarAmounts, e => e.date == date);
-        return filtered.dollarAmount;
+        let dollarAmountObjs = [...node.dollarAmounts];
+        let obj = this.filterTakeFirst(dollarAmountObjs, e => e.date == date);
+        return obj.dollarAmount;
     }
 
     taxAdjustedDollarAmountOfDate(date, node=this.data) {
-        let dollarAmounts = [...node.dollarAmounts];
-        let filtered = this.filterTakeFirst(dollarAmounts, e => e.date == date);
-        return filtered.dollarAmount;
+        if(node.children.length == 0) {
+            let dollarAmountObjs = [...node.dollarAmounts];
+            let obj = this.filterTakeFirst(dollarAmountObjs, e => e.date == date);
+            let fundedByTaxes = this.getMetaProperty("FUNDED_BY_TAXES", 1, node);
+            return obj.dollarAmount * fundedByTaxes;
+        } else {
+            let childDollarAmounts = node.children.map(
+                            e => this.taxAdjustedDollarAmountOfDate(date, e)
+                        );
+            return childDollarAmounts.reduce((a,b) => a+b, 0);
+        }
+    }
+
+    getMetaProperty(propName, defaultValue, node=this.data) {
+        let meta = this.filterTakeFirst(node.meta, e => e.name == "FUNDED_BY_TAXES");
+        return meta ? meta.value : defaultValue;
     }
 
     dollarAmountOfCurrentDate(node=this.data) {

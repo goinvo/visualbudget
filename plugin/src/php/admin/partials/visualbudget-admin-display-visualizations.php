@@ -89,6 +89,16 @@
                         <iframelink metric='numyearsaveraged'></iframelink>
                     </div>
                 </div>
+                <div class="row" style='margin-top: 2em'>
+                    <div class="col-md-6">
+                        <p style='text-align:center'>Download link:</p>
+                        <chart vis='metric' metric='download'></chart>
+                        <shortcode metric='download'></shortcode>
+                        <iframelink metric='download'></iframelink>
+                    </div>
+                    <div class="col-md-6">
+                    </div>
+                </div>
             </pane>
             <pane title="My Tax Bill">
                 <p>The "My Tax Bill" component allows users to enter their tax bill (in dollars)

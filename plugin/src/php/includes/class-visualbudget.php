@@ -38,7 +38,7 @@ class VisualBudget {
         $trailingslashit = function ($s) { return rtrim( $s, '/\\' ) . '/'; };
 
         define('VISUALBUDGET_SLUG', 'visualbudget' );
-        define('VISUALBUDGET_VERSION', '0.1.0' );
+        define('VISUALBUDGET_VERSION', '2.0' );
         define('VISUALBUDGET_ALIASES_FILE', 'vis/aliases.json' );
         define('VISUALBUDGET_UPLOAD_DIR', 'datasets/' );
         define('VISUALBUDGET_PATH', $trailingslashit(dirname(dirname(__FILE__))));

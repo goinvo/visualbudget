@@ -191,32 +191,60 @@ class VbMetric extends VbChart {
             this.atts.target = "_blank";
         }
 
+        // A simple function for replacing the .json extension with
+        // an arbitrary extension, so the correct link is displayed.
+        let setFiletype = (filename, ext) => filename
+                .substr(0, filename.lastIndexOf(".")) + "." + ext;
+
+        // The default file extension is CSV. If the query param
+        // filetype=json is set, then JSON is instead linked.
+        let filetype = 'csv';
+        if(this.atts.filetype == 'json') {
+            filetype = 'json';
+        }
+
         // Initialize the html variable.
         let html = '';
 
+        // Generate the links. Logic here forks depending on
+        // how many URLs there are.
         if("datasetUrls" in this.atts) {
+            // In this case, there are multiple datasets.
             let urls = this.atts.datasetUrls.split(',');
             let linkStrings = [];
             html = this.atts.text;
             for(let i = 0; i < urls.length; i++) {
+
+                // The filetype will be CSV or JSON spending on query params.
+                let theUrl = setFiletype(urls[i], filetype);
+
                 linkStrings.push(jQuery('<a>', {
                         text:   (i+1) + '',         // convert to string
                         title:  this.atts.title,
-                        href:   urls[i],
+                        href:   theUrl,
                         target: this.atts.target
                     }).prop('outerHTML'));
             }
             html += ' [' + linkStrings.join(', ') + ']';
+
         } else if("datasetUrl" in this.atts) {
+            // In this case, there is only one dataset.
+
+            // The filetype will be CSV or JSON spending on query params.
+            let theUrl = setFiletype(this.atts.datasetUrl, filetype);
+
             html = jQuery('<a>', {
                 text:   this.atts.text,
                 title:  this.atts.title,
-                href:   this.atts.datasetUrl,
+                href:   theUrl,
                 target: this.atts.target
             }).prop('outerHTML');
+
         } else {
+            // If no datasets were specified, only include an HTML comment.
             html = '<!-- No dataset URLs specified. -->';
         }
+
         return html;
     }
 

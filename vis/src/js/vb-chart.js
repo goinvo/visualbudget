@@ -34,6 +34,11 @@ class VbChart {
             this.$div.height(this.atts.height);
         }
 
+        // Set the class if the user set such a parameter.
+        if(typeof this.atts.class !== 'undefined') {
+            this.$div.addClass(this.atts.class);
+        }
+
         // The shared state among charts. These properties are used
         // for the interaction between charts.
         this.state = {

@@ -109,7 +109,9 @@ class VbTreeMap extends VbChart {
         let tooltipContent = function(that) {
             return function(d) {
                 let html = "<div class='name'>" + d.data.name + "</div>";
-                if(that.state.myTaxBill !== '') {
+                let showMyContribution = that.getAttribute('showmycontribution');
+                
+                if(that.state.myTaxBill !== '' && showMyContribution) {
 
                     // Calculate the user's contribution as well as the
                     // portion of this treemap item paid for by (property) taxes.
@@ -117,27 +119,24 @@ class VbTreeMap extends VbChart {
                     let subTotal = that.taxAdjustedDollarAmountOfDate(that.state.date, d.data);
                     let myBill = that.state.myTaxBill;
                     let myContribution = myBill * (subTotal / total);
-                    let fundedByTaxes = subTotal / that.dollarAmountOfDate(that.state.date, d.data);
-                    fundedByTaxes = Math.round(100*fundedByTaxes);
+                    let pctFundedByTaxes = subTotal / that.dollarAmountOfDate(that.state.date, d.data);
+                    pctFundedByTaxes = Math.round(100*pctFundedByTaxes);
 
                     // The parenthetical is added only if the query param "taxtype=property" is set
                     // AND (if (the param "showfundedbytaxes" is either set to "all")
                     // or (is set to "fractions" and % funded by taxes is less than one)).
 
                     // Make sure showFundedByTaxes is set properly; the default is "fractions".
-                    let showFundedByTaxes = "fractions";
-                    if(that.atts.hasOwnProperty('showfundedbytaxes')) {
-                        showFundedByTaxes = (that.atts.showfundedbytaxes == "all")
-                            ? "all" : showFundedByTaxes;
-                    }
+                    let showFundedByTaxes = that.getAttribute('showfundedbytaxes',
+                            'fractions', ['all', 'fractions']);
+
                     // Now add the note, if.
                     let taxesNote = "";
-                    if(that.atts.hasOwnProperty('taxtype')) {
-                        if(showFundedByTaxes == "all" || fundedByTaxes < 100) {
-                            let taxesType = that.atts.taxtype;
-                            taxesNote = "<br/>(" + fundedByTaxes + "% is paid for by "
-                                + taxesType + " taxes.)";
-                        }
+                    let taxType = that.getAttribute('taxtype');
+                    if (taxType && (showFundedByTaxes == "all" || pctFundedByTaxes < 100)) {
+                        let taxesType = that.atts.taxtype;
+                        taxesNote = "<br/>(" + pctFundedByTaxes + "% is paid for by "
+                            + taxesType + " taxes.)";
                     }
 
                     // Put the HTML all together.

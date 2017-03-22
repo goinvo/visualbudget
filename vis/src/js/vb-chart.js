@@ -160,10 +160,33 @@ class VbChart {
         }
     }
 
-    // Get a meta property by name.
+    // Get a meta property (of the dataset) by name.
     getMetaProperty(propName, defaultValue='', node=this.data) {
         let meta = this.filterTakeFirst(node.meta, e => e.name == propName);
         return meta ? meta.value : defaultValue;
+    }
+
+    // Get an attribute (i.e. query parameter) by name,
+    // accounting for default value and acceptable values.
+    //      name             : string
+    //      defaultvalue     : string
+    //      acceptableValues : array of strings
+    getAttribute(name, defaultValue='', acceptableValues=[]) {
+        // If the attribute isn't set, return the default.
+        if (!this.atts.hasOwnProperty(name)) {
+            return defaultValue;
+        }
+
+        // If the attribute is set and it isn't an acceptable value,
+        // return the default as well.
+        let value = this.atts[name];
+        if (acceptableValues.length > 0 &&
+            acceptableValues.indexOf(value) == -1) {
+            return defaultValue;
+        } else {
+            // Otherwise, return the set value.
+            return value;
+        }
     }
 
     dollarAmountOfCurrentDate(node=this.data) {
@@ -175,7 +198,7 @@ class VbChart {
     filterTakeFirst(array, filterFunc) {
         let filtered = array.filter(filterFunc);
 
-        if(filtered.length == 0) {
+        if (filtered.length == 0) {
             // There were no elements matching the filter function.
             return null;
         } else {

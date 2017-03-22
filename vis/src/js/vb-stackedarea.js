@@ -13,7 +13,7 @@ class VbStackedArea extends VbChart {
         super($div, data);
 
         // Smooth or stepwise graph?
-        this.atts.smooth = this.atts.smooth || false;
+        this.smooth = this.getAttribute('smooth', false);
 
         // Set up the SVG.
         this.setupChartSvg();
@@ -398,7 +398,7 @@ class VbStackedArea extends VbChart {
     }
 
     isSmooth() {
-        return this.atts.smooth;
+        return this.smooth;
     }
 
 }

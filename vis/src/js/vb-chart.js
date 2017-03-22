@@ -45,7 +45,7 @@ class VbChart {
             hash: this.data.hash,
             myTaxBill: 7500, // Default. Q: How to set this?.
             groups: [],
-            date: "2016",
+            date: "2017",
             dragging: false,
             mouseX: null
         }

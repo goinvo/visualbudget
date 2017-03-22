@@ -65,11 +65,11 @@ class VbTreeMap extends VbChart {
         var formatNumber = d3.format(",d"),
             transitioning;
 
-        // create svg
+        // Create svg
         let nav = this.nav = d3.select($div.get(0)).append("svg")
             .append("g").style("shape-rendering", "crispEdges");
 
-        // initialize x and y scales
+        // Initialize x and y scales
         nav.x = d3.scaleLinear()
             .domain([0, width])
 
@@ -80,7 +80,7 @@ class VbTreeMap extends VbChart {
 
         let dateIndex = this.dateIndex = this.getDateIndex(this.state.date);
 
-        // remove all old treemap elements
+        // Remove all old treemap elements
         nav.selectAll("g").remove();
         
         this.calculateLayout();
@@ -110,13 +110,37 @@ class VbTreeMap extends VbChart {
             return function(d) {
                 let html = "<div class='name'>" + d.data.name + "</div>";
                 if(that.state.myTaxBill !== '') {
+
+                    // Calculate the user's contribution as well as the
+                    // portion of this treemap item paid for by (property) taxes.
                     let total = that.taxAdjustedDollarAmountOfDate(that.state.date);
                     let subTotal = that.taxAdjustedDollarAmountOfDate(that.state.date, d.data);
                     let myBill = that.state.myTaxBill;
                     let myContribution = myBill * (subTotal / total);
                     let fundedByTaxes = subTotal / that.dollarAmountOfDate(that.state.date, d.data);
                     fundedByTaxes = Math.round(100*fundedByTaxes);
-                    let taxesNote = " (" + fundedByTaxes + "% is paid for by taxes.)";
+
+                    // The parenthetical is added only if the query param "taxtype=property" is set
+                    // AND (if (the param "showfundedbytaxes" is either set to "all")
+                    // or (is set to "fractions" and % funded by taxes is less than one)).
+
+                    // Make sure showFundedByTaxes is set properly; the default is "fractions".
+                    let showFundedByTaxes = "fractions";
+                    if(that.atts.hasOwnProperty('showfundedbytaxes')) {
+                        showFundedByTaxes = (that.atts.showfundedbytaxes == "all")
+                            ? "all" : showFundedByTaxes;
+                    }
+                    // Now add the note, if.
+                    let taxesNote = "";
+                    if(that.atts.hasOwnProperty('taxtype')) {
+                        if(showFundedByTaxes == "all" || fundedByTaxes < 100) {
+                            let taxesType = that.atts.taxtype;
+                            taxesNote = "<br/>(" + fundedByTaxes + "% is paid for by "
+                                + taxesType + " taxes.)";
+                        }
+                    }
+
+                    // Put the HTML all together.
                     html = html + "<div class='description'>Your contribution is "
                                 + "$" + myContribution.toFixed(2) + "."
                                 + taxesNote + "</div>";

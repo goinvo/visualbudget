@@ -48,7 +48,7 @@ class VbMyTaxBill extends VbChart {
             // Set the state and broadcast the change.
             // (The value of the input will change upon broadcast,
             // which bubbles back down to here.)
-            jQuery('.vb-mytaxbill').val(validNumber);
+            // jQuery('.vb-mytaxbill').val(validNumber);
 
             // Store the tax bill in local storage if it's supported.
             if (typeof(Storage) !== "undefined") {
@@ -58,8 +58,9 @@ class VbMyTaxBill extends VbChart {
                     "persistent across this session.")
             }
 
-            that.state.myTaxBill = validNumber;
-            visualbudget.broadcastStateChange(that.state);
+            visualbudget.broadcastStateChange({
+                myTaxBill: validNumber
+            });
         }
     }
 

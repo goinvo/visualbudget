@@ -166,15 +166,17 @@ class VbMetric extends VbChart {
     /* Get the name of the node
      */
     getMetricName(state, data) {
-        if(this.isNumeric(data.name)) {
-            if(typeof this.atts.name !== undefined) {
-                return this.atts.name;
-            } else {
-                return '';
-            }
+        if (this.isNumeric(data.name)) {
+            // There is no chart parameter for name, and only
+            // a dataset ID is given. Return an empty string
+            // rather than a number.
+            return '';
+        } else {
+            // There is a name defined. In the chart's constructor
+            // this was set to either a defined query/shortcode attribute
+            // or the dataset alias in title case.
+            return data.name;
         }
-
-        return data.name;
     }
 
     /* Get the download link. Multiple links if multiple datasets.

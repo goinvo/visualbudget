@@ -23,8 +23,8 @@ class VbMyTaxBill extends VbChart {
     // The redraw just ensures the value of the input is set correctly.
     redraw() {
         console.log('Drawing chart ' + this.atts.hash + ' (mytaxbill).');
-        this.$div.val(this.state.myTaxBill);
-        console.log('My Tax Bill is ' + this.state.myTaxBill)
+        this.$div.find('.vb-mytaxbill').val(this.state.myTaxBill);
+        console.log('My Tax Bill is ' + this.state.myTaxBill + ".")
     }
 
     // Create the HTML element for the input.
@@ -36,6 +36,8 @@ class VbMyTaxBill extends VbChart {
     // The handler for the 'input' event.
     inputChangeHandler(that) {
         return function(event) {
+
+            // First validate the input.
             let string = event.target.value;
             let validatedString = string.replace(/[^\d\.]/g, '')
                                     .replace(/^\.*/, '')
@@ -45,11 +47,6 @@ class VbMyTaxBill extends VbChart {
                 validNumber = '';
             }
 
-            // Set the state and broadcast the change.
-            // (The value of the input will change upon broadcast,
-            // which bubbles back down to here.)
-            // jQuery('.vb-mytaxbill').val(validNumber);
-
             // Store the tax bill in local storage if it's supported.
             if (typeof(Storage) !== "undefined") {
                 sessionStorage.myTaxBill = validNumber;
@@ -58,6 +55,9 @@ class VbMyTaxBill extends VbChart {
                     "persistent across this session.")
             }
 
+            // Broadcast the change to set the state.
+            // (The value of the input will change when the broadcast,
+            // which bubbles back down to here, is received.)
             visualbudget.broadcastStateChange({
                 myTaxBill: validNumber
             });

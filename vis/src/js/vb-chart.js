@@ -11,6 +11,8 @@ class VbChart {
             this.setColors(data);
         }
 
+        this.defaulttaxbill = 7500;
+
         // The jQuery object for the chart div
         // and the chart's data.
         this.$div = $div;
@@ -43,7 +45,7 @@ class VbChart {
         // for the interaction between charts.
         this.state = {
             hash: this.data.hash,
-            myTaxBill: 7500, // Default. Q: How to set this?.
+            myTaxBill: this.determineMyTaxBill(this.defaulttaxbill),
             groups: [],
             date: "2017",
             dragging: false,
@@ -124,6 +126,36 @@ class VbChart {
         }
 
         return newAtts;
+    }
+
+    // Determines the "mytaxbill" value. Can come from (in order of priority) either
+    // local persistent storage, the VB state, a chart attribute, or hardcoded default.
+    determineMyTaxBill(defaultBill) {
+
+        // Check to see if a value for mytaxbill is already locally stored for this session.
+        let myTaxBill = this.getLocalStorageVar("myTaxBill")
+        if (myTaxBill !== null) {
+            return myTaxBill;
+        }
+
+        // If not, return the current state's myTaxBill.
+        if (typeof this.state !== 'undefined') {
+            return this.state.myTaxBill;
+        }
+
+        // If still not, return the attribute "mytaxbill".
+        return this.getAttribute('mytaxbill', defaultBill);
+    }
+
+    // Returns the value of a locally stored variable, if it exists.
+    // If storage is unavailable or the variable isn't stored, returns null.
+    getLocalStorageVar(name, defaultVal=null) {
+        if (typeof(Storage) !== "undefined") {
+            if(sessionStorage[name]) {
+                return sessionStorage[name];
+            }
+        }
+        return defaultVal;
     }
 
     // What is the dollarAmound corresponding to a given date for

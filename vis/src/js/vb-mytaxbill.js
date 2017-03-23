@@ -29,7 +29,8 @@ class VbMyTaxBill extends VbChart {
 
     // Create the HTML element for the input.
     constructInput() {
-        this.$div.append("<span>$</span><input type='text' class='vb-mytaxbill' placeholder='2000'>");
+        this.$div.append("<span>$</span><input type='text' class='vb-mytaxbill' placeholder='"
+            + this.defaulttaxbill + "' value='" + this.getLocalStorageVar("myTaxBill", "") + "'>");
     }
 
     // The handler for the 'input' event.
@@ -48,6 +49,15 @@ class VbMyTaxBill extends VbChart {
             // (The value of the input will change upon broadcast,
             // which bubbles back down to here.)
             jQuery('.vb-mytaxbill').val(validNumber);
+
+            // Store the tax bill in local storage if it's supported.
+            if (typeof(Storage) !== "undefined") {
+                sessionStorage.myTaxBill = validNumber;
+            } else {
+                console.log("Local storage not supported. 'My Tax Bill' will not be " +
+                    "persistent across this session.")
+            }
+
             that.state.myTaxBill = validNumber;
             visualbudget.broadcastStateChange(that.state);
         }

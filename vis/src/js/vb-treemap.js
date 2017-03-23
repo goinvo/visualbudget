@@ -158,7 +158,9 @@ class VbTreeMap extends VbChart {
     }
 
     calculateLayout() {
-        this.root = d3.hierarchy(this.data, d => d.children)
+        this.root = d3
+            .hierarchy(this.data,
+                d => d.children.filter(a => a.dollarAmounts[this.dateIndex].dollarAmount))
             .sum(d => d.children.length ? 0 : d.dollarAmounts[this.dateIndex].dollarAmount)
             .sort((a, b) => b.dollarAmount - a.dollarAmount);
 
@@ -182,14 +184,15 @@ class VbTreeMap extends VbChart {
     *   @param {node} d - node where treemap begins (root)
     */
     display(d) {
+
         let that = this;
         let nav = this.nav;
 
         var formatNumber = d3.format(",d"),
-            // flag will be used to avoid overlapping transitions
+            // Flag will be used to avoid overlapping transitions
             transitioning;
 
-        // return block name [unused]
+        // return block name [function is unused]
         function name(d) {
             return d.parent ? name(d.parent) + "." + d.name : d.name;
         }
@@ -207,7 +210,7 @@ class VbTreeMap extends VbChart {
             .data((d.children.length === 0) ? [d] : d.children)
             .enter().append("g");
 
-        // create grandparent bar at top
+        // create grandparent zoom-out bar at top
         nav.grandparent
             .attr('width', '100%')
             .attr('height', '20px')
@@ -218,13 +221,9 @@ class VbTreeMap extends VbChart {
                 that.zoneClick.call(this, d3.select(this).datum(), true, null, that);
             })
 
-        // refresh title
-        // updateTitle(d);
-
         /* transition on child click */
-        g.filter(function (d) {
-            return d.children;
-        })
+        g
+            .filter(d => d.children)
             .classed("children", true)
             // expand when clicked
             .on("click", function (event) {
@@ -250,25 +249,13 @@ class VbTreeMap extends VbChart {
         // recursively draw children rectangles
         function addChilds(d, g) {
             // add child rectangles
-            g.selectAll(".child")
+            g
+                .selectAll(".child")
                 .data(function (d) {
                     return d.children || [d];
                 })
                 .enter().append("g")
                 .attr("class", "child")
-
-            // propagate recursively to next depth
-            .each(function () {
-                var group = d3.select(this);
-                if (d.children !== undefined) {
-                    for(let i = 0; i < d.children.length; i++) {
-                        // addChilds(d.children[i], group);
-                    }
-                    // $.each(d.children, function () {
-                    //     addChilds(this, group);
-                    // })
-                }
-            })
                 .append("rect")
                 .call(that.rect(that.nav));
         }
@@ -305,7 +292,6 @@ class VbTreeMap extends VbChart {
                 .classed("no-label", true);
 
             // textLabels.call(this); // FIXME
-
         });
 
         return g;
@@ -433,20 +419,11 @@ class VbTreeMap extends VbChart {
     */
     rect(nav) {
         return function(rect) {
-            rect.attr("x", function (d) {
-                return nav.x(d.x0);
-            })
-            .attr("y", function (d) {
-                return nav.y(d.y0);
-            })
-            .attr("width", function (d) {
-                return nav.x(d.x1) - nav.x(d.x0);
-            })
-            .attr("height", function (d) {
-                return nav.y(d.y1) - nav.y(d.y0);
-            });
+            rect.attr("x",      d => nav.x(d.x0))
+                .attr("y",      d => nav.y(d.y0))
+                .attr("width",  d => nav.x(d.x1) - nav.x(d.x0))
+                .attr("height", d => nav.y(d.y1) - nav.y(d.y0));
         }
     }
-
 
 }

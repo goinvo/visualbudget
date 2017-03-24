@@ -354,6 +354,7 @@ class VbStackedArea extends VbChart {
                 x = e.touches[0].pageX;
             } else {
                 // Solves some IE compatibility issues
+
                 x = e.offsetX || d3.mouse(this)[0];
             }
             return x - that.chart.margin.left;
@@ -403,6 +404,7 @@ class VbStackedArea extends VbChart {
         this.svg.on('mousedown', mousedown_callback);
         this.svg.on('mousemove', mousemove_callback);
         this.svg.on('mouseup',   mouseup_callback);
+        // this.svg.on('mouseout',  mouseout_callback); // glitchy.
     }
 
     isSmooth() {

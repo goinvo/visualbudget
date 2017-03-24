@@ -148,7 +148,7 @@ class VbTable extends VbChart {
                 }
             },
             {
-                title: "Portion",
+                title: "Impact",
                 cellClass: "value textright",
                 value: function(node) {
                     let val = that.dollarAmountOfCurrentDate(node);

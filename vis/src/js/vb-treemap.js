@@ -21,6 +21,7 @@ class VbTreeMap extends VbChart {
         d3.selectAll('#' + this.$div.attr('id') + ' svg g *').remove();
         this.adjustSize();
         this.calculateLayout();
+        this.currentLevel = this.display(this.currentData);
         this.open();
     }
 
@@ -32,6 +33,10 @@ class VbTreeMap extends VbChart {
 
         // Resize the svg.
         d3.select(this.$div.get(0)).select('svg')
+            .attr('width', width)
+            .attr('height', height);
+
+        d3.select('#vb-zoom-button')
             .attr('width', width)
             .attr('height', height);
 
@@ -57,8 +62,17 @@ class VbTreeMap extends VbChart {
 
     // Initialize the treemap.
     initialize($div, data) {
+
+        // null for now.
+        this.currentLevel = null;
+
+        // Index of the starting date.
+        let dateIndex = this.dateIndex = this.getDateIndex(this.state.date);
+
+        // The div element
         let theDiv = d3.select($div.get(0));
 
+        // Size of container
         var width = $div.width(),
             height = $div.height();
 
@@ -76,18 +90,12 @@ class VbTreeMap extends VbChart {
         nav.y = d3.scaleLinear()
             .domain([0, height])
 
-        this.adjustSize();
-
-        let dateIndex = this.dateIndex = this.getDateIndex(this.state.date);
-
-        // Remove all old treemap elements
-        nav.selectAll("g").remove();
-        
-        this.calculateLayout();
-
         nav.grandparent = nav.append("rect")
                 .attr("y", "-20px")
                 .attr("class", "grandparent");
+
+        // this.adjustSize();
+        // this.calculateLayout();
 
         // Create the "zoom out" button
         let p = document.createElement("p");
@@ -154,19 +162,19 @@ class VbTreeMap extends VbChart {
         nav.call(this.tip);
 
         // Display the treemap.
-        this.currentLevel = this.display(this.currentData);
+        // this.currentLevel = this.display(this.currentData);
     }
 
     calculateLayout() {
+        console.log("##############################################################################################################################")
         this.root = d3
-            .hierarchy(this.data,
-                d => d.children.filter(a => a.dollarAmounts[this.dateIndex].dollarAmount))
+            .hierarchy(this.data, d => d.children)
             .sum(d => d.children.length ? 0 : d.dollarAmounts[this.dateIndex].dollarAmount)
-            .sort((a, b) => b.dollarAmount - a.dollarAmount);
+            .sort((a,b) => b.value - a.value );
 
         // make the treemap
         this.treemap = d3.treemap()
-            .tile(d3.treemapBinary) // FIXME: This is causing errors even though it works.
+            .tile(d3.treemapResquarify)
             .size([this.$div.width(), this.$div.height()])
             .padding(0)
             .round(1);
@@ -201,9 +209,6 @@ class VbTreeMap extends VbChart {
         var g1 = nav.insert("g", ".grandparent-g")
             .datum(d)
             .attr("class", "depth")
-            .on("click", function (event) {
-                that.zoneClick.call(this, d3.select(this).datum(), true, null, that);
-            })
 
         // add in data
         var g = g1.selectAll("g")
@@ -216,10 +221,9 @@ class VbTreeMap extends VbChart {
             .attr('height', '20px')
             .style('fill', '#eaa')
             .datum((d.parent === undefined) ? d : d.parent)
-            // .attr("nodeid", (d.parent === undefined) ? d.hash : d.parent.hash)
             .on("click", function (event) {
                 that.zoneClick.call(this, d3.select(this).datum(), true, null, that);
-            })
+            });
 
         /* transition on child click */
         g
@@ -233,8 +237,7 @@ class VbTreeMap extends VbChart {
                 var node = d3.select(this);
                 // assign node hash attribute
                 node.attr('nodeid', function () {
-                    // return node.datum().hash;
-                    return '1'
+                    return node.datum().data.hash;
                 });
             });
 
@@ -261,14 +264,6 @@ class VbTreeMap extends VbChart {
         }
 
         addChilds(d, g);
-
-        // IE popover action
-        // if (ie()) {
-        //     nav.on('mouseout', function () {
-        //         d3.select('#ie-popover').style('display', 'none')
-        //     });
-        //     return g;
-        // }
 
         // the dateIndex.
         let dateIndex = this.dateIndex;
@@ -298,7 +293,7 @@ class VbTreeMap extends VbChart {
     }
 
     // Open a node.
-    open(nodeId, transition) {
+    open(transition) {
         // find node with given hash or open root node
         this.zoneClick.call(null, this.currentData, false, transition || 1, this);
     }
@@ -314,13 +309,15 @@ class VbTreeMap extends VbChart {
     zoneClick(d, click, transition, that) {
         //destroy popovers on transition (so they don't accidentally stay)
         // $(this).find('div').first().popover('destroy');
+        that.tip.hide();
 
         let nav = that.nav;
 
         // stop event propagation
-        var event = window.event || event
-        // stopPropagation( event );
-        event.preventDefault();
+        var event = d3.event || window.event || event;
+        if(event) {
+            event.preventDefault();
+        }
 
         transition = transition || 750;
 

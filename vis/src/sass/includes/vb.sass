@@ -224,22 +224,22 @@
     overflow-x: scroll;
     overflow-y: hidden;
 
+.vb-table-element
+    display: table;
+    table-layout: fixed;
+    min-width: 100%;
+
 .tablerow
     cursor: pointer;
-    display: inline-block;
-    white-space: nowrap;
-    padding: 4px 6px;
+    display: table-row;
 
-    .value, .bullet
+    .value
         vertical-align: middle;
-
-    &.datarow
-        border-top: 1px solid #aaaaaa;
 
     &.atomic .expand-icon
         display: none;
 
-    &.header:hover
+    &.tableheader:hover
         background-color: #ffffff;
 
     .value
@@ -248,7 +248,9 @@
         white-space: nowrap;
         text-overflow: ellipsis;
         overflow: hidden;
-        display: inline-block;
+        display: table-cell;
+        border-bottom: 1px solid #aaa;
+        padding: 4px 7px;
 
         &.long
             width: 250px;
@@ -265,22 +267,16 @@
         &.head
             font-weight: bold;
 
+        .bullet
+            width: 20px;
+            vertical-align: top;
+            display: inline-block;
+            
+            &.hidden
+                opacity: 0;
+
     &:hover
         background-color: #ebebeb;
-
-    .group
-        display: none;
-
-    .bullet, .sparkline
-        vertical-align: bottom;
-
-    .bullet
-        width: 20px;
-        vertical-align: top;
-        display: inline-block;
-
-    .bullet-hidden
-        opacity: 0;
 
     .sparkline
         line-height: 0px;

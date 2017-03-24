@@ -29,16 +29,19 @@ class VbTable extends VbChart {
             .range(["#aaa", "#333"]);
     }
 
-    resize() {
-    }
-
     redraw() {
         console.log('Drawing chart ' + this.atts.hash + ' (table).');
         this.initialize(this.$div, this.data);        
     }
 
+    // Override the super class's method.
+    resize() {
+        // Do nothing.
+    }
+
     // Overrides the super class's method.
     setState(newState) {
+        // Don't do a full redraw, just update.
         this.state = Object.assign({}, this.state, newState);
         this.update(this.$div, this.data, this.state.date);
     }
@@ -189,7 +192,7 @@ class VbTable extends VbChart {
     *  The template for a table row.
     */
     rowTemplate() {
-        return  '<div class="tablerow">' +
+        return  '<div class="tablerow datarow">' +
                     '<div class="bullet {{hidden}}">&#9656;</div>' +
                 '</div>';
     }

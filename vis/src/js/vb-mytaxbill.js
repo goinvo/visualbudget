@@ -27,6 +27,11 @@ class VbMyTaxBill extends VbChart {
         console.log('My Tax Bill is ' + this.state.myTaxBill + ".")
     }
 
+    // Triggered by window resize.
+    resize() {
+        this.redraw();
+    }
+
     // Create the HTML element for the input.
     constructInput() {
         this.$div.append("<span>$</span><input type='text' class='vb-mytaxbill' placeholder='"

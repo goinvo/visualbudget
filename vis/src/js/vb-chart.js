@@ -54,7 +54,7 @@ class VbChart {
 
         // Bind the window resize event to the redraw function.
         window.addEventListener("resize", () => {
-            this.redraw();
+            this.resize();
         });
     }
 
@@ -62,6 +62,11 @@ class VbChart {
         // Redraw the chart.
         console.log('Drawing chart ' + this.atts.hash + '.');
         this.$div.html('[vb-chart]');
+    }
+
+    // Triggered by window resize.
+    resize() {
+        this.redraw();
     }
 
     destroy() {

@@ -138,7 +138,7 @@ class VbStackedArea extends VbChart {
                     .data( d => d )
                     .enter()
                 .append("circle")
-                    .attr("r", 4)
+                    .attr("r", 3)
                     .attr("cx", (d,i) => x(new Date(d.date)) )
                     .attr("cy", (d,i) => y(d.dollarAmount) );
         }
@@ -233,6 +233,17 @@ class VbStackedArea extends VbChart {
         svg.layers.classed('layers', true);
         layers.width = chart.xwidth;
         layers.height = chart.yheight;
+
+        // Half-transparent layer hides everything to the right
+        // of the hoverline.
+        let xpos = this.chart.x(new Date(this.state.date));
+        svg.layers.veil = svg.layers.append('rect')
+            .attr("height", chart.yheight)
+            .attr("width", chart.xwidth)
+            .attr("x", xpos)
+            .attr("y", 0)
+            .attr("fill", 'white')
+            .attr("fill-opacity", .5)
 
         // if there is only one entry being displayed:
         // format it so the subsequent code can still draw a layer for it
@@ -336,11 +347,15 @@ class VbStackedArea extends VbChart {
     moveHoverline() {
         // Note that the year must be a string here;
         // otherwise it is interpreted as unix time.
-        let xpos = this.chart.x(new Date(this.state.date));
+
+        let xpos = this.state.mouseX || this.chart.x(new Date(this.state.date));
+        xpos = Math.min(xpos, this.chart.xwidth);
+        xpos = Math.max(xpos, 0);
+
         this.hoverline
             .attr("x1", xpos).attr("x2", xpos);
 
-        this.svg.layers.svg.attr('width', xpos);
+        this.svg.layers.veil.attr('x', xpos);
     }
 
     // Add interaction actions.
@@ -377,6 +392,7 @@ class VbStackedArea extends VbChart {
             let date = (dateobj.getMonth() <= 6) ?
                         dateobj.getUTCFullYear() : dateobj.getUTCFullYear() + 1;
             visualbudget.broadcastStateChange({
+                mouseX: mouseX,
                 date: "" + date, // cast to string
                 dragging: true,
             })

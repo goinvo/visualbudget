@@ -13,7 +13,7 @@ class VbStackedArea extends VbChart {
         super($div, data);
 
         // Smooth or stepwise graph?
-        this.atts.smooth = this.atts.smooth || false;
+        this.smooth = this.getAttribute('smooth', false);
 
         // Set up the SVG.
         this.setupChartSvg();
@@ -74,14 +74,12 @@ class VbStackedArea extends VbChart {
 
     adjustSize() {
         this.setChartVars();
-        let chart = this.chart;
 
         d3.select(this.$div.get(0)).select('svg')
-            .attr('width', chart.width)
-            .attr('height', chart.height)
+            .attr('width', this.chart.width)
+            .attr('height', this.chart.height)
     }
 
-    // FIXME: This function should be broken up into drawAxes(), drawLine(data), etc.
     drawChart(data) {
         let that  = this;
         let chart = this.chart;
@@ -89,13 +87,12 @@ class VbStackedArea extends VbChart {
 
         var inDateRange = function(range) {
             return function(d) {
+                // Currently the chart shows all dates, always.
                 return true; // return d.date >= range[0] && d.date <= range[1];
             }
         }
 
-
         this.svg.layers = svg.append('g');
-
 
         // Parse the date / time
         let parseDate = d3.timeFormat("%d-%b-%y").parse;
@@ -123,13 +120,13 @@ class VbStackedArea extends VbChart {
         x.domain(this.getDateRange())
         y.domain([0, d3.max(data.dollarAmounts.filter(inDateRange(null)), d => d.dollarAmount)]);
 
-
+        // If the chart is smooth, plot the line and points.
         if(this.isSmooth()) {
+
             // Add the valueline path.
             svg.append("path")
                 .attr("class", "line")
                 .attr("d", valueline(data.dollarAmounts.filter(inDateRange(null))));
-
 
             // Plot points on the line.
             svg.selectAll("g.circles-line")
@@ -141,7 +138,7 @@ class VbStackedArea extends VbChart {
                     .data( d => d )
                     .enter()
                 .append("circle")
-                    .attr("r", 4)
+                    .attr("r", 3)
                     .attr("cx", (d,i) => x(new Date(d.date)) )
                     .attr("cy", (d,i) => y(d.dollarAmount) );
         }
@@ -176,15 +173,19 @@ class VbStackedArea extends VbChart {
             .attr("y1", 0).attr("y2", chart.yheight)
             .attr("class", "hoverline");
 
+        // Now draw the layers (either areas or stacked bars).
         this.drawLayers(data);
+
+        // Finally, set the hoverline.
         this.moveHoverline();
     }
 
 
     /*
-    *   Draws stacked area layers
+    * Draws stacked area layers or stacked bars, depending on if
+    * the chart is "smooth".
     *
-    *   @param {node} data - node for which data has to be displayed
+    * @param {node} data - node for which data has to be displayed
     */
     drawLayers(data) {
 
@@ -217,20 +218,32 @@ class VbStackedArea extends VbChart {
         }
         */
 
-        // layers are a whole new svg image, this is done so that
+        // Layers are a whole new svg image, this is done so that
         // the width of this svg can be easily adjusted to whatever desired
         // value, giving the illusion of 'clipping' the layers
         let layers = svg.layers.append('svg')
-            .attr("height", chart.yheight).attr("width", chart.xwidth)
+            .attr("height", chart.yheight)
+            .attr("width", chart.xwidth)
             .classed('layers', true);
 
-        // clip area used by boundary shadow
+        // Clip area used by boundary shadow
         layers.attr("clip-path", "url(#areaclip)");
 
         svg.layers.svg = layers;
         svg.layers.classed('layers', true);
         layers.width = chart.xwidth;
         layers.height = chart.yheight;
+
+        // Half-transparent layer hides everything to the right
+        // of the hoverline.
+        let xpos = this.chart.x(new Date(this.state.date));
+        svg.layers.veil = svg.layers.append('rect')
+            .attr("height", chart.yheight)
+            .attr("width", chart.xwidth)
+            .attr("x", xpos)
+            .attr("y", 0)
+            .attr("fill", 'white')
+            .attr("fill-opacity", .5)
 
         // if there is only one entry being displayed:
         // format it so the subsequent code can still draw a layer for it
@@ -243,6 +256,8 @@ class VbStackedArea extends VbChart {
           singleAreaColor = data.color;
         }
 
+        // If there are no children, we've got to fudge it a bit
+        // so the data's in the right format.
         if (data.children.length == 0) {
             let newChildren = jQuery.extend({}, data);
             data.children.push(newChildren);
@@ -254,13 +269,6 @@ class VbStackedArea extends VbChart {
         let xscale = chart.x;
 
         layers.xscale = xscale;
-
-        // line declaration
-        let area = d3.area()
-            // .interpolate("monotone")
-            .x(  d => xscale(new Date(d.data.date)) )
-            .y0( d => yscale(d[0]) )
-            .y1( d => yscale(d[1]) );
 
         // We have to reorder the data for the stack.
         let newData = [];
@@ -287,13 +295,21 @@ class VbStackedArea extends VbChart {
         if(this.isSmooth()) {
             // It will be a line chart.
 
+            // Line declaration.
+            let area = d3.area()
+                // .interpolate("monotone")
+                .x(  d => xscale(new Date(d.data.date)) )
+                .y0( d => yscale(d[0]) )
+                .y1( d => yscale(d[1]) );
+
+            // Create the regions
             let regions = layers.selectAll(".browser")
                 .data(instance)
-                .enter().append("g")
-                    .attr('fill', (d,i) => colors[i])
-                .attr("class", "browser");
+                .enter()
+                    .append("g")
+                    .attr("class", "browser");
 
-            // draw areas
+            // Draw the areas
             layers.areas = regions.append("path")
                 .attr("class", "multiarea")
                 .attr("d", area )
@@ -302,11 +318,14 @@ class VbStackedArea extends VbChart {
         } else {
             // It will be a bar chart.
 
+            // This is a dummy array needed for the scaleband, just so it
+            // knows how many bands there are. The values doesn't matter for us.
+            let dummyArray = Array(data.dollarAmounts.length).fill().map((x,i)=>i);
+
             let newx = d3.scaleBand()
                 .rangeRound([0, chart.xwidth])
-                .padding(0.15)
-                .align(0.3)
-                .domain(keys);
+                .padding(0)
+                .domain(dummyArray); // number of bars on graph
 
             let regions = layers.selectAll(".browser")
                 .data(instance)
@@ -328,11 +347,15 @@ class VbStackedArea extends VbChart {
     moveHoverline() {
         // Note that the year must be a string here;
         // otherwise it is interpreted as unix time.
-        let xpos = this.chart.x(new Date(this.state.date));
+
+        let xpos = this.state.mouseX || this.chart.x(new Date(this.state.date));
+        xpos = Math.min(xpos, this.chart.xwidth);
+        xpos = Math.max(xpos, 0);
+
         this.hoverline
             .attr("x1", xpos).attr("x2", xpos);
 
-        this.svg.layers.svg.attr('width', xpos);
+        this.svg.layers.veil.attr('x', xpos);
     }
 
     // Add interaction actions.
@@ -346,6 +369,7 @@ class VbStackedArea extends VbChart {
                 x = e.touches[0].pageX;
             } else {
                 // Solves some IE compatibility issues
+
                 x = e.offsetX || d3.mouse(this)[0];
             }
             return x - that.chart.margin.left;
@@ -368,6 +392,7 @@ class VbStackedArea extends VbChart {
             let date = (dateobj.getMonth() <= 6) ?
                         dateobj.getUTCFullYear() : dateobj.getUTCFullYear() + 1;
             visualbudget.broadcastStateChange({
+                mouseX: mouseX,
                 date: "" + date, // cast to string
                 dragging: true,
             })
@@ -395,10 +420,11 @@ class VbStackedArea extends VbChart {
         this.svg.on('mousedown', mousedown_callback);
         this.svg.on('mousemove', mousemove_callback);
         this.svg.on('mouseup',   mouseup_callback);
+        // this.svg.on('mouseout',  mouseout_callback); // glitchy.
     }
 
     isSmooth() {
-        return this.atts.smooth;
+        return this.smooth;
     }
 
 }

@@ -21,6 +21,7 @@ class VbTreeMap extends VbChart {
         d3.selectAll('#' + this.$div.attr('id') + ' svg g *').remove();
         this.adjustSize();
         this.calculateLayout();
+        this.currentLevel = this.display(this.currentData);
         this.open();
     }
 
@@ -32,6 +33,10 @@ class VbTreeMap extends VbChart {
 
         // Resize the svg.
         d3.select(this.$div.get(0)).select('svg')
+            .attr('width', width)
+            .attr('height', height);
+
+        d3.select('#vb-zoom-button')
             .attr('width', width)
             .attr('height', height);
 
@@ -57,33 +62,33 @@ class VbTreeMap extends VbChart {
 
     // Initialize the treemap.
     initialize($div, data) {
+
+        // null for now.
+        this.currentLevel = null;
+
+        // Index of the starting date.
+        let dateIndex = this.dateIndex = this.getDateIndex(this.state.date);
+
+        // The div element
         let theDiv = d3.select($div.get(0));
 
+        // Size of container
         var width = $div.width(),
             height = $div.height();
 
         var formatNumber = d3.format(",d"),
             transitioning;
 
-        // create svg
+        // Create svg
         let nav = this.nav = d3.select($div.get(0)).append("svg")
             .append("g").style("shape-rendering", "crispEdges");
 
-        // initialize x and y scales
+        // Initialize x and y scales
         nav.x = d3.scaleLinear()
             .domain([0, width])
 
         nav.y = d3.scaleLinear()
             .domain([0, height])
-
-        this.adjustSize();
-
-        let dateIndex = this.dateIndex = this.getDateIndex(this.state.date);
-
-        // remove all old treemap elements
-        nav.selectAll("g").remove();
-        
-        this.calculateLayout();
 
         nav.grandparent = nav.append("rect")
                 .attr("y", "-20px")
@@ -91,15 +96,9 @@ class VbTreeMap extends VbChart {
 
         // Create the "zoom out" button
         let p = document.createElement("p");
-        p.setAttribute("id", "vb-zoom-button");
-        if(typeof this.atts.width !== undefined) {
-            p.style.width = this.atts.width;
-            p.style.marginRight = 'auto';
-            p.style.marginLeft = 'auto';
-        }
-        $div.get(0).parentNode.insertBefore(p, $div.get(0));
-
-        d3.select('#vb-zoom-button')
+        p.setAttribute("class", "vb-zoom-button disabled");
+        $div.prepend(p);
+        d3.select(p)
             .text('Zoom out')
             .on("click", function() {
                 nav.grandparent.dispatch('click');
@@ -109,14 +108,37 @@ class VbTreeMap extends VbChart {
         let tooltipContent = function(that) {
             return function(d) {
                 let html = "<div class='name'>" + d.data.name + "</div>";
-                if(that.state.myTaxBill !== '') {
+                let showMyContribution = that.getAttribute('showmycontribution');
+                
+                if(that.state.myTaxBill !== '' && showMyContribution) {
+
+                    // Calculate the user's contribution as well as the
+                    // portion of this treemap item paid for by (property) taxes.
                     let total = that.taxAdjustedDollarAmountOfDate(that.state.date);
                     let subTotal = that.taxAdjustedDollarAmountOfDate(that.state.date, d.data);
                     let myBill = that.state.myTaxBill;
                     let myContribution = myBill * (subTotal / total);
-                    let fundedByTaxes = subTotal / that.dollarAmountOfDate(that.state.date, d.data);
-                    fundedByTaxes = Math.round(100*fundedByTaxes);
-                    let taxesNote = " (" + fundedByTaxes + "% is paid for by taxes.)";
+                    let pctFundedByTaxes = subTotal / that.dollarAmountOfDate(that.state.date, d.data);
+                    pctFundedByTaxes = Math.round(100*pctFundedByTaxes);
+
+                    // The parenthetical is added only if the query param "taxtype=property" is set
+                    // AND (if (the param "showfundedbytaxes" is either set to "all")
+                    // or (is set to "fractions" and % funded by taxes is less than one)).
+
+                    // Make sure showFundedByTaxes is set properly; the default is "fractions".
+                    let showFundedByTaxes = that.getAttribute('showfundedbytaxes',
+                            'fractions', ['all', 'fractions']);
+
+                    // Now add the note, if.
+                    let taxesNote = "";
+                    let taxType = that.getAttribute('taxtype');
+                    if (taxType && (showFundedByTaxes == "all" || pctFundedByTaxes < 100)) {
+                        let taxesType = that.atts.taxtype;
+                        taxesNote = "<br/>(" + pctFundedByTaxes + "% is paid for by "
+                            + taxesType + " taxes.)";
+                    }
+
+                    // Put the HTML all together.
                     html = html + "<div class='description'>Your contribution is "
                                 + "$" + myContribution.toFixed(2) + "."
                                 + taxesNote + "</div>";
@@ -131,17 +153,19 @@ class VbTreeMap extends VbChart {
         nav.call(this.tip);
 
         // Display the treemap.
-        this.currentLevel = this.display(this.currentData);
+        // this.currentLevel = this.display(this.currentData);
     }
 
     calculateLayout() {
-        this.root = d3.hierarchy(this.data, d => d.children)
+        console.log("##############################################################################################################################")
+        this.root = d3
+            .hierarchy(this.data, d => d.children)
             .sum(d => d.children.length ? 0 : d.dollarAmounts[this.dateIndex].dollarAmount)
-            .sort((a, b) => b.dollarAmount - a.dollarAmount);
+            .sort((a,b) => b.value - a.value );
 
         // make the treemap
         this.treemap = d3.treemap()
-            .tile(d3.treemapBinary) // FIXME: This is causing errors even though it works.
+            .tile(d3.treemapResquarify)
             .size([this.$div.width(), this.$div.height()])
             .padding(0)
             .round(1);
@@ -159,14 +183,15 @@ class VbTreeMap extends VbChart {
     *   @param {node} d - node where treemap begins (root)
     */
     display(d) {
+
         let that = this;
         let nav = this.nav;
 
         var formatNumber = d3.format(",d"),
-            // flag will be used to avoid overlapping transitions
+            // Flag will be used to avoid overlapping transitions
             transitioning;
 
-        // return block name [unused]
+        // return block name [function is unused]
         function name(d) {
             return d.parent ? name(d.parent) + "." + d.name : d.name;
         }
@@ -175,33 +200,25 @@ class VbTreeMap extends VbChart {
         var g1 = nav.insert("g", ".grandparent-g")
             .datum(d)
             .attr("class", "depth")
-            .on("click", function (event) {
-                that.zoneClick.call(this, d3.select(this).datum(), true, null, that);
-            })
 
         // add in data
         var g = g1.selectAll("g")
             .data((d.children.length === 0) ? [d] : d.children)
             .enter().append("g");
 
-        // create grandparent bar at top
+        // create grandparent zoom-out bar at top
         nav.grandparent
             .attr('width', '100%')
             .attr('height', '20px')
             .style('fill', '#eaa')
             .datum((d.parent === undefined) ? d : d.parent)
-            // .attr("nodeid", (d.parent === undefined) ? d.hash : d.parent.hash)
             .on("click", function (event) {
                 that.zoneClick.call(this, d3.select(this).datum(), true, null, that);
-            })
-
-        // refresh title
-        // updateTitle(d);
+            });
 
         /* transition on child click */
-        g.filter(function (d) {
-            return d.children;
-        })
+        g
+            .filter(d => d.children)
             .classed("children", true)
             // expand when clicked
             .on("click", function (event) {
@@ -211,8 +228,7 @@ class VbTreeMap extends VbChart {
                 var node = d3.select(this);
                 // assign node hash attribute
                 node.attr('nodeid', function () {
-                    // return node.datum().hash;
-                    return '1'
+                    return node.datum().data.hash;
                 });
             });
 
@@ -227,38 +243,18 @@ class VbTreeMap extends VbChart {
         // recursively draw children rectangles
         function addChilds(d, g) {
             // add child rectangles
-            g.selectAll(".child")
+            g
+                .selectAll(".child")
                 .data(function (d) {
                     return d.children || [d];
                 })
                 .enter().append("g")
                 .attr("class", "child")
-
-            // propagate recursively to next depth
-            .each(function () {
-                var group = d3.select(this);
-                if (d.children !== undefined) {
-                    for(let i = 0; i < d.children.length; i++) {
-                        // addChilds(d.children[i], group);
-                    }
-                    // $.each(d.children, function () {
-                    //     addChilds(this, group);
-                    // })
-                }
-            })
                 .append("rect")
                 .call(that.rect(that.nav));
         }
 
         addChilds(d, g);
-
-        // IE popover action
-        // if (ie()) {
-        //     nav.on('mouseout', function () {
-        //         d3.select('#ie-popover').style('display', 'none')
-        //     });
-        //     return g;
-        // }
 
         // the dateIndex.
         let dateIndex = this.dateIndex;
@@ -282,14 +278,13 @@ class VbTreeMap extends VbChart {
                 .classed("no-label", true);
 
             // textLabels.call(this); // FIXME
-
         });
 
         return g;
     }
 
     // Open a node.
-    open(nodeId, transition) {
+    open(transition) {
         // find node with given hash or open root node
         this.zoneClick.call(null, this.currentData, false, transition || 1, this);
     }
@@ -305,13 +300,15 @@ class VbTreeMap extends VbChart {
     zoneClick(d, click, transition, that) {
         //destroy popovers on transition (so they don't accidentally stay)
         // $(this).find('div').first().popover('destroy');
+        that.tip.hide();
 
         let nav = that.nav;
 
         // stop event propagation
-        var event = window.event || event
-        // stopPropagation( event );
-        event.preventDefault();
+        var event = d3.event || window.event || event;
+        if(event) {
+            event.preventDefault();
+        }
 
         transition = transition || 750;
 
@@ -323,6 +320,14 @@ class VbTreeMap extends VbChart {
         if (click && d.data.hash === that.currentData.data.hash) {
             nav.grandparent.dispatch('click');
             return;
+        }
+
+        // Enable or disable the zoom button, depending.
+        let zoombutton = jQuery(that.$div).find('.vb-zoom-button');
+        if(d.data.hash == that.root.data.hash) {
+            zoombutton.addClass("disabled");
+        } else {
+            zoombutton.removeClass("disabled");
         }
 
         // Reset year
@@ -410,20 +415,11 @@ class VbTreeMap extends VbChart {
     */
     rect(nav) {
         return function(rect) {
-            rect.attr("x", function (d) {
-                return nav.x(d.x0);
-            })
-            .attr("y", function (d) {
-                return nav.y(d.y0);
-            })
-            .attr("width", function (d) {
-                return nav.x(d.x1) - nav.x(d.x0);
-            })
-            .attr("height", function (d) {
-                return nav.y(d.y1) - nav.y(d.y0);
-            });
+            rect.attr("x",      d => nav.x(d.x0))
+                .attr("y",      d => nav.y(d.y0))
+                .attr("width",  d => nav.x(d.x1) - nav.x(d.x0))
+                .attr("height", d => nav.y(d.y1) - nav.y(d.y0));
         }
     }
-
 
 }

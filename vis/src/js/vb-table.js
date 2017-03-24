@@ -13,6 +13,8 @@ class VbTable extends VbChart {
 
         // Call super method.
         super($div, data);
+        this.$table = $("<div class='vb-table-element'></div>");
+        $div.append(this.$table);
 
         // Configuration variables.
         let table = this.table = {};
@@ -29,12 +31,35 @@ class VbTable extends VbChart {
             .range(["#aaa", "#333"]);
     }
 
-    resize() {
-    }
-
     redraw() {
         console.log('Drawing chart ' + this.atts.hash + ' (table).');
-        this.initialize(this.$div, this.data);        
+        this.initialize(this.$table, this.data);        
+    }
+
+    // Override the super class's method.
+    resize() {
+        // Do nothing.
+    }
+
+    // Overrides the super class's method.
+    setState(newState) {
+        // Don't do a full redraw, just update.
+        this.state = Object.assign({}, this.state, newState);
+        this.update(this.$table, this.data, this.state.date);
+    }
+
+    // Update the table data without destroying it.
+    // This is used when the year is changed.
+    update($container, data, date) {
+        let that = this;
+
+        $container.find('.tablerow').not('.tableheader').each(function(i) {
+            let node = $(this).data();
+            let level = $(this).data('level');
+            $(this).html($(that.renderNode(node, level)).html());
+        });
+
+        this.alignRows(0);
     }
 
     /*
@@ -68,32 +93,26 @@ class VbTable extends VbChart {
 
         // Open the first group
         $table.children().eq(1).click();
-        console.log($table.children().eq(1))
     }
 
 
     /*
     *   Aligns columns when the indentation level changes
     */
-    alignRows() {
-        // Could do this using a stack.
-        let maxLevel = 0;
+    alignRows(duration=250) {
+        let that = this;
 
-        // Find maximum depth level.
-        $('.tablerow').each(function () {
-            if ($(this).data('level') > maxLevel) {
-                maxLevel = $(this).data('level');
-            }
-        });
-
-        // Assign each first column a margin-right so that all the remaining
-        // columns will be aligned.
+        // Assign each row some CSS based on its depth.
         $('.tablerow').each(function () {
             let thisLevel = $(this).data('level') || 0;
-            $(this).find('.name').animate({
-                'margin-right': (maxLevel - thisLevel) * 25
-            }, 250);
+            let theCSS = that.getAlignmentCSS(thisLevel);
+            $(this).find('.name').animate(theCSS, duration);
         });
+    }
+
+    // How does a row's CSS change to align it, based on its depth?
+    getAlignmentCSS(level) {
+        return { 'padding-left': level * 25 };
     }
 
     /*
@@ -107,7 +126,19 @@ class VbTable extends VbChart {
             {
                 title: "Name",
                 cellClass: "value name long textleft",
-                value: function(node) { return node.name; }
+                value: function(node) {
+
+                    let bulletedName = function(hasChildren) {
+                        return '<div class="bullet'
+                            + (hasChildren ? "" : " hidden")
+                            + '">&#9656;</div>' + node.name;
+                    }
+
+                    return bulletedName(node.children.length);
+                },
+                cssFunction: function(node, level) {
+                    return that.getAlignmentCSS(level);
+                }
             },
             {
                 title: "Amount",
@@ -117,7 +148,7 @@ class VbTable extends VbChart {
                 }
             },
             {
-                title: "Portion",
+                title: "Impact",
                 cellClass: "value textright",
                 value: function(node) {
                     let val = that.dollarAmountOfCurrentDate(node);
@@ -157,7 +188,7 @@ class VbTable extends VbChart {
     *  Renders the header based on node data
     */
     renderHeader(tableStats) {
-        let template = '<div class="tablerow header" id="vb-table-header" data-level=0>' +
+        let template = '<div class="tablerow tableheader" data-level=0>' +
                          '{{#.}}' +
                            '<div class="{{cellClass}} head">{{title}}</div>' +
                          '{{/.}}' +
@@ -169,9 +200,7 @@ class VbTable extends VbChart {
     *  The template for a table row.
     */
     rowTemplate() {
-        return  '<div class="tablerow">' +
-                    '<div class="bullet {{hidden}}">&#9656;</div>' +
-                '</div>';
+        return  '<div class="tablerow datarow"></div>';
     }
 
     /*
@@ -198,11 +227,21 @@ class VbTable extends VbChart {
     *
     *   @return {jquery object} - new row
     */
-    renderNode(node, level, container) {
-        // append row to container
+    renderNode(node, level, container=false) {
+        // Grab the template
         let template = this.rowTemplate();
-        let rendered = container.append(Mustache.render(template,
-                {hidden: node.children.length ? '' : 'bullet-hidden'})).children().last();
+
+        // Render the template.
+        let rendered = jQuery(template);
+        // let rendered = jQuery(Mustache.render(template,
+        //         {hidden: node.children.length ? '' : 'bullet-hidden'}));
+
+        // Only append it to the container if the flag is passed.
+        if (container) {
+            container.append(rendered);
+        }
+
+        // Get the stats.
         let tableStats = this.tableStats();
 
         // check whether node has children
@@ -218,12 +257,11 @@ class VbTable extends VbChart {
         $.each(tableStats, function () {
             // append new cell to row
             let newcell = $('<div class="' + this.cellClass + '"> </div>').appendTo(rendered);
-            if (this.cellFunction) {
-                // function (eg. formatting numerical value)
-                this.cellFunction(node, newcell.get(0));
-            } else {
-                // text (eg. row title)
-                newcell.text(this.value(node));
+
+            // text (eg. row title)
+            newcell.html(this.value(node));
+            if (this.cssFunction) {
+                newcell.css(this.cssFunction(node, level));
             }
         });
 
@@ -249,13 +287,26 @@ class VbTable extends VbChart {
                  *  Collapse row if expanded
                  */
 
-                // retrieve children rows
-                let child = row.data('childDiv');
-                // slide up children rows
-                child.slideUp(250, function () {
+                let allChildren = [];
+                let getAllChildren = function(node) {
+                    let divs = $(node).data('childDivs');
+                    if(divs) {
+                        allChildren.push(...divs);
+                        divs.forEach(d => getAllChildren(d));
+                    }
+                }
+                getAllChildren(row);
+
+                let count = 0;
+                let total = allChildren.length;
+
+                allChildren.forEach(d => d.fadeOut(300, function() {
                     $(this).remove();
-                    that.alignRows();
-                })
+                    count++;
+                    if (count == total) {
+                        that.alignRows();
+                    }
+                }));
 
                 row.removeClass('expanded');
 
@@ -265,18 +316,20 @@ class VbTable extends VbChart {
                  *  Expand row if collapsed
                  */
 
-                // container
-                let childDiv = $('<div class="group"></div>').insertAfter(row);
+                let childDivs = [];
 
                 // render children rows
                 for (let i = 0; i < node.children.length; i++) {
-                    that.renderNode(node.children[i], row.data('level') + 1, childDiv);
-                    row.data('childDiv', childDiv);
+                    childDivs.push(that.renderNode(node.children[i], row.data('level') + 1));
                 }
+                childDivs.reverse();
+
+                row.data('childDivs', childDivs);
+                childDivs.forEach(d => row.after($(d).hide()));
 
                 // show children rows
                 that.alignRows();
-                childDiv.slideDown(250);
+                childDivs.forEach(d => d.fadeIn(300));
 
                 row.addClass('expanded');
             }

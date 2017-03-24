@@ -47,13 +47,27 @@
                 <dataset-select></dataset-select>
                 <div class="row" style='margin-top: 2em'>
                     <div class="col-md-6">
-                        <p style='text-align:center'>The total for a given date:</p>
+                        <p style='text-align:center'>The item's name:</p>
+                        <chart vis='metric' metric='name'></chart>
+                        <shortcode metric='name'></shortcode>
+                        <iframelink metric='name'></iframelink>
+                    </div>
+                    <div class="col-md-6">
+                        <p style='text-align:center'>The item's average dollar amount over all years:</p>
+                        <chart vis='metric' metric='average'></chart>
+                        <shortcode metric='average'></shortcode>
+                        <iframelink metric='average'></iframelink>
+                    </div>
+                </div>
+                <div class="row" style='margin-top: 2em'>
+                    <div class="col-md-6">
+                        <p style='text-align:center'>The item's dollar amount for a given date:</p>
                         <chart vis='metric' metric='datetotal'></chart>
                         <shortcode metric='datetotal'></shortcode>
                         <iframelink metric='datetotal'></iframelink>
                     </div>
                     <div class="col-md-6">
-                        <p style='text-align:center'>The date:</p>
+                        <p style='text-align:center'>The current date:</p>
                         <chart vis='metric' metric='date'></chart>
                         <shortcode metric='date'></shortcode>
                         <iframelink metric='date'></iframelink>
@@ -67,7 +81,7 @@
                         <iframelink metric='percentgrowth'></iframelink>
                     </div>
                     <div class="col-md-6">
-                        <p style='text-align:center'>The absolute growth from previous year:</p>
+                        <p style='text-align:center'>The absolute growth ($) from previous year:</p>
                         <chart vis='metric' metric='absgrowth'></chart>
                         <shortcode metric='absgrowth'></shortcode>
                         <iframelink metric='absgrowth'></iframelink>
@@ -75,7 +89,7 @@
                 </div>
                 <div class="row" style='margin-top: 2em'>
                     <div class="col-md-6">
-                        <p style='text-align:center'>5-year average:<br>
+                        <p style='text-align:center'>The 5-year average:<br>
                             <small>(or fewer, on the boundary)</small></p>
                         <chart vis='metric' metric='5yearaverage'></chart>
                         <shortcode metric='5yearaverage'></shortcode>
@@ -91,13 +105,13 @@
                 </div>
                 <div class="row" style='margin-top: 2em'>
                     <div class="col-md-6">
-                        <p style='text-align:center'>My tax contribution:</p>
+                        <p style='text-align:center'>The user's tax contribution to the current item:</p>
                         <chart vis='metric' metric='mytaxcontribution'></chart>
                         <shortcode metric='mytaxcontribution'></shortcode>
                         <iframelink metric='mytaxcontribution'></iframelink>
                     </div>
                     <div class="col-md-6">
-                        <p style='text-align:center'>Download link:</p>
+                        <p style='text-align:center'>Dataset download link:</p>
                         <chart vis='metric' metric='download'></chart>
                         <shortcode metric='download'></shortcode>
                         <iframelink metric='download'></iframelink>
@@ -121,9 +135,9 @@
             <pane title="Ratio">
             </pane>
             <pane title="Difference">
-            </pane>-->
-            <pane title="Custom">
             </pane>
+            <pane title="Custom">
+            </pane>-->
         </tabs>
 
     </div>

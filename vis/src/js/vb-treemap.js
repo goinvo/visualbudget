@@ -94,20 +94,11 @@ class VbTreeMap extends VbChart {
                 .attr("y", "-20px")
                 .attr("class", "grandparent");
 
-        // this.adjustSize();
-        // this.calculateLayout();
-
         // Create the "zoom out" button
         let p = document.createElement("p");
-        p.setAttribute("id", "vb-zoom-button");
-        if(typeof this.atts.width !== undefined) {
-            p.style.width = this.atts.width;
-            p.style.marginRight = 'auto';
-            p.style.marginLeft = 'auto';
-        }
-        $div.get(0).parentNode.insertBefore(p, $div.get(0));
-
-        d3.select('#vb-zoom-button')
+        p.setAttribute("class", "vb-zoom-button disabled");
+        $div.prepend(p);
+        d3.select(p)
             .text('Zoom out')
             .on("click", function() {
                 nav.grandparent.dispatch('click');
@@ -329,6 +320,14 @@ class VbTreeMap extends VbChart {
         if (click && d.data.hash === that.currentData.data.hash) {
             nav.grandparent.dispatch('click');
             return;
+        }
+
+        // Enable or disable the zoom button, depending.
+        let zoombutton = jQuery(that.$div).find('.vb-zoom-button');
+        if(d.data.hash == that.root.data.hash) {
+            zoombutton.addClass("disabled");
+        } else {
+            zoombutton.removeClass("disabled");
         }
 
         // Reset year

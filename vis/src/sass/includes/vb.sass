@@ -225,13 +225,13 @@
     overflow-y: hidden;
 
 .tablerow
-    height: 30px;
     cursor: pointer;
-    padding-top: 4px;
-    padding-bottom: 4px;
-    line-height: 30px;
     display: inline-block;
     white-space: nowrap;
+    padding: 4px 6px;
+
+    .value, .bullet
+        vertical-align: middle;
 
     &.datarow
         border-top: 1px solid #aaaaaa;
@@ -249,7 +249,6 @@
         text-overflow: ellipsis;
         overflow: hidden;
         display: inline-block;
-        padding-right: .4em;
 
         &.long
             width: 250px;
@@ -266,15 +265,8 @@
         &.head
             font-weight: bold;
 
-        &.maplink
-            width: 40px;
-            opacity: 0.1;
-
     &:hover
         background-color: #ebebeb;
-
-        .value.maplink
-            opacity: 0.8;
 
     .group
         display: none;

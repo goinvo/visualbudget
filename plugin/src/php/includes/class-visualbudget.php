@@ -42,7 +42,9 @@ class VisualBudget {
         define('VISUALBUDGET_GITHUB_LINK', 'https://github.com/goinvo/visualbudget' );
         
         define('VISUALBUDGET_ALIASES_FILE', 'vis/aliases.json' );
-        define('VISUALBUDGET_UPLOAD_DIR', 'datasets/' );
+        // NOTE: The upload directory is also hardcoded into vis.php & api.php.
+        //       It has to be since those are standalone files.
+        define('VISUALBUDGET_UPLOAD_DIR', '../visualbudget-datasets/' );
         define('VISUALBUDGET_PATH', $trailingslashit(dirname(dirname(__FILE__))));
         define('VISUALBUDGET_UPLOAD_PATH', VISUALBUDGET_PATH . VISUALBUDGET_UPLOAD_DIR );
 

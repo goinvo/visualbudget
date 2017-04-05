@@ -52,10 +52,10 @@ $id_or_alias_to_url = function($string) use ($get_aliases) {
     }
 
     // Absolute URL:
-    // $url = $_SERVER['HTTP_HOST'] . dirname(dirname($_SERVER["REQUEST_URI"]))
+    // $url = $_SERVER['HTTP_HOST'] . dirname(dirname(dirname($_SERVER["REQUEST_URI"])))
     //             . "/datasets/" . $the_id . ".json";
-    $url = dirname(dirname($_SERVER["REQUEST_URI"]))
-                    . "/datasets/" . $the_id . ".json";
+    $url = dirname(dirname(dirname($_SERVER["REQUEST_URI"])))
+                    . "/visualbudget-datasets/" . $the_id . ".json";
 
     return $url;
 };

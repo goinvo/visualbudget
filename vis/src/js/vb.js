@@ -91,6 +91,10 @@ var visualbudget = (function (vb, $, d3) {
                     newChart = new VbTreeMap($div, data);
                     break;
 
+                case 'legend':
+                    newChart = new VbLegend($div, data);
+                    break;
+
                 case 'table':
                     newChart = new VbTable($div, data);
                     break;

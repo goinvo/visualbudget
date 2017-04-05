@@ -112,8 +112,6 @@
         margin-left: 10px;
 
 
-
-
 /* Comparison
  ------------------------------------------------------- */
 
@@ -137,15 +135,17 @@
 
 .vb-chart-treemap
     -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+    margin-bottom: 3.5em;
     position: relative;
     height: 300px;
     width: 100%;
-    max-width: 600px;
-    /*font: 10px sans-serif;*/
+    /* max-width: 500px;      */
+    /* font: 10px sans-serif; */
 
     svg
         position: relative;
         overflow: hidden;
+        width: 100%
 
     rect
         fill: none;
@@ -216,6 +216,21 @@
     &:hover
         background-position: 0 -55px;
         transition: background 0.1s linear;
+
+
+/* Legend
+ ------------------------------------------------------- */
+
+.vb-chart-legend
+    ul
+        li
+            list-style-position: inside;
+            padding-left: 26px;
+            list-style: none;
+            background-image: none;
+            background-repeat: no-repeat;
+            background-position: left center;
+            background-size: 16px;
 
 
 /* Tabular

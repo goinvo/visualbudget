@@ -51,11 +51,17 @@ $id_or_alias_to_url = function($string) use ($get_aliases) {
         $the_id = $aliases[$string];
     }
 
-    // Absolute URL:
-    // $url = $_SERVER['HTTP_HOST'] . dirname(dirname($_SERVER["REQUEST_URI"]))
-    //             . "/datasets/" . $the_id . ".json";
-    $url = dirname(dirname($_SERVER["REQUEST_URI"]))
-                    . "/datasets/" . $the_id . ".json";
+    // Output relative URLs to localhost; absolute URLs to real websites.
+    $whitelist = array('127.0.0.1', '::1');
+    if(in_array($_SERVER['REMOTE_ADDR'], $whitelist)) {
+        // Site is running on localhost. Use relative URL.
+        $url = dirname(dirname(dirname($_SERVER["REQUEST_URI"])))
+                . "/visualbudget-datasets/" . $the_id . ".json";
+    } else {
+        // Site is not on localhost. Use absolute URL. 
+        $url = $_SERVER['HTTP_HOST'] . dirname(dirname(dirname($_SERVER["REQUEST_URI"])))
+                . "/visualbudget-datasets/" . $the_id . ".json";
+    }
 
     return $url;
 };

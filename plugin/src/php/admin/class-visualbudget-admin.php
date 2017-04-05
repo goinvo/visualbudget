@@ -308,9 +308,9 @@ class VisualBudget_Admin {
 
         // A list of the tabs
         $tabs = array(
-            'configuration' =>
-                array('name'=>'Configuration',
-                      'icon'=>'dashicons-admin-settings'),
+            // 'configuration' =>
+            //     array('name'=>'Configuration',
+            //           'icon'=>'dashicons-admin-settings'),
             'datasets' =>
                 array('name'=>'Datasets',
                       'icon'=>'dashicons-media-spreadsheet'),

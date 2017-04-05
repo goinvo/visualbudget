@@ -11,7 +11,7 @@ header("Content-Type: text/plain");
 
 // Gotta hardcode something in a standalone file.
 // This is the same constant as defined in includes/class-visualbudget.php
-define( 'VISUALBUDGET_UPLOAD_DIR', '../datasets/' );
+define( 'VISUALBUDGET_UPLOAD_DIR', '../../visualbudget-datasets/' );
 
 // If the "filename" key of the query string has been defined,
 // then look for that file. If it exists, return its contents.

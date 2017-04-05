@@ -103,7 +103,10 @@ if (empty($datasets)) {
         echo '<br/>';
         echo '<div class="row"><div class="col-md-4 dataset-info">';
         // echo '<span class="glyphicon glyphicon-ok" aria-hidden="true"></span>';
-        echo '<strong>' . $props['uploaded_name'] . '</strong>';
+        echo '<strong>' . $props['uploaded_name'] . '</strong> (ID: ' . props['id'] . ')';
+        if(isset($props['url'])) {
+            echo '<br/><span class="dataset-actions"><a href="javascript:(function(){jQuery(\'#url\').val(\'' . $props['url'] . '\');jQuery(\'#submit\').click();})()"><span class="label label-success">fetch again from URL</span></a></span>';
+        }
         echo '<br/>';
         // echo '<span class="glyphicon glyphicon-th" aria-hidden="true"></span>';
         echo $dataset->num_rows() . ' rows &times; ' . $dataset->num_cols() . ' columns';

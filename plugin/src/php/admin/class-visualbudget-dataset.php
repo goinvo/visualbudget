@@ -180,6 +180,9 @@ class VisualBudget_Dataset {
                 $pathinfo = pathinfo($this->properties['uploaded_name']);
                 $this->properties['uploaded_extension'] = $pathinfo['extension'];
 
+                // Add the url too
+                $this->properties['url'] = $url;
+
             } else {
 
                 // There was a problem on the other end.
@@ -224,6 +227,7 @@ class VisualBudget_Dataset {
             // The original filename
             $this->properties['filename_original'] =
                 $this->properties['id'] . '_orig.' . $this->properties['uploaded_extension'];
+
         }
 
     }

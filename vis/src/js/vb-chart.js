@@ -7,19 +7,38 @@ class VbChart {
     // Chart
     constructor($div, data) {
 
+        // Properties of the chart are specified as HTML data attributes.
+        this.atts = this.removeVbPrefixesOnAttributes($div.data());
+
+        // If this is a comparison chart, then data is an array.
+        if(data.constructor !== Array) {
+            // Not a comparison chart.
+            if(typeof this.atts.node !== 'undefined') {
+                data = this.getNodeByLevels(this.atts.node, data);
+            }
+        } else {
+            // Comparison chart.
+            if(typeof this.atts.node !== 'undefined') {
+                let nodeNames = this.atts.node.split(",");
+                let count = Math.min(nodeNames.length, data.length);
+                for(let i = 0; i < count; i++) {
+                    data[i] = this.getNodeByLevels(nodeNames[i], data[i]);
+                }
+            }
+        }
+
+        // If this is a comparison chart, then data is an array.
         if(data.constructor !== Array) {
             this.setColors(data);
         }
 
+        // FIXME: Make this set-able.
         this.defaulttaxbill = 7500;
 
         // The jQuery object for the chart div
         // and the chart's data.
         this.$div = $div;
         this.data = data;
-
-        // Properties of the chart are specified as HTML data attributes.
-        this.atts = this.removeVbPrefixesOnAttributes($div.data());
 
         // Set the name of the dataset.
         if (typeof this.atts.name !== 'undefined') {
@@ -72,6 +91,7 @@ class VbChart {
     destroy() {
         // Remove everything in the chart.
         console.log('Destroying chart ' + this.atts.hash + '.');
+        // To do.
     }
 
     setState(newState) {
@@ -163,7 +183,7 @@ class VbChart {
         return defaultVal;
     }
 
-    // What is the dollarAmound corresponding to a given date for
+    // What is the dollarAmount corresponding to a given date for
     // a given node in the dataset?
     dollarAmountOfDate(date, node=this.data) {
         // Find the right dollar amount for our date.
@@ -310,6 +330,13 @@ class VbChart {
         return range[0].getUTCFullYear();
     }
 
+    // To title case
+    toTitleCase(str) {
+        return str.replace(/(?:^|\s)\w/g, function(match) {
+            return match.toUpperCase();
+        });
+    }
+
     // Return a node based on its hash.
     // FIXME: this function is used only by the treemap
     // and is specific to the d3.hierarchy object type.
@@ -321,13 +348,6 @@ class VbChart {
             }
         });
         return node;
-    }
-
-    // To title case
-    toTitleCase(str) {
-        return str.replace(/(?:^|\s)\w/g, function(match) {
-            return match.toUpperCase();
-        });
     }
 
     // FIXME: this function is basically same as above,
@@ -347,6 +367,45 @@ class VbChart {
             node = this.getNodeByHash(hash, data.children[i]);
             if(node) {
                 break;
+            }
+        }
+
+        return node;
+    }
+
+    // Get a child node by its name.
+    // Note: only searches in IMMEDIATE children of the data argument.
+    getChildNodeByName(str, data) {
+
+        // Normalize our strings.
+        let normalize = function(s) {
+            return s.replace(/ /g, "_").toLowerCase();
+        }
+
+        // Loop through, return the first match.
+        for(let i = 0; i < data.children.length; i++) {
+            let child = data.children[i];
+            if(normalize(child.name) == normalize(str)) {
+                return child
+            }
+        }
+
+        return null;
+    }
+
+    // Get a node by a name ID.
+    // e.g. Schools:Admin:Salaries
+    // If not found, return the original data object.
+    getNodeByLevels(str, data) {
+        let parts = str.split(":");
+        let node = data;
+
+        // Dive down into each part. At any point, if the right
+        // child isn't found, return null.
+        for(let i = 0; i < parts.length; i++) {
+            node = this.getChildNodeByName(parts[i], node);
+            if (!node) {
+                return data;
             }
         }
 

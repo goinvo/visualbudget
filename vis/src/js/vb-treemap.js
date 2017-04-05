@@ -36,10 +36,6 @@ class VbTreeMap extends VbChart {
             .attr('width', width)
             .attr('height', height);
 
-        d3.select('#vb-zoom-button')
-            .attr('width', width)
-            .attr('height', height);
-
         // Reset the ranges to fit the new div size.
         this.nav.x.range([0, width]);
         this.nav.y.range([0, height]);
@@ -68,9 +64,6 @@ class VbTreeMap extends VbChart {
 
         // Index of the starting date.
         let dateIndex = this.dateIndex = this.getDateIndex(this.state.date);
-
-        // The div element
-        let theDiv = d3.select($div.get(0));
 
         // Size of container
         var width = $div.width(),
@@ -157,7 +150,6 @@ class VbTreeMap extends VbChart {
     }
 
     calculateLayout() {
-        console.log("##############################################################################################################################")
         this.root = d3
             .hierarchy(this.data, d => d.children)
             .sum(d => d.children.length ? 0 : d.dollarAmounts[this.dateIndex].dollarAmount)

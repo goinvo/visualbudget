@@ -10,6 +10,13 @@ class VbChart {
         // Properties of the chart are specified as HTML data attributes.
         this.atts = this.removeVbPrefixesOnAttributes($div.data());
 
+        // Set the name of the dataset.
+        if (typeof this.atts.name !== 'undefined') {
+            data.name = this.atts.name;
+        } else {
+            data.name = this.toTitleCase(this.atts.data.toString());
+        }
+
         // If this is a comparison chart, then data is an array.
         if(data.constructor !== Array) {
             // Not a comparison chart.
@@ -39,13 +46,6 @@ class VbChart {
         // and the chart's data.
         this.$div = $div;
         this.data = data;
-
-        // Set the name of the dataset.
-        if (typeof this.atts.name !== 'undefined') {
-            this.data.name = this.atts.name;
-        } else {
-            this.data.name = this.toTitleCase(this.atts.data.toString());
-        }
 
         // Set the chart width & height if user set them.
         if(typeof this.atts.width !== 'undefined') {

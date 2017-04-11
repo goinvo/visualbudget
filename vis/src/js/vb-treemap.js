@@ -186,19 +186,16 @@ class VbTreeMap extends VbChart {
             // Flag will be used to avoid overlapping transitions
             transitioning;
 
-        // return block name [function is unused]
-        function name(d) {
-            return d.parent ? name(d.parent) + "." + d.name : d.name;
-        }
-
         // insert top-level blocks
         var g1 = nav.insert("g", ".grandparent-g")
             .datum(d)
             .attr("class", "depth")
 
         // add in data
+        console.log(d)
+
         var g = g1.selectAll("g")
-            .data((d.children.length === 0) ? [d] : d.children)
+            .data((d.children) ? d.children : [d])
             .enter().append("g");
 
         // create grandparent zoom-out bar at top
@@ -211,12 +208,13 @@ class VbTreeMap extends VbChart {
                 that.zoneClick.call(this, d3.select(this).datum(), true, null, that);
             });
 
-        /* transition on child click */
-        g
+        /* add "childen" class to those with children */
+        g.classed("treemap-item", true)
             .filter(d => d.children)
-            .classed("children", true)
-            // expand when clicked
-            .on("click", function (event) {
+            .classed("children", true);
+
+        /* transition on child click */
+        g.on("click", function (event) {
                 that.zoneClick.call(this, d3.select(this).datum(), true, null, that);
             })
             .each(function () {

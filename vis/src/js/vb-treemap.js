@@ -192,8 +192,6 @@ class VbTreeMap extends VbChart {
             .attr("class", "depth")
 
         // add in data
-        console.log(d)
-
         var g = g1.selectAll("g")
             .data((d.children) ? d.children : [d])
             .enter().append("g");

@@ -34,8 +34,18 @@ class VbChart {
             }
         }
 
+        // Color schemes, which can be invoked by the parameter
+        // colorscheme=N, where N is an index. Default is N=0.
+        this.colors = [
+            d3.schemeCategory20,
+            ["#34B3E4","#B79EC7","#F38A78","#EC9F48","#57BFC1","#F0C23B","#F289B7","#92C749","#9D9FA1","#046293","#66418C","#AF1923","#A8480C","#14717B","#9E7C21","#AC2258","#4C792D","#4D4F51"]
+        ];
+
         // If this is a comparison chart, then data is an array.
         if(data.constructor !== Array) {
+            if(typeof this.atts.colorscheme === 'undefined') {
+                this.atts.colorscheme = 0;
+            }
             this.setColors(data);
         }
 
@@ -101,12 +111,13 @@ class VbChart {
 
     setColors(data) {
         // We will count through, getting new colors.
+        let colorscheme = this.colors[this.atts.colorscheme];
         let i = 0;
         let pickAColor = function() {
-            if (!d3.schemeCategory20[i]) {
+            if (!colorscheme[i]) {
                 i = 0;
             }
-            return d3.schemeCategory20[i++];
+            return colorscheme[i++];
         }
 
         // Recurse through the hierarchy.

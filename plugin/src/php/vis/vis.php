@@ -24,8 +24,12 @@ if ( ! isset($_GET['hash']) ) {
 // Retrieve aliases from aliases.json.
 $get_aliases = function() {
     $filename = 'aliases.json';
-    $aliases = json_decode(file_get_contents($filename), true);
-    return $aliases;
+    if(file_exists($filename)) {
+        $aliases = json_decode(file_get_contents($filename), true);
+        return $aliases;
+    } else {
+        return Array();
+    }
 };
 
 // Turn $_GET['data'] into an array of strings.

@@ -43,7 +43,8 @@ class VbChart {
 
         // If this is a comparison chart, then data is an array.
         if(data.constructor !== Array) {
-            if(typeof this.atts.colorscheme === 'undefined') {
+            if(typeof this.atts.colorscheme === 'undefined' ||
+                typeof this.colors[this.atts.colorscheme] === 'undefined') {
                 this.atts.colorscheme = 0;
             }
             this.setColors(data);

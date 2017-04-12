@@ -194,6 +194,7 @@ For metric=download, the result is different if there is one or multiple dataset
 - For e.g. "data=expenses", the result is          `<Download data>`
 - For e.g. "data=expenses,funds", the result is     `Download data [<1>, <2>]`,
   where <> denotes a link. In each case, only the "Download data" text is customizable.
+  
 
     [visualbudget
         vis=metric

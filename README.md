@@ -39,6 +39,9 @@ On the WordPress dashboard there is a "Plugins" link on the sidebar.
 At the top of the Plugins page there is a button to "Add New".
 You can simply upload the .zip file of the VisualBudget plugin to install it.
 
+To update the plugin, simply delete it and reinstall. Your datasets are saved in a different
+folder in your WP installation and will not be lost.
+
 ### For developers
 
 Compiling the plugin requires Node.js and npm, the Node Package Manager.
@@ -62,10 +65,6 @@ directory), then run
 $ gulp plugin-export
 ```
 
+## Use
 
-## Screenshots
-[Screenshots of VB in action.]
-
-
-## Changelog
-[A log of version updates.]
+Refer to the `/docs` folder of this repository for comprehensive documentation.

@@ -304,19 +304,19 @@ class VisualBudget_Admin {
         echo '<h2 class="nav-tab-wrapper">';
 
         // Get the active tab name if there is one; else go to default.
-        $active_tab = isset( $_GET[ 'tab' ] ) ? $_GET[ 'tab' ] : 'configuration';
+        $active_tab = isset( $_GET[ 'tab' ] ) ? $_GET[ 'tab' ] : 'datasets';
 
         // A list of the tabs
         $tabs = array(
-            // 'configuration' =>
-            //     array('name'=>'Configuration',
-            //           'icon'=>'dashicons-admin-settings'),
             'datasets' =>
                 array('name'=>'Datasets',
                       'icon'=>'dashicons-media-spreadsheet'),
             'visualizations' =>
                 array('name'=>'Visualizations',
                       'icon'=>'dashicons-chart-line'),
+            'configuration' =>
+                array('name'=>'Configuration',
+                      'icon'=>'dashicons-admin-settings'),
             );
 
         foreach ($tabs as $key => $info) {
@@ -401,8 +401,12 @@ class VisualBudget_Admin {
         wp_localize_script(
             'vb_admin',
             '_vbAdminGlobal',
-            array('vbPluginUrl' => plugin_dir_url(dirname(__FILE__)),
-                  'vbAdminUrl' => admin_url('', 'admin')) );
+            array('vbPluginUrl' => VISUALBUDGET_URL,
+                  'vbAdminUrl' => admin_url('', 'admin'),
+                  'vbUploadDir' => VISUALBUDGET_UPLOAD_URL,
+                  'vbAliasesFileUrl' => VISUALBUDGET_ALIASES_URL,
+                  'vbConfigFileUrl' => VISUALBUDGET_CONFIG_URL )
+            );
     }
 
     /**

@@ -42,15 +42,20 @@ class VisualBudget {
         define('VISUALBUDGET_GITHUB_LINK', 'https://github.com/goinvo/visualbudget' );
         define('VISUALBUDGET_DOCS_LINK', 'https://github.com/goinvo/visualbudget/tree/master/docs' );
         
-        define('VISUALBUDGET_ALIASES_FILE', 'vis/aliases.json' );
         // NOTE: The upload directory is also hardcoded into vis.php & api.php.
         //       It has to be since those are standalone files.
         define('VISUALBUDGET_UPLOAD_DIR', '../visualbudget-datasets/' );
         define('VISUALBUDGET_PATH', $trailingslashit(dirname(dirname(__FILE__))));
         define('VISUALBUDGET_UPLOAD_PATH', VISUALBUDGET_PATH . VISUALBUDGET_UPLOAD_DIR );
+        define('VISUALBUDGET_ALIASES_FILENAME', 'aliases.json' );
+        define('VISUALBUDGET_CONFIG_FILENAME', 'config.json' );
+        define('VISUALBUDGET_ALIASES_PATH', VISUALBUDGET_UPLOAD_PATH . 'settings/' . VISUALBUDGET_ALIASES_FILENAME );
+        define('VISUALBUDGET_CONFIG_PATH', VISUALBUDGET_UPLOAD_PATH . 'settings/' . VISUALBUDGET_CONFIG_FILENAME );
 
         define('VISUALBUDGET_URL', plugin_dir_url( dirname( __FILE__ ) ) );
         define('VISUALBUDGET_UPLOAD_URL', VISUALBUDGET_URL . VISUALBUDGET_UPLOAD_DIR );
+        define('VISUALBUDGET_ALIASES_URL', VISUALBUDGET_UPLOAD_URL . 'settings/' . VISUALBUDGET_ALIASES_FILENAME );
+        define('VISUALBUDGET_CONFIG_URL', VISUALBUDGET_UPLOAD_URL . 'settings/' . VISUALBUDGET_CONFIG_FILENAME );
 
         // When errors arise in data uploading, the user gets a link to a more full
         // documentation page on the VisGov website:

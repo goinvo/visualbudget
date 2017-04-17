@@ -6,6 +6,9 @@
 
 // The _vbAdminGlobal is set by wp_localize_script() in the vb admin php file.
 let _vbPluginUrl = _vbAdminGlobal.vbPluginUrl;
+let _vbUploadDir = _vbAdminGlobal.vbUploadDir;
+let _vbAliasesFileUrl = _vbAdminGlobal.vbAliasesFileUrl;
+let _vbConfigFileUrl = _vbAdminGlobal.vbConfigFileUrl;
 let $ = jQuery;
 
 // Initialize all modules.
@@ -21,6 +24,9 @@ angular.module('vbAdmin.iframelink', []);
 (function(vb,$,angular) {
 
     let _vbPluginUrl = _vbAdminGlobal.vbPluginUrl;
+    let _vbUploadDir = _vbAdminGlobal.vbUploadDir;
+    let _vbAliasesFileUrl = _vbAdminGlobal.vbAliasesFileUrl;
+    let _vbConfigFileUrl = _vbAdminGlobal.vbConfigFileUrl;
 
     let vbAdmin = angular.module('vbAdmin', [
         'vbAdmin.tabs',
@@ -38,7 +44,7 @@ angular.module('vbAdmin.iframelink', []);
         function loadDatasets() {
 
             // Load the aliases.
-            let aliases_url = _vbPluginUrl + 'vis/aliases.json';
+            let aliases_url = _vbAliasesFileUrl;
             $http.get(aliases_url).success( function(aliases) {
                 for(let alias in aliases) {
                     let metadata = {

@@ -28,6 +28,21 @@ class VisualBudget_DatasetManager {
         if ( !is_dir(VISUALBUDGET_UPLOAD_PATH . 'trash/') ) {
             $wp_filesystem->mkdir(VISUALBUDGET_UPLOAD_PATH . 'trash/');
         }
+
+        // Create the settings directory if it doesn't exist.
+        if ( !is_dir(VISUALBUDGET_UPLOAD_PATH . 'settings/') ) {
+            $wp_filesystem->mkdir(VISUALBUDGET_UPLOAD_PATH . 'settings/');
+        }
+
+        // Create the aliases file if it doesn't exist.
+        if ( !file_exists(VISUALBUDGET_ALIASES_PATH) ) {
+            $wp_filesystem->put_contents(VISUALBUDGET_ALIASES_PATH, '{}');
+        }
+
+        // Create the config file if it doesn't exist.
+        if ( !file_exists(VISUALBUDGET_CONFIG_PATH) ) {
+            $wp_filesystem->put_contents(VISUALBUDGET_CONFIG_PATH, '{}');
+        }
     }
 
     /**
@@ -106,7 +121,7 @@ class VisualBudget_DatasetManager {
             global $wp_filesystem;
 
             // Get the existing contents.
-            $contents = $wp_filesystem->get_contents(VISUALBUDGET_PATH . VISUALBUDGET_ALIASES_FILE);
+            $contents = $wp_filesystem->get_contents(VISUALBUDGET_ALIASES_PATH);
             $aliases_array = json_decode($contents, true); // "true" makes it an associative array
             if (!$aliases_array) {
                 $aliases_array = array();
@@ -130,7 +145,7 @@ class VisualBudget_DatasetManager {
         // Write the new file
         try {
             global $wp_filesystem; // WordPress's own filesystem class.
-            $wp_filesystem->put_contents(VISUALBUDGET_PATH . VISUALBUDGET_ALIASES_FILE,
+            $wp_filesystem->put_contents(VISUALBUDGET_ALIASES_PATH,
                                 json_encode($new_aliases_array, JSON_PRETTY_PRINT));
         } catch (Exception $e) {
             // FIXME: What to do with this error?

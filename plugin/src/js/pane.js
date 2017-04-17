@@ -25,20 +25,23 @@ let paneController = function($scope, $http, $timeout, datasetsService) {
 
         // Watch function for when new datasets are loaded.
         $scope.$watch(datasetsService.getCount, function(count) {
-            $scope.datasets = datasetsService.getDatasets();
-            if (loading) {
-                loading = false;
-                $scope.chartData.dataset = $scope.datasets[0];
-                $scope.chartData.datasets = [$scope.datasets[0]];
-                $scope.atts.data = $scope.datasets[0].id;
+            if(count > 0) {
+                $scope.datasets = datasetsService.getDatasets();
 
-                if($scope.selected) {
-                    $timeout(that.redrawCharts, 0);
+                if (loading) {
+                    loading = false;
+                    $scope.chartData.dataset = $scope.datasets[0];
+                    $scope.chartData.datasets = [$scope.datasets[0]];
+                    $scope.atts.data = $scope.datasets[0].id;
+
+                    if($scope.selected) {
+                        $timeout(that.redrawCharts, 0);
+                    }
                 }
-            }
 
-            if (toAddSecondDataset && count > 1) {
-                this.addSecondDefaultSelectedDataset();
+                if (toAddSecondDataset && count > 1) {
+                    this.addSecondDefaultSelectedDataset();
+                }
             }
         });
 

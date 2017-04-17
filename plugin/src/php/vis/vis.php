@@ -4,6 +4,12 @@
  * Visualization page, using the API specified in the VB wiki on Github.
  */
 
+// Gotta hardcode something in a standalone file.
+// This is the same constant as defined in includes/class-visualbudget.php
+define('WP_PLUGINS_DIR', dirname(dirname(dirname($_SERVER["REQUEST_URI"]))));
+define('VISUALBUDGET_UPLOAD_DIR', '/visualbudget-datasets/');
+define('VISUALBUDGET_ALIASES_FILE', '../../' . VISUALBUDGET_UPLOAD_DIR . 'settings/aliases.json');
+
 
 // Set the GET variables 'rand' and 'hash' if they are not set
 // (which they shouldn't be, but I'm leaving available the option
@@ -23,7 +29,7 @@ if ( ! isset($_GET['hash']) ) {
 
 // Retrieve aliases from aliases.json.
 $get_aliases = function() {
-    $filename = 'aliases.json';
+    $filename = VISUALBUDGET_ALIASES_FILE;
     if(file_exists($filename)) {
         $aliases = json_decode(file_get_contents($filename), true);
         return $aliases;
@@ -59,12 +65,10 @@ $id_or_alias_to_url = function($string) use ($get_aliases) {
     $whitelist = array('127.0.0.1', '::1');
     if(in_array($_SERVER['REMOTE_ADDR'], $whitelist)) {
         // Site is running on localhost. Use relative URL.
-        $url = dirname(dirname(dirname($_SERVER["REQUEST_URI"])))
-                . "/visualbudget-datasets/" . $the_id . ".json";
+        $url = WP_PLUGINS_DIR . VISUALBUDGET_UPLOAD_DIR . $the_id . ".json";
     } else {
         // Site is not on localhost. Use absolute URL. 
-        $url = "//" . $_SERVER['HTTP_HOST'] . dirname(dirname(dirname($_SERVER["REQUEST_URI"])))
-                . "/visualbudget-datasets/" . $the_id . ".json";
+        $url = "//" . $_SERVER['HTTP_HOST'] . WP_PLUGINS_DIR . VISUALBUDGET_UPLOAD_DIR . $the_id . ".json";
     }
 
     return $url;

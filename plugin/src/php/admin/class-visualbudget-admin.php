@@ -401,8 +401,12 @@ class VisualBudget_Admin {
         wp_localize_script(
             'vb_admin',
             '_vbAdminGlobal',
-            array('vbPluginUrl' => plugin_dir_url(dirname(__FILE__)),
-                  'vbAdminUrl' => admin_url('', 'admin')) );
+            array('vbPluginUrl' => VISUALBUDGET_URL,
+                  'vbAdminUrl' => admin_url('', 'admin'),
+                  'vbUploadDir' => VISUALBUDGET_UPLOAD_URL,
+                  'vbAliasesFileUrl' => VISUALBUDGET_ALIASES_URL,
+                  'vbConfigFileUrl' => VISUALBUDGET_CONFIG_URL )
+            );
     }
 
     /**

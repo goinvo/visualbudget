@@ -40,6 +40,7 @@ class VisualBudget {
         define('VISUALBUDGET_SLUG', 'visualbudget' );
         define('VISUALBUDGET_VERSION', '2.0' );
         define('VISUALBUDGET_GITHUB_LINK', 'https://github.com/goinvo/visualbudget' );
+        define('VISUALBUDGET_DOCS_LINK', 'https://github.com/goinvo/visualbudget/tree/master/docs' );
         
         define('VISUALBUDGET_ALIASES_FILE', 'vis/aliases.json' );
         // NOTE: The upload directory is also hardcoded into vis.php & api.php.

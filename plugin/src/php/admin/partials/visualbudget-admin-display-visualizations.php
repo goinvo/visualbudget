@@ -5,7 +5,9 @@
 ?>
 <div class='bootstrap-wrapper'>
 
-    <br/><br/><br/>
+    <br/>
+    See <a href="https://github.com/goinvo/visualbudget/tree/master/docs/Visualization%20API.md" target="_blank">documentation</a> for a comprehensive list of visualizations and parameters.
+    <br/><br/>
 
     <div ng-app="vbAdmin" ng-controller="vbController as vbCtrl">
 

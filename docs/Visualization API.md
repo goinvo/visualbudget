@@ -14,12 +14,13 @@ are translated into iframes.
 
 For example, when the Visual Budget plugin is installed, the shortcode
 
-    [visualbudget vis=treemap data=expenses node=schools]
+    [visualbudget vis=treemap data=expenses node=schools iframe]
 
 gets translated into the HTML code
 
     <iframe src='[PLUGIN_URL]/vis/vis.php?vis=treemap&data=expenses&node=schools'></iframe>
 
+which in turn will load an iframe with a treemap of a dataset with alias "expenses".
 For information about shortcodes, see the
 [WordPress Codex](https://codex.wordpress.org/Shortcode).
 
@@ -34,7 +35,7 @@ Note: The value of `data` parameter can either be a dataset ID
 (listed in the dashboard) or an alias (which can be set in the dashboard).
 
 
-### ALL CHARTS
+### All charts
 
     [visualbudget               // The tag always opens with the "visualbudget" identifier.
         vis={VALUE}             // Required: Visualization type.
@@ -52,7 +53,7 @@ Note: The value of `data` parameter can either be a dataset ID
         ]
 
 
-### LINE CHART
+### Line chart
 
     [visualbudget
         vis=linechart
@@ -60,7 +61,7 @@ Note: The value of `data` parameter can either be a dataset ID
         ]
 
 
-### STACKED AREA CHART
+### Stacked area chart
 
     [visualbudget
         vis=stackedarea
@@ -73,7 +74,7 @@ Note: The value of `data` parameter can either be a dataset ID
         ]
 
 
-### TREEMAP
+### Treemap
 
     [visualbudget
         vis=treemap
@@ -91,7 +92,7 @@ Note: The value of `data` parameter can either be a dataset ID
         ]
 
 
-### LEGEND
+### Legend
 
     [visualbudget
         vis=legend
@@ -102,7 +103,7 @@ Note: The value of `data` parameter can either be a dataset ID
         ]
 
 
-### COMPARISON CHART
+### Comparison chart
 
     [visualbudget
         vis=comparisontime
@@ -110,7 +111,7 @@ Note: The value of `data` parameter can either be a dataset ID
         ]
 
 
-### METRICS
+### Metrics
 
 #### Date
 
@@ -190,25 +191,27 @@ Note: The value of `data` parameter can either be a dataset ID
 
 #### Download link
 
-For metric=download, the result is different if there is one or multiple datasets:  
-- For e.g. "data=expenses", the result is          `<Download data>`
-- For e.g. "data=expenses,funds", the result is     `Download data [<1>, <2>]`,
-  where <> denotes a link. In each case, only the "Download data" text is customizable.
-  
+For `metric=download`, the result is different if there is one or multiple datasets:
 
-    [visualbudget
-        vis=metric
-        metric=download         // Displays a link to download data.
-        data=expenses           // Which datasets to download. Can also be a
-                                //   comma-separated list (e.g. "expenses,revenues,funds")
-  
-        // Optional parameters:
-        filetype=json           // Set the filetype to download (default: "csv")
-        text="Click me"         // Set the text to display (default: "Download data")
-        title="Title text"      // Set the title text (default: "Download data")
-        target="_self"          // Set the target attribute of the link
-                                //   (default: "_blank", which opens the link in a new tab)
-        ]
+- For e.g. `data=expenses`, the result is          `<Download data>`
+- For e.g. `data=expenses,funds`, the result is     `Download data [<1>, <2>]`,
+  where <> denotes a link. In each case, only the "Download data" text is customizable.
+
+```
+[visualbudget
+    vis=metric
+    metric=download         // Displays a link to download data.
+    data=expenses           // Which datasets to download. Can also be a
+                            //   comma-separated list (e.g. "expenses,revenues,funds")
+
+    // Optional parameters:
+    filetype=json           // Set the filetype to download (default: "csv")
+    text="Click me"         // Set the text to display (default: "Download data")
+    title="Title text"      // Set the title text (default: "Download data")
+    target="_self"          // Set the target attribute of the link
+                            //   (default: "_blank", which opens the link in a new tab)
+    ]
+```
 
 #### My tax contribution
 
@@ -220,7 +223,7 @@ For metric=download, the result is different if there is one or multiple dataset
         ]
 
 
-### MY TAX BILL
+### My tax bill
 
     [visualbudget
         vis=mytaxbill           // Displays an text input field for the user to write
@@ -228,7 +231,7 @@ For metric=download, the result is different if there is one or multiple dataset
         ]
 
 
-### TABLE
+### Table
 
     [visualbudget
         vis=table

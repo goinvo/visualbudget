@@ -8,7 +8,6 @@
  * display here.
  */
 
-
 // Table generation code from http://stackoverflow.com/a/37727144/1516307
 function make_html_table($data) {
     $tbody = array_reduce(array_slice($data,1), function($a, $b) {
@@ -19,6 +18,9 @@ function make_html_table($data) {
     return $html;
 }
 ?>
+<br/>
+See <a href="https://github.com/goinvo/visualbudget/tree/master/docs/Dataset%20Specification.md" target="_blank">documentation</a> for the comprehensive dataset specification.
+<br/>
 <form method="post" action="<?php echo $_SERVER['REQUEST_URI']?>" enctype="multipart/form-data">
 <?php
 // Grab the saved options.

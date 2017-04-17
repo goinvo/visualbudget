@@ -40,6 +40,7 @@ class VisualBudget {
         define('VISUALBUDGET_SLUG', 'visualbudget' );
         define('VISUALBUDGET_VERSION', '2.0' );
         define('VISUALBUDGET_GITHUB_LINK', 'https://github.com/goinvo/visualbudget' );
+        define('VISUALBUDGET_DOCS_LINK', 'https://github.com/goinvo/visualbudget/tree/master/docs' );
         
         // NOTE: The upload directory is also hardcoded into vis.php & api.php.
         //       It has to be since those are standalone files.

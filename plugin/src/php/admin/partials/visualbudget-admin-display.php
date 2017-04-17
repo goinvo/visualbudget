@@ -11,7 +11,7 @@ $this->visualbudget_display_dashboard_tabs();
 
 // Find out (or set) which tab is active.
 // By default, 'configuration' is active.
-$active_tab = isset( $_GET[ 'tab' ] ) ? $_GET[ 'tab' ] : 'configuration';
+$active_tab = isset( $_GET[ 'tab' ] ) ? $_GET[ 'tab' ] : 'datasets';
 
 // Display the appropriate tab content.
 switch ( $active_tab ) {

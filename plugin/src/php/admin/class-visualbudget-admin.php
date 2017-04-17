@@ -304,19 +304,19 @@ class VisualBudget_Admin {
         echo '<h2 class="nav-tab-wrapper">';
 
         // Get the active tab name if there is one; else go to default.
-        $active_tab = isset( $_GET[ 'tab' ] ) ? $_GET[ 'tab' ] : 'configuration';
+        $active_tab = isset( $_GET[ 'tab' ] ) ? $_GET[ 'tab' ] : 'datasets';
 
         // A list of the tabs
         $tabs = array(
-            // 'configuration' =>
-            //     array('name'=>'Configuration',
-            //           'icon'=>'dashicons-admin-settings'),
             'datasets' =>
                 array('name'=>'Datasets',
                       'icon'=>'dashicons-media-spreadsheet'),
             'visualizations' =>
                 array('name'=>'Visualizations',
                       'icon'=>'dashicons-chart-line'),
+            'configuration' =>
+                array('name'=>'Configuration',
+                      'icon'=>'dashicons-admin-settings'),
             );
 
         foreach ($tabs as $key => $info) {

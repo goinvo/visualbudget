@@ -80,10 +80,12 @@ class VbChart {
             hash: this.data.hash,
             myTaxBill: this.determineMyTaxBill(this.avg_tax_bill),
             groups: [],
-            date: this.getDefaultDate() + "",
+            date: this.getAttribute('date', this.getDefaultDate()).toString(),
             dragging: false,
             mouseX: null
         }
+
+        console.log(this.state)
 
         // Bind the window resize event to the redraw function.
         window.addEventListener("resize", () => {

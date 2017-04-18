@@ -3,7 +3,7 @@
  */
 class VbTable extends VbChart {
 
-    constructor($div, data) {
+    constructor($div, data, config) {
 
         // Cast the data.
         data.dollarAmounts.forEach(function(d) {
@@ -12,7 +12,7 @@ class VbTable extends VbChart {
         });
 
         // Call super method.
-        super($div, data);
+        super($div, data, config);
         this.$table = $("<div class='vb-table-element'></div>");
         $div.append(this.$table);
 

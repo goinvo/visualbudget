@@ -1,7 +1,7 @@
 
 class VbLegend extends VbChart {
 
-    constructor($div, data) {
+    constructor($div, data, config) {
 
         // If multiple datasets were passed in, abort.
         if(data.constructor === Array) {
@@ -15,7 +15,7 @@ class VbLegend extends VbChart {
         });
 
         // Call super method.
-        super($div, data);
+        super($div, data, config);
     }
 
     redraw() {

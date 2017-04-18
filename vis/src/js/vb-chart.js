@@ -5,7 +5,7 @@
 class VbChart {
 
     // Chart
-    constructor($div, data) {
+    constructor($div, data, config) {
 
         // Properties of the chart are specified as HTML data attributes.
         this.atts = this.removeVbPrefixesOnAttributes($div.data());
@@ -50,8 +50,10 @@ class VbChart {
             this.setColors(data);
         }
 
-        // FIXME: Make this set-able.
-        this.defaulttaxbill = 7500;
+        // The configuration, from the config.json file.
+        this.avg_tax_bill = config['avg_tax_bill'];
+        this.default_tax_year = config['default_tax_year'];
+        this.fiscal_year_start = config['fiscal_year_start'];
 
         // The jQuery object for the chart div
         // and the chart's data.
@@ -71,13 +73,14 @@ class VbChart {
             this.$div.addClass(this.atts.class);
         }
 
+        // Determine the initial date.
         // The shared state among charts. These properties are used
         // for the interaction between charts.
         this.state = {
             hash: this.data.hash,
-            myTaxBill: this.determineMyTaxBill(this.defaulttaxbill),
+            myTaxBill: this.determineMyTaxBill(this.avg_tax_bill),
             groups: [],
-            date: "2017",
+            date: this.getDefaultDate() + "",
             dragging: false,
             mouseX: null
         }
@@ -422,6 +425,30 @@ class VbChart {
         }
 
         return node;
+    }
+
+
+    // According to configuration settings.
+    getDefaultDate() {
+        // Current calendar year.
+        let theYear = new Date().getFullYear();
+
+        // When the fiscal year turns over.
+        let endOfFiscalYear = new Date(this.fiscal_year_start + ' 1 ' + new Date().getFullYear());
+        // Today's date.
+        let today = new Date();
+
+        // If we've passed the end of the fiscal year, increment.
+        if(today > endOfFiscalYear) {
+            theYear++;
+        }
+
+        // If the default tax year is "next year", increment again.
+        if(this.default_tax_year == "next") {
+            theYear++;
+        }
+
+        return theYear;
     }
 
 }

@@ -23,13 +23,13 @@ else if($fiscalstart == "jul") { $fiscal_jul = $selected; }
 
 <table class="form-table">
 <tr>
-    <td scope="row">Average tax bill (whole number, in dollars)</td>
+    <th scope="row">Average tax bill<br/>(whole number, in dollars)</th>
     <td>
         <input type="text" size="15" id="avg_tax_bill" name="visualbudget_tab_config[avg_tax_bill]" value="<?php echo $this->config['avg_tax_bill']; ?>" />
     </td>
 </tr>
 <tr>
-    <td scope="row">Default tax year to display</td>
+    <th scope="row">Default tax year to display</th>
     <td>
         <select name="visualbudget_tab_config[default_tax_year]" id="default_tax_year">
         <option value="current"<?php echo $taxyear_cur; ?>>current year</option>
@@ -38,7 +38,7 @@ else if($fiscalstart == "jul") { $fiscal_jul = $selected; }
     </td>
 </tr>
 <tr>
-    <td scope="row">Fiscal year start</td>
+    <th scope="row">Fiscal year start</th>
     <td>
         <select name="visualbudget_tab_config[fiscal_year_start]" id="fiscal_year_start">
         <option value="jan"<?php echo $fiscal_jan; ?>>1 Jan</option>

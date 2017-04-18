@@ -132,12 +132,16 @@ class VisualBudget_Admin {
         $this->handle_file_uploads();
         $this->handle_file_deletions();
         $this->handle_alias_updates();
+        $this->handle_config_updates();
 
-        // Now construct the dataset objects and store them in $this->datasets.
+        // Construct the dataset objects and store them in $this->datasets.
         $this->datasets = $this->construct_dataset_objects();
 
-        // Now set up the aliases array and store it in $this->aliases.
+        // Set up the aliases array and store it in $this->aliases.
         $this->aliases = $this->datasetmanager->get_aliases();
+
+        // Set up the config array and store it in $this->config.
+        $this->config = $this->datasetmanager->get_config();
     }
 
     /**
@@ -261,6 +265,35 @@ class VisualBudget_Admin {
                 }
             }
             $this->datasetmanager->update_aliases($aliases);
+        }
+    }
+
+    /**
+     * Add a new config and change any old ones that are to be changed.
+     */
+    public function handle_config_updates() {
+        if($_POST['visualbudget_submit_config']) {
+            $config_array = array();
+            foreach($_POST['visualbudget_tab_config'] as $name => $val) {
+                switch ($name) {
+                    case "avg_tax_bill":
+                        $config_array[$name] = $this->int($val);
+                        break;
+
+                    case "default_tax_year":
+                        $config_array[$name] = $val;
+                        break;
+
+                    case "fiscal_year_start":
+                        $config_array[$name] = $val;
+                        break;
+
+                    default:
+                        break;
+                }
+            }
+
+            $this->datasetmanager->update_config($config_array);
         }
     }
 
@@ -414,6 +447,13 @@ class VisualBudget_Admin {
      */
     public function notifications_callback() {
         echo $this->notifier->get_html();
+    }
+
+    /**
+     * Take any string and turn it into an int.
+     */
+    public function int($s) {
+        return (int) preg_replace('/[^\-\d]*(\-?\d*).*/', '$1', $s);
     }
 
 }

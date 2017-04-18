@@ -1,7 +1,7 @@
 
 class VbComparisonTime extends VbChart {
 
-    constructor($div, data) {
+    constructor($div, data, config) {
 
         // Make sure the data is an array. If only one dataset was
         // passed, we can still make a chart -- but we need it to
@@ -18,7 +18,7 @@ class VbComparisonTime extends VbChart {
         })
 
         // Call super method.
-        super($div, data);
+        super($div, data, config);
 
         // Set up the SVG.
         this.setupChartSvg();

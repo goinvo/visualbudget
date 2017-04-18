@@ -1,7 +1,7 @@
 
 class VbStackedArea extends VbChart {
 
-    constructor($div, data) {
+    constructor($div, data, config) {
 
         // Cast the data.
         data.dollarAmounts.forEach(function(d) {
@@ -10,7 +10,7 @@ class VbStackedArea extends VbChart {
         });
 
         // Call super method.
-        super($div, data);
+        super($div, data, config);
 
         // Smooth or stepwise graph?
         this.smooth = this.getAttribute('smooth', false);

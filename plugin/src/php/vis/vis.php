@@ -50,10 +50,17 @@ $data_query_to_array = function($string) {
     return $array;
 };
 
+
+$is_localhost = false;
+$whitelist = array('127.0.0.1', '::1');
+if(in_array($_SERVER['REMOTE_ADDR'], $whitelist)) {
+    $is_localhost = true;
+}
+
 // Return a URL of a dataset given an ID or alias.
 // First, check to see if input string an alias;
 // if it is an alias, convert it to an ID. Return a URL.
-$id_or_alias_to_url = function($string) use ($get_aliases) {
+$id_or_alias_to_url = function($string) use ($get_aliases, $is_localhost) {
     $aliases = $get_aliases();
 
     $the_id = $string;
@@ -63,7 +70,7 @@ $id_or_alias_to_url = function($string) use ($get_aliases) {
 
     // Output relative URLs to localhost; absolute URLs to real websites.
     $whitelist = array('127.0.0.1', '::1');
-    if(in_array($_SERVER['REMOTE_ADDR'], $whitelist)) {
+    if($is_localhost) {
         // Site is running on localhost. Use relative URL.
         $url = WP_PLUGINS_DIR . VISUALBUDGET_UPLOAD_DIR . $the_id . ".json";
     } else {
@@ -73,6 +80,13 @@ $id_or_alias_to_url = function($string) use ($get_aliases) {
 
     return $url;
 };
+
+// Hard coded.
+$config_url = WP_PLUGINS_DIR . VISUALBUDGET_UPLOAD_DIR . "settings/config.json";
+if(!$is_localhost) {
+    $config_url = "//" . $_SERVER['HTTP_HOST'] . $config_url;
+}
+
 
 
 /** * * * * * * * * * * * * * * * * * **
@@ -117,6 +131,10 @@ $custom_atts = array();
 foreach ($_GET as $key => $val) {
     array_push($custom_atts, 'data-vb-' . $key . '="' . $val . '"');
 }
+
+// Include the config file URL. There isn't any other way for the
+// visualbudget JS module to know where to look for it.
+array_push($custom_atts, 'data-vb-config-url="' . $config_url . '"');
 
 // Build a string of the data attributes.
 if ($_GET['vis'] == 'mytaxbill') {

@@ -42,6 +42,15 @@ class VisualBudget_DatasetManager {
         // Create the config file if it doesn't exist.
         if ( !file_exists(VISUALBUDGET_CONFIG_PATH) ) {
             $wp_filesystem->put_contents(VISUALBUDGET_CONFIG_PATH, '{}');
+
+            // Set defaults.
+            $defaults = array(
+                "avg_tax_bill" => 4500,
+                "default_tax_year" => "current",
+                "fiscal_year_start" => "jul"
+                );
+
+            $this->update_config($defaults);
         }
     }
 
@@ -147,6 +156,47 @@ class VisualBudget_DatasetManager {
             global $wp_filesystem; // WordPress's own filesystem class.
             $wp_filesystem->put_contents(VISUALBUDGET_ALIASES_PATH,
                                 json_encode($new_aliases_array, JSON_PRETTY_PRINT));
+        } catch (Exception $e) {
+            // FIXME: What to do with this error?
+        }
+    }
+
+    /**
+     * Read the config.json file and return its contents as an
+     * associative array.
+     */
+    public function get_config() {
+        try {
+            // WordPress's own filesystem class.
+            global $wp_filesystem;
+
+            // Get the existing contents.
+            $contents = $wp_filesystem->get_contents(VISUALBUDGET_CONFIG_PATH);
+            $config_array = json_decode($contents, true); // "true" makes it an associative array
+            if (!$config_array) {
+                $config_array = array();
+            }
+
+            // Return the aliases.
+            return $config_array;
+
+        } catch (Exception $e) {
+            // FIXME: What to do with this error?
+        }
+    }
+
+    /**
+     * This function updates the config.json file with
+     * any new or changed config as submitted by the user.
+     * Note that the config submitted by the user COMPLETELY
+     * OVERWRITES any existing config.
+     */
+    public function update_config($new_config_array) {
+        // Write the new file
+        try {
+            global $wp_filesystem; // WordPress's own filesystem class.
+            $wp_filesystem->put_contents(VISUALBUDGET_CONFIG_PATH,
+                                json_encode($new_config_array, JSON_PRETTY_PRINT));
         } catch (Exception $e) {
             // FIXME: What to do with this error?
         }

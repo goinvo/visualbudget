@@ -47,6 +47,8 @@ Note: The value of `data` parameter can either be a dataset ID
         node=schools:salaries   // Default: null. Dive into the data, displaying a child node as
                                 //   the dataset. Levels are colon-separated. Can be a
                                 //   comma-separated list when used with comparison chart.
+        date=2012               // Set the year whose data the chart draws. Irrelevant on the
+                                //   comparison chart.
         width=400px             // Set the css width of the chart div.
         height=600px            // Set the css height of the chart div.
         class="abc xyz"         // Set custom classes of the chart div.

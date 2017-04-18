@@ -4,7 +4,7 @@
  */
 class VbMetric extends VbChart {
 
-    constructor($div, data) {
+    constructor($div, data, config) {
 
         // Cast the data.
         // data.dollarAmounts.forEach(function(d) {
@@ -13,7 +13,7 @@ class VbMetric extends VbChart {
         // });
 
         // Call super method.
-        super($div, data);
+        super($div, data, config);
 
         $div.css({"display": "inline"});
     }

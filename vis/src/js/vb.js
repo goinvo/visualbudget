@@ -14,11 +14,30 @@ var visualbudget = (function (vb, $, d3) {
         }
 
         console.log('Initializing VB charts.');
-        vb.charts = [];
-        var $chartDivs = $('.vb-chart');
-        $.when.apply($, $chartDivs.map(vb.tryToInitializeChart))
-            .then(vb.drawAllCharts)
-            .then(callback);
+
+        // First get the config settings.
+        var configURL = $('.vb-chart:first').data('vbConfigUrl');
+        $.when( $.getJSON(configURL)
+            .done(vb.setConfig)
+            .fail(function(_,txt,err) {
+                console.log("Request Failed: " + txt + ", " + err);
+            })
+        )
+        .done(function() {
+            // Now initialize all charts.
+            vb.charts = [];
+            var $chartDivs = $('.vb-chart');
+            $.when.apply($, $chartDivs.map(vb.tryToInitializeChart))
+                .then(vb.drawAllCharts)
+                .then(callback);
+        });
+    }
+
+    /**
+     * Configuration callback.
+     */
+    vb.setConfig = function(data) {
+        vb.config = data;
     }
 
     /**
@@ -73,38 +92,39 @@ var visualbudget = (function (vb, $, d3) {
         return function(data) {
 
             var newChart;
+            var config = vb.config;
 
             switch($div.data('vbVis')) {
                 case 'linechart':
-                    newChart = new VbLineChart($div, data);
+                    newChart = new VbLineChart($div, data, config);
                     break;
 
                 case 'stackedarea':
-                    newChart = new VbStackedArea($div, data);
+                    newChart = new VbStackedArea($div, data, config);
                     break;
 
                 case 'comparisontime':
-                    newChart = new VbComparisonTime($div, data);
+                    newChart = new VbComparisonTime($div, data, config);
                     break;
 
                 case 'treemap':
-                    newChart = new VbTreeMap($div, data);
+                    newChart = new VbTreeMap($div, data, config);
                     break;
 
                 case 'legend':
-                    newChart = new VbLegend($div, data);
+                    newChart = new VbLegend($div, data, config);
                     break;
 
                 case 'table':
-                    newChart = new VbTable($div, data);
+                    newChart = new VbTable($div, data, config);
                     break;
 
                 case 'metric':
-                    newChart = new VbMetric($div, data);
+                    newChart = new VbMetric($div, data, config);
                     break;
 
                 case 'mytaxbill':
-                    newChart = new VbMyTaxBill($div);
+                    newChart = new VbMyTaxBill($div, config);
                     break;
 
                 default:

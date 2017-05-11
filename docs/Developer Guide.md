@@ -47,6 +47,7 @@ visualbudget/
 ### Setting up the repository
 
 Clone the repo from github using
+
 ```$ git clone https://github.com/goinvo/visualbudget.git```
 
 
@@ -55,11 +56,17 @@ Clone the repo from github using
 To build, you must have Node.js and npm, the Node Package Manager, installed.
 
 After cloning the repo, navigate to it in a console and run
+
 ```$ npm install```
+
 to install dependences. Then run
+
 ```$ gulp build```
+
 to build. (If this command returns an error, it may because gulp isn't installed globally. You can fix this by running `$ npm install -g gulp`.) Finally, if you want to export the built plugin to a local install of WordPress, run
+
 ```$ gulp plugin-export```
+
 Of course, you will need to modify the `paths.pluginExport` variable in `gulpfile.js` to point to the plugins directory of your WordPress install (usually at `wp-content/plugins/` from the WP base directory).
 
 
@@ -68,3 +75,41 @@ Of course, you will need to modify the `paths.pluginExport` variable in `gulpfil
 We are happy to consider pull requests with new features, and any submitted bug reports are appreciated.
 
 
+
+## More about the code
+
+More about the code for developers.
+
+### Code structure, in-depth
+
+The general code structure is above; here it is in more detail.
+
+#### Plugin
+
+The code for the plugin is divided into PHP, JavaScript, and SASS. The code in each language serves a difference function in the plugin, so it's a clean separation.
+
+##### PHP
+
+The plugin is built off of the [WordPress plugin boilerplate](https://github.com/DevinVinson/WordPress-Plugin-Boilerplate) repository. The important parts are these:
+
+```
+visualbudget/plugin/src/php/
+  |-- admin/
+  |-- includes/
+  +-- vis/
+```
+
+- **_admin/_** contains the bulk of the important Visual Budget code, including all the classes and methods for displaying the dashboard and uploading datasets. Several classes exist solely for the dataset upload & restructuring process. The files `class-visualbudget-admin.php` is the high-level executor of admin dashboard functions. The subfolder `partials/` contains the files to display each of the individual dashboard tabs (“Datasets”, “Visualizations”, “Configuration”).
+
+- **_includes/_** contains one file of note, `class-visualbudget.php`, which defines all the important constants that are used throughout the plugin.
+
+- **_vis/_** contains `vis.php`, which is the most important file in interfacing with the visualization JavaScript module. When `vis.php` is loaded with a set of query string parameters, it produces a visualization in accordance with those parameters. Most of the parameters are not dealt with in `vis.php` itself; rather, with a couple of exceptions, all parameters are simply written out as data-attributes in a div which the visualization JavaScript module parses on its own.  
+  
+It also contains `api.php`, which is an interface for querying datasets. Loading `api.php` on its own returns a JSON array filenames. Loading `api.php?filename={filename}` will return the contents of a specific file.
+
+
+#### Visualization module
+
+### Coding conventions
+
+### Adding visualizations

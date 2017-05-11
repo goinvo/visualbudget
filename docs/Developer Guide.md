@@ -9,7 +9,12 @@ This document contains what is necessary to understand the codebase and begin de
 
 Visual Budget 2.0 comprises two connected components: a JavaScript visualization module and a WordPress plugin. Accordingly, development for the two components occurs separately, although the code resides in the same respository. The reason for this is that while the plugin cannot exist without the visualization module, the visualization module *can* exist without the plugin, at least in principle. (However, it is a bit more difficult to use that way.)
 
-## Structure of the codebase
+
+
+
+## Getting started
+
+### Structure of the codebase
 
 The overall directory structure of the repository is this:
 
@@ -32,22 +37,34 @@ visualbudget/
 
 **_vis/src/_** contains the code for the visualization module. The code is mostly JavaScript. After building, the compiled code will be written to *vis/dist/*.
 
-**_zip/visualbudget.zip_** is a zip file of the latest build of VB2. The file is rewritten each build. It is stored here so that the latest build is always accessible by the URL [`https://github.com/goinvo/visualbudget/raw/master/zip/visualbudget.zip`](https://github.com/goinvo/visualbudget/raw/master/zip/visualbudget.zip), and it can be directly installed in WordPress as a plugin from the WordPress dashboard.
+**_zip/visualbudget.zip_** is a zip file of the latest build of VB2. The file is rewritten each build and is always accessible by the URL [`https://github.com/goinvo/visualbudget/raw/master/zip/visualbudget.zip`](https://github.com/goinvo/visualbudget/raw/master/zip/visualbudget.zip). This file can be directly installed in WordPress as a plugin from the WordPress dashboard.
+
+**_gulpfile.js_** is a script containing the directives for the compiling process, which uses Gulp.
+
+**_package.json_** is a package definition file written in accordance with npm conventions.
 
 
+### Setting up the repository
+
+Clone the repo from github using
+```$ git clone https://github.com/goinvo/visualbudget.git```
 
 
+### Building
+
+To build, you must have Node.js and npm, the Node Package Manager, installed.
+
+After cloning the repo, navigate to it in a console and run
+```$ npm install```
+to install dependences. Then run
+```$ gulp build```
+to build. (If this command returns an error, it may because gulp isn't installed globally. You can fix this by running `$ npm install -g gulp`.) Finally, if you want to export the built plugin to a local install of WordPress, run
+```$ gulp plugin-export```
+Of course, you will need to modify the `paths.pluginExport` variable in `gulpfile.js` to point to the plugins directory of your WordPress install (usually at `wp-content/plugins/` from the WP base directory).
 
 
+### Contributing to the repository
 
-------
+We are happy to consider pull requests with new features, and any submitted bug reports are appreciated.
 
-- Developing
-    - Getting started
-        - Setting up the repository
-        - Building
-        - Contributing to the repo
 
-    - Code structure
-        - Plugin
-        - Visualization module

@@ -134,6 +134,19 @@ The SASS file here contains only the styles for the admin dashboard, and *not* f
 
 #### Visualization module
 
+First, a note on how visualizations are actually rendered.
+
+When the plugin is installed, the shortcode `[visualbudget data=X vis=Y]` is recognized by WP and substituted in the rendered HTML page by a div with data attributes corresponding to the parameters passed in the shortcode. For example, the shortcode
+
+```[visualbudget vis=treemap data=expenses node=schools]```
+
+may be translated into
+
+```<div id="vb-chart-50df532a" class="vb-chart vb-chart-treemap" data-vb-dataset-url="//example.com/wp-content/plugins/visualbudget-datasets/1493153072.json" data-vb-vis="treemap" data-vb-data="expenses" data-vb-node="schools" data-vb-hash="50df532a" data-vb-config-url="//demo1.visgov.com/wp-content/plugins/visualbudget-datasets/settings/config.json"></div>```
+
+in the HTML page. The JavaScript module `vb.js` is included in the page and, after the page loads, will search the page for elements like this (divs with class `vb-chart`) and will render each of them, if it can, into the appropriate chart. In this case, it will be a treemap of the "Schools" node of the "expenses" dataset, assuming those exist.
+
+
 ##### JavaScript
 
 The folder `visualbudget/vis/src/js/` contains the bulk of code responsible for generating visualizations.

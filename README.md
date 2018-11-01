@@ -3,6 +3,8 @@
 Visual Budget is a WordPress plugin designed to make it easy to visualize a
 town's budget for its citizenry.
 
+The main Visual Budget Framework repository is [here](https://github.com/goinvo/Visual-Town-Budget).
+
 
 ## Description
 
@@ -66,5 +68,6 @@ $ gulp plugin-export
 ```
 
 ## Use
-
 Refer to the `/docs` folder of this repository for comprehensive documentation.
+
+### For guidance integrating Visual Town Budget for your town, contact us at arlington-internal@goinvo.com. ###
